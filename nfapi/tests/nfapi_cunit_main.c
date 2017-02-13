@@ -3193,7 +3193,7 @@ void nfapi_test_dl_config_request()
 	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[0].dci_dl_pdu.dci_dl_pdu_rel12.primary_cell_type);
 	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[0].dci_dl_pdu.dci_dl_pdu_rel12.ul_dl_configuration_flag);
 	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[0].dci_dl_pdu.dci_dl_pdu_rel12.number_ul_dl_configurations);
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[0].dci_dl_pdu.dci_dl_pdu_rel12.ul_dl_configuration_indication[NFAPI_MAX_UL_DL_CONFIGURATIONS]);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[0].dci_dl_pdu.dci_dl_pdu_rel12.ul_dl_configuration_indication[NFAPI_MAX_UL_DL_CONFIGURATIONS -1]);
 
 	CU_ASSERT_EQUAL(in.dl_config_request_body.dl_config_pdu_list[0].dci_dl_pdu.dci_dl_pdu_rel13.tl.tag, out.dl_config_request_body.dl_config_pdu_list[0].dci_dl_pdu.dci_dl_pdu_rel13.tl.tag);
 	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[0].dci_dl_pdu.dci_dl_pdu_rel13.laa_end_partial_sf_flag);
