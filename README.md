@@ -22,9 +22,10 @@ extend the nFAPI libraries use the specified vendor extension techniques,
 so ensuring the widest interoperability of the baseline nFAPI specification 
 in those derivative works. 
 
+
 ## Licensing
 
-The open-nFAPI libraries are release by CISCO under an Apache 2 license. 
+The open-nFAPI libraries are release by CISCO under an Apache 2 license. See `LICENSE.md` file for details
 
 ## Downloading
 
@@ -34,9 +35,21 @@ The open-nFAPI project can be pulled from git hub
 git clone https://github.com/cisco/open-nFAPI.git nfapi
 ```
 
-The following dependencies are required
-* BOOST
-* SCTP
+The following dependencies are required. These are based on a fresh ubuntu installation.
+
+```
+sudo apt-get install autoconf
+sudo apt-get install gcc
+sudo apt-get install g++
+sudo apt-get install libtool
+sudo apt-get install make
+sudo apt-get install doxygen
+sudo apt-get install libcunit1-dev
+sudo apt-get install libz-dev
+sudo apt-get install libsctp-dev
+sudo apt-get install libboost-all-dev
+```
+
 
 
 ## Building
@@ -54,4 +67,40 @@ To run the unit and integration tests
 ```
 make check
 ```
+
+## Running the simulator
+
+The vnf and pnf simulator can be run using the following commands. The pnf and vnf simulator support sourcing and sinking
+data over udp. Review the xml configuration files for the details of the port and address to configure. Console logging will show
+which address:port is being used
+
+### vnf simulator
+
+To run the vnf simulator you need to specify the port the vnf will listen for p5 connection request upon and also the xml configuration file
+
+```
+vnfsim <port> <xml config file>
+```
+
+### pnf simulator
+
+To run the vnf simulator you need to specify the addrss & port the pnf will connect to the vnf on and also the xml configuration file
+
+```
+pnfsim <address> <port> <xml config file>
+```
+
+
+## Directory structure
+
+docs				doxgen documentation
+common				common code used by the nfapi libraries
+nfapi				the nfapi library including message definitions & encode/decode functions
+pnf					the pnf library for p4, p5, & p7 interfaces
+vnf					the vnf library for p4, p5, & p7 interfaces
+sim_common			common simulation for used by the vnf and pnf sim
+vnf_sim				a vnf simulator including a stub mac implementation
+pnf_sim				a pnf simualtor including a fapi interface defintion and stub implementation
+xml					xml configuration files for the vnf and pnf simulator
+
 
