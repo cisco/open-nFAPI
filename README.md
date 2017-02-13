@@ -102,6 +102,6 @@ vnf					the vnf library for p4, p5, & p7 interfaces
 sim_common			common simulation for used by the vnf and pnf sim
 vnf_sim				a vnf simulator including a stub mac implementation
 pnf_sim				a pnf simualtor including a fapi interface defintion and stub implementation
-`xml					xml configuration files for the vnf and pnf simulator
+xml					xml configuration files for the vnf and pnf simulator
 ```
 
