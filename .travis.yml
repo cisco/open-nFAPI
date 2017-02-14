@@ -1,13 +1,9 @@
-language: c
+language: cpp
 dist: trusty
 
 compiler:
   - g++
-  - gcc
 
 before_install:
   - sudo apt-get install libsctp-dev
-
-
-install:
-  - make check
+  - autoreconf -i
