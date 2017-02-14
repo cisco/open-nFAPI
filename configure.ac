@@ -2,7 +2,7 @@ AC_INIT([open-nFAPI], [1.0])
 
 AC_CONFIG_MACRO_DIR([m4])
 
-AM_INIT_AUTOMAKE([subdir-objects -Wall -Werror foreign])
+AM_INIT_AUTOMAKE([subdir-objects -Wall -Werror foreign serial-tests])
 AM_PROG_AR
 
 LT_INIT([shared static])
