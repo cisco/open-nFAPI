@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/cisco/open-nFAPI.svg?branch-master)](https://travis-ci.org/cisco/open-nFAPI)
+
+
 # open-nFAPI
  
 Open-nFAPI is implementation of the Small Cell Forum's network functional API or nFAPI for short. 
