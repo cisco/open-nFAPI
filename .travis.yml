@@ -11,3 +11,6 @@ before_install:
   - sudo apt-get install libsctp-dev
   - sudo apt-get install libboost-all-dev
   - autoreconf -i
+
+script:
+  - ./configure && make && make check
