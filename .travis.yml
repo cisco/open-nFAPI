@@ -13,4 +13,4 @@ before_install:
   - autoreconf -i
 
 script:
-  - ./configure && make && make check
+  - ./configure && make
