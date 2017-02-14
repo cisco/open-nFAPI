@@ -2231,7 +2231,6 @@ int main ( void )
         (NULL == CU_add_test(pSuite, "pnf_test_start_invalid_ip", pnf_test_start_invalid_ip)) ||
         (NULL == CU_add_test(pSuite, "pnf_test_start_no_connection", pnf_test_start_no_connection)) ||
         (NULL == CU_add_test(pSuite, "pnf_test_start_connect", pnf_test_start_connect)) ||
-        (NULL == CU_add_test(pSuite, "pnf_test_start_connect_ipv6", pnf_test_start_connect_ipv6)) ||
         (NULL == CU_add_test(pSuite, "pnf_test_start_pnf_config_invalid_state", pnf_test_state_pnf_config_invalid_state)) ||
         (NULL == CU_add_test(pSuite, "pnf_test_start_pnf_param_invalid_state", pnf_test_state_pnf_param_invalid_state)) ||
         (NULL == CU_add_test(pSuite, "pnf_test_p7_segmentation_test_1", pnf_test_p7_segmentation_test_1)) ||
@@ -2242,6 +2241,8 @@ int main ( void )
       CU_cleanup_registry();
       return CU_get_error();
    }
+
+   //(NULL == CU_add_test(pSuite, "pnf_test_start_connect_ipv6", pnf_test_start_connect_ipv6)) ||
 
    // Run all tests using the basic interface
    CU_basic_set_mode(CU_BRM_VERBOSE);
