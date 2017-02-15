@@ -1,0 +1,14 @@
+*.o
+*.lo
+*.la
+*.a
+
+*.in
+
+/Makefile
+
+.deps/
+.libs/
+.dirstamp
+
+m4/

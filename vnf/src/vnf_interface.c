@@ -590,7 +590,7 @@ int nfapi_vnf_rssi_request(nfapi_vnf_config_t* config, int p5_idx, nfapi_rssi_re
 
 	vnf_t* _this = (vnf_t*)(config);
 
-	return vnf_pack_and_send_p5_message(_this, p5_idx, &req->header, sizeof(nfapi_rssi_request_t));
+	return vnf_pack_and_send_p4_message(_this, p5_idx, &req->header, sizeof(nfapi_rssi_request_t));
 }
 int nfapi_vnf_cell_search_request(nfapi_vnf_config_t* config, int p5_idx, nfapi_cell_search_request_t* req)
 {
@@ -599,7 +599,7 @@ int nfapi_vnf_cell_search_request(nfapi_vnf_config_t* config, int p5_idx, nfapi_
 
 	vnf_t* _this = (vnf_t*)(config);
 
-	return vnf_pack_and_send_p5_message(_this, p5_idx, &req->header, sizeof(nfapi_cell_search_request_t));
+	return vnf_pack_and_send_p4_message(_this, p5_idx, &req->header, sizeof(nfapi_cell_search_request_t));
 }
 int nfapi_vnf_broadcast_detect_request(nfapi_vnf_config_t* config, int p5_idx, nfapi_broadcast_detect_request_t* req)
 {
@@ -608,7 +608,7 @@ int nfapi_vnf_broadcast_detect_request(nfapi_vnf_config_t* config, int p5_idx, n
 
 	vnf_t* _this = (vnf_t*)(config);
 
-	return vnf_pack_and_send_p5_message(_this, p5_idx, &req->header, sizeof(nfapi_broadcast_detect_request_t));
+	return vnf_pack_and_send_p4_message(_this, p5_idx, &req->header, sizeof(nfapi_broadcast_detect_request_t));
 }
 int nfapi_vnf_system_information_schedule_request(nfapi_vnf_config_t* config, int p5_idx, nfapi_system_information_schedule_request_t* req)
 {
@@ -617,7 +617,7 @@ int nfapi_vnf_system_information_schedule_request(nfapi_vnf_config_t* config, in
 
 	vnf_t* _this = (vnf_t*)(config);
 
-	return vnf_pack_and_send_p5_message(_this, p5_idx, &req->header, sizeof(nfapi_system_information_schedule_request_t));
+	return vnf_pack_and_send_p4_message(_this, p5_idx, &req->header, sizeof(nfapi_system_information_schedule_request_t));
 }
 int nfapi_vnf_system_information_request(nfapi_vnf_config_t* config, int p5_idx, nfapi_system_information_request_t* req)
 {
@@ -626,7 +626,7 @@ int nfapi_vnf_system_information_request(nfapi_vnf_config_t* config, int p5_idx,
 
 	vnf_t* _this = (vnf_t*)(config);
 
-	return vnf_pack_and_send_p5_message(_this, p5_idx, &req->header, sizeof(nfapi_system_information_request_t));
+	return vnf_pack_and_send_p4_message(_this, p5_idx, &req->header, sizeof(nfapi_system_information_request_t));
 }
 int nfapi_vnf_nmm_stop_request(nfapi_vnf_config_t* config, int p5_idx, nfapi_nmm_stop_request_t* req)
 {
@@ -635,7 +635,7 @@ int nfapi_vnf_nmm_stop_request(nfapi_vnf_config_t* config, int p5_idx, nfapi_nmm
 
 	vnf_t* _this = (vnf_t*)(config);
 
-	return vnf_pack_and_send_p5_message(_this, p5_idx, &req->header, sizeof(nfapi_nmm_stop_request_t));
+	return vnf_pack_and_send_p4_message(_this, p5_idx, &req->header, sizeof(nfapi_nmm_stop_request_t));
 }
 int nfapi_vnf_vendor_extension(nfapi_vnf_config_t* config, int p5_idx, nfapi_p4_p5_message_header_t* msg)
 {

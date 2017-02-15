@@ -286,7 +286,7 @@ int nfapi_pnf_rssi_resp(nfapi_pnf_config_t* config, nfapi_rssi_response_t* resp)
 
 	pnf_t* _this = (pnf_t*)(config);
 
-	return pnf_pack_and_send_p5_message(_this, &(resp->header), sizeof(nfapi_rssi_response_t));
+	return pnf_pack_and_send_p4_message(_this, &(resp->header), sizeof(nfapi_rssi_response_t));
 }
 
 int nfapi_pnf_rssi_ind(nfapi_pnf_config_t* config, nfapi_rssi_indication_t* ind)
@@ -299,7 +299,7 @@ int nfapi_pnf_rssi_ind(nfapi_pnf_config_t* config, nfapi_rssi_indication_t* ind)
 
 	pnf_t* _this = (pnf_t*)(config);
 
-	return pnf_pack_and_send_p5_message(_this, &(ind->header), sizeof(nfapi_rssi_indication_t));
+	return pnf_pack_and_send_p4_message(_this, &(ind->header), sizeof(nfapi_rssi_indication_t));
 }
 int nfapi_pnf_cell_search_resp(nfapi_pnf_config_t* config, nfapi_cell_search_response_t* resp)
 {
@@ -313,7 +313,7 @@ int nfapi_pnf_cell_search_resp(nfapi_pnf_config_t* config, nfapi_cell_search_res
 
 	pnf_t* _this = (pnf_t*)(config);
 
-	return pnf_pack_and_send_p5_message(_this, &(resp->header), sizeof(nfapi_cell_search_response_t));
+	return pnf_pack_and_send_p4_message(_this, &(resp->header), sizeof(nfapi_cell_search_response_t));
 }
 int nfapi_pnf_cell_search_ind(nfapi_pnf_config_t* config, nfapi_cell_search_indication_t* ind)
 {
@@ -325,7 +325,7 @@ int nfapi_pnf_cell_search_ind(nfapi_pnf_config_t* config, nfapi_cell_search_indi
 
 	pnf_t* _this = (pnf_t*)(config);
 
-	return pnf_pack_and_send_p5_message(_this, &(ind->header), sizeof(nfapi_cell_search_indication_t));
+	return pnf_pack_and_send_p4_message(_this, &(ind->header), sizeof(nfapi_cell_search_indication_t));
 }
 int nfapi_pnf_broadcast_detect_resp(nfapi_pnf_config_t* config, nfapi_broadcast_detect_response_t* resp)
 {
@@ -337,7 +337,7 @@ int nfapi_pnf_broadcast_detect_resp(nfapi_pnf_config_t* config, nfapi_broadcast_
 
 	pnf_t* _this = (pnf_t*)(config);
 
-	return pnf_pack_and_send_p5_message(_this, &(resp->header), sizeof(nfapi_broadcast_detect_response_t));
+	return pnf_pack_and_send_p4_message(_this, &(resp->header), sizeof(nfapi_broadcast_detect_response_t));
 }
 int nfapi_pnf_broadcast_detect_ind(nfapi_pnf_config_t* config, nfapi_broadcast_detect_indication_t* ind)
 {
@@ -349,7 +349,7 @@ int nfapi_pnf_broadcast_detect_ind(nfapi_pnf_config_t* config, nfapi_broadcast_d
 
 	pnf_t* _this = (pnf_t*)(config);
 
-	return pnf_pack_and_send_p5_message(_this, &(ind->header), sizeof(nfapi_broadcast_detect_indication_t));
+	return pnf_pack_and_send_p4_message(_this, &(ind->header), sizeof(nfapi_broadcast_detect_indication_t));
 }
 int nfapi_pnf_system_information_schedule_resp(nfapi_pnf_config_t* config, nfapi_system_information_schedule_response_t* resp)
 {
@@ -361,7 +361,7 @@ int nfapi_pnf_system_information_schedule_resp(nfapi_pnf_config_t* config, nfapi
 
 	pnf_t* _this = (pnf_t*)(config);
 
-	return pnf_pack_and_send_p5_message(_this, &(resp->header), sizeof(nfapi_system_information_schedule_response_t));
+	return pnf_pack_and_send_p4_message(_this, &(resp->header), sizeof(nfapi_system_information_schedule_response_t));
 }
 
 int nfapi_pnf_system_information_schedule_ind(nfapi_pnf_config_t* config, nfapi_system_information_schedule_indication_t* ind)
@@ -374,7 +374,7 @@ int nfapi_pnf_system_information_schedule_ind(nfapi_pnf_config_t* config, nfapi_
 
 	pnf_t* _this = (pnf_t*)(config);
 
-	return pnf_pack_and_send_p5_message(_this, &(ind->header), sizeof(nfapi_system_information_schedule_indication_t));
+	return pnf_pack_and_send_p4_message(_this, &(ind->header), sizeof(nfapi_system_information_schedule_indication_t));
 }
 int nfapi_pnf_system_information_resp(nfapi_pnf_config_t* config, nfapi_system_information_response_t* resp)
 {
@@ -386,7 +386,7 @@ int nfapi_pnf_system_information_resp(nfapi_pnf_config_t* config, nfapi_system_i
 
 	pnf_t* _this = (pnf_t*)(config);
 
-	return pnf_pack_and_send_p5_message(_this, &(resp->header), sizeof(nfapi_system_information_response_t));
+	return pnf_pack_and_send_p4_message(_this, &(resp->header), sizeof(nfapi_system_information_response_t));
 }
 
 int nfapi_pnf_system_information_ind(nfapi_pnf_config_t* config, nfapi_system_information_indication_t* ind)
@@ -399,7 +399,7 @@ int nfapi_pnf_system_information_ind(nfapi_pnf_config_t* config, nfapi_system_in
 
 	pnf_t* _this = (pnf_t*)(config);
 
-	return pnf_pack_and_send_p5_message(_this, &(ind->header), sizeof(nfapi_system_information_indication_t));
+	return pnf_pack_and_send_p4_message(_this, &(ind->header), sizeof(nfapi_system_information_indication_t));
 }
 int nfapi_pnf_nmm_stop_resp(nfapi_pnf_config_t* config, nfapi_nmm_stop_response_t* resp)
 {
@@ -412,7 +412,7 @@ int nfapi_pnf_nmm_stop_resp(nfapi_pnf_config_t* config, nfapi_nmm_stop_response_
 
 	pnf_t* _this = (pnf_t*)(config);
 
-	return pnf_pack_and_send_p5_message(_this, &(resp->header), sizeof(nfapi_nmm_stop_request_t));
+	return pnf_pack_and_send_p4_message(_this, &(resp->header), sizeof(nfapi_nmm_stop_request_t));
 }
 
 int nfapi_pnf_vendor_extension(nfapi_pnf_config_t* config, nfapi_p4_p5_message_header_t* msg, uint32_t msg_len)

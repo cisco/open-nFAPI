@@ -56,10 +56,10 @@ class mac_private
 		std::queue<mac_pdu*> free_store;
 	public:
 
-		mac_private()
-			: byte_count(0), tick(0)
+		mac_private(bool _wireshark_test_mode)
+			: byte_count(0), tick(0), wireshark_test_mode(_wireshark_test_mode)
 		{
-			wireshark_test_mode = true;
+
 		}
 
 		mac_pdu* allocate_mac_pdu()
@@ -130,10 +130,10 @@ extern "C"
 		
 	} mac_internal_t;
 
-	mac_t* mac_create()
+	mac_t* mac_create(uint8_t wireshark_test_mode)
 	{
 		mac_internal_t* instance = (mac_internal_t*)malloc(sizeof(mac_internal_t));
-		instance->mac = new mac_private();
+		instance->mac = new mac_private((wireshark_test_mode >= 1));
 		return &(instance->_public);
 	}
 	

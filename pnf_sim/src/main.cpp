@@ -150,7 +150,6 @@ class pnf_info
 
 		pnf_info() : release(13)
 		{
-			wireshark_test_mode = true;
 		}
 
 		int release;
@@ -174,7 +173,7 @@ class pnf_info
 		int16_t max_total_power;
 		uint8_t oui;
 		
-		bool wireshark_test_mode;
+		uint8_t wireshark_test_mode;
 
 };
 
@@ -194,6 +193,8 @@ void read_pnf_xml(pnf_info& pnf, const char* xml_file)
 	ptree pt;
 
 	read_xml(input, pt);
+	
+	pnf.wireshark_test_mode = pt.get<unsigned>("pnf.wireshark_test_mode", 0);
 
 	
 	pnf.sync_mode = pt.get<unsigned>("pnf.sync_mode");
@@ -222,6 +223,8 @@ void read_pnf_xml(pnf_info& pnf, const char* xml_file)
 		if(v.first == "phy")
 		{
 			phy_info phy;
+			
+			
 				
 			phy.index = v.second.get<unsigned>("index");
 			phy.local_port = v.second.get<unsigned>("port");
@@ -1698,6 +1701,220 @@ int start_request(nfapi_pnf_config_t* config, nfapi_pnf_phy_config_t* phy, nfapi
 
 	return 0;
 }
+
+int measurement_request(nfapi_pnf_config_t* config, nfapi_pnf_phy_config_t* phy, nfapi_measurement_request_t* req)
+{
+	nfapi_measurement_response_t resp;
+	memset(&resp, 0, sizeof(resp));
+	resp.header.message_id = NFAPI_MEASUREMENT_RESPONSE;
+	resp.header.phy_id = req->header.phy_id;
+	resp.error_code = NFAPI_MSG_OK;
+	nfapi_pnf_measurement_resp(config, &resp);
+	return 0;
+}
+int rssi_request(nfapi_pnf_config_t* config, nfapi_pnf_phy_config_t* phy, nfapi_rssi_request_t* req)
+{
+	nfapi_rssi_response_t resp;
+	memset(&resp, 0, sizeof(resp));
+	resp.header.message_id = NFAPI_RSSI_RESPONSE;
+	resp.header.phy_id = req->header.phy_id;
+	resp.error_code = NFAPI_P4_MSG_OK;
+	nfapi_pnf_rssi_resp(config, &resp);
+	
+	nfapi_rssi_indication_t ind;
+	memset(&ind, 0, sizeof(ind));
+	ind.header.message_id = NFAPI_RSSI_INDICATION;
+	ind.header.phy_id = req->header.phy_id;
+	ind.error_code = NFAPI_P4_MSG_OK;
+	ind.rssi_indication_body.tl.tag = NFAPI_RSSI_INDICATION_TAG;
+	ind.rssi_indication_body.number_of_rssi = 1;
+	ind.rssi_indication_body.rssi[0] = -42;
+	nfapi_pnf_rssi_ind(config, &ind);
+	return 0;
+}
+int cell_search_request(nfapi_pnf_config_t* config, nfapi_pnf_phy_config_t* phy, nfapi_cell_search_request_t* req)
+{
+	nfapi_cell_search_response_t resp;
+	memset(&resp, 0, sizeof(resp));
+	resp.header.message_id = NFAPI_CELL_SEARCH_RESPONSE;
+	resp.header.phy_id = req->header.phy_id;
+	resp.error_code = NFAPI_P4_MSG_OK;
+	nfapi_pnf_cell_search_resp(config, &resp);
+	
+	nfapi_cell_search_indication_t ind;
+	memset(&ind, 0, sizeof(ind));
+	ind.header.message_id = NFAPI_CELL_SEARCH_INDICATION;
+	ind.header.phy_id = req->header.phy_id;
+	ind.error_code = NFAPI_P4_MSG_OK;
+	
+	switch(req->rat_type)
+	{
+		case NFAPI_RAT_TYPE_LTE:
+		{
+			ind.lte_cell_search_indication.tl.tag = NFAPI_LTE_CELL_SEARCH_INDICATION_TAG;
+			ind.lte_cell_search_indication.number_of_lte_cells_found = 1;
+			ind.lte_cell_search_indication.lte_found_cells[0].pci = 123;
+			ind.lte_cell_search_indication.lte_found_cells[0].rsrp = 123;
+			ind.lte_cell_search_indication.lte_found_cells[0].rsrq = 123;
+			ind.lte_cell_search_indication.lte_found_cells[0].frequency_offset = 123;
+		}
+		break;
+		case NFAPI_RAT_TYPE_UTRAN:
+		{
+			ind.utran_cell_search_indication.tl.tag = NFAPI_UTRAN_CELL_SEARCH_INDICATION_TAG;
+			ind.utran_cell_search_indication.number_of_utran_cells_found = 1;
+			ind.utran_cell_search_indication.utran_found_cells[0].psc = 89;
+			ind.utran_cell_search_indication.utran_found_cells[0].rscp = 89;
+			ind.utran_cell_search_indication.utran_found_cells[0].ecno = 89;
+			ind.utran_cell_search_indication.utran_found_cells[0].frequency_offset = -89;
+			
+		}
+		break;
+		case NFAPI_RAT_TYPE_GERAN:
+		{
+			ind.geran_cell_search_indication.tl.tag = NFAPI_GERAN_CELL_SEARCH_INDICATION_TAG;
+			ind.geran_cell_search_indication.number_of_gsm_cells_found = 1;
+			ind.geran_cell_search_indication.gsm_found_cells[0].bsic = 23;
+			ind.geran_cell_search_indication.gsm_found_cells[0].rxlev = 23;
+			ind.geran_cell_search_indication.gsm_found_cells[0].rxqual = 23;
+			ind.geran_cell_search_indication.gsm_found_cells[0].frequency_offset = -23;
+			ind.geran_cell_search_indication.gsm_found_cells[0].sfn_offset = 230;
+			
+		}
+		break;
+	}
+	
+	ind.pnf_cell_search_state.tl.tag = NFAPI_PNF_CELL_SEARCH_STATE_TAG;
+	ind.pnf_cell_search_state.length = 3;
+	
+	nfapi_pnf_cell_search_ind(config, &ind);	
+	return 0;
+}
+int broadcast_detect_request(nfapi_pnf_config_t* config, nfapi_pnf_phy_config_t* phy, nfapi_broadcast_detect_request_t* req)
+{
+	nfapi_broadcast_detect_response_t resp;
+	memset(&resp, 0, sizeof(resp));
+	resp.header.message_id = NFAPI_BROADCAST_DETECT_RESPONSE;
+	resp.header.phy_id = req->header.phy_id;
+	resp.error_code = NFAPI_P4_MSG_OK;
+	nfapi_pnf_broadcast_detect_resp(config, &resp);
+	
+	nfapi_broadcast_detect_indication_t ind;
+	memset(&ind, 0, sizeof(ind));
+	ind.header.message_id = NFAPI_BROADCAST_DETECT_INDICATION;
+	ind.header.phy_id = req->header.phy_id;
+	ind.error_code = NFAPI_P4_MSG_OK;
+	
+	switch(req->rat_type)
+	{
+		case NFAPI_RAT_TYPE_LTE:
+		{
+			ind.lte_broadcast_detect_indication.tl.tag = NFAPI_LTE_BROADCAST_DETECT_INDICATION_TAG;
+			ind.lte_broadcast_detect_indication.number_of_tx_antenna = 1;
+			ind.lte_broadcast_detect_indication.mib_length = 4;
+			//ind.lte_broadcast_detect_indication.mib...
+			ind.lte_broadcast_detect_indication.sfn_offset = 77;
+		
+		}
+		break;
+		case NFAPI_RAT_TYPE_UTRAN:
+		{
+			ind.utran_broadcast_detect_indication.tl.tag = NFAPI_UTRAN_BROADCAST_DETECT_INDICATION_TAG;
+			ind.utran_broadcast_detect_indication.mib_length = 4;
+			//ind.utran_broadcast_detect_indication.mib...
+			ind.utran_broadcast_detect_indication.sfn_offset;
+			
+		}
+		break;
+	}
+	
+	ind.pnf_cell_broadcast_state.tl.tag = NFAPI_PNF_CELL_BROADCAST_STATE_TAG;
+	ind.pnf_cell_broadcast_state.length = 3;
+	
+	nfapi_pnf_broadcast_detect_ind(config, &ind);	
+	return 0;
+}
+int system_information_schedule_request(nfapi_pnf_config_t* config, nfapi_pnf_phy_config_t* phy, nfapi_system_information_schedule_request_t* req)
+{
+	nfapi_system_information_schedule_response_t resp;
+	memset(&resp, 0, sizeof(resp));
+	resp.header.message_id = NFAPI_SYSTEM_INFORMATION_SCHEDULE_RESPONSE;
+	resp.header.phy_id = req->header.phy_id;
+	resp.error_code = NFAPI_P4_MSG_OK;
+	nfapi_pnf_system_information_schedule_resp(config, &resp);
+	
+	nfapi_system_information_schedule_indication_t ind;
+	memset(&ind, 0, sizeof(ind));
+	ind.header.message_id = NFAPI_SYSTEM_INFORMATION_SCHEDULE_INDICATION;
+	ind.header.phy_id = req->header.phy_id;
+	ind.error_code = NFAPI_P4_MSG_OK;
+	
+	ind.lte_system_information_indication.tl.tag = NFAPI_LTE_SYSTEM_INFORMATION_INDICATION_TAG;
+	ind.lte_system_information_indication.sib_type = 3;
+	ind.lte_system_information_indication.sib_length = 5;
+	//ind.lte_system_information_indication.sib...
+	
+	nfapi_pnf_system_information_schedule_ind(config, &ind);		
+	return 0;
+}
+int system_information_request(nfapi_pnf_config_t* config, nfapi_pnf_phy_config_t* phy, nfapi_system_information_request_t* req)
+{
+	nfapi_system_information_response_t resp;
+	memset(&resp, 0, sizeof(resp));
+	resp.header.message_id = NFAPI_SYSTEM_INFORMATION_RESPONSE;
+	resp.header.phy_id = req->header.phy_id;
+	resp.error_code = NFAPI_P4_MSG_OK;
+	nfapi_pnf_system_information_resp(config, &resp);
+	
+	nfapi_system_information_indication_t ind;
+	memset(&ind, 0, sizeof(ind));
+	ind.header.message_id = NFAPI_SYSTEM_INFORMATION_INDICATION;
+	ind.header.phy_id = req->header.phy_id;
+	ind.error_code = NFAPI_P4_MSG_OK;
+	
+	switch(req->rat_type)
+	{
+		case NFAPI_RAT_TYPE_LTE:
+		{
+			ind.lte_system_information_indication.tl.tag = NFAPI_LTE_SYSTEM_INFORMATION_INDICATION_TAG;
+			ind.lte_system_information_indication.sib_type = 1;
+			ind.lte_system_information_indication.sib_length = 3;
+			//ind.lte_system_information_indication.sib...
+		}
+		break;
+		case NFAPI_RAT_TYPE_UTRAN:
+		{
+			ind.utran_system_information_indication.tl.tag = NFAPI_UTRAN_SYSTEM_INFORMATION_INDICATION_TAG;
+			ind.utran_system_information_indication.sib_length = 3;
+			//ind.utran_system_information_indication.sib...
+			
+		}
+		break;
+		case NFAPI_RAT_TYPE_GERAN:
+		{
+			ind.geran_system_information_indication.tl.tag = NFAPI_GERAN_SYSTEM_INFORMATION_INDICATION_TAG;
+			ind.geran_system_information_indication.si_length = 3;
+			//ind.geran_system_information_indication.si...
+			
+		}
+		break;
+	}
+		
+	
+	nfapi_pnf_system_information_ind(config, &ind);		
+
+	return 0;
+}
+int nmm_stop_request(nfapi_pnf_config_t* config, nfapi_pnf_phy_config_t* phy, nfapi_nmm_stop_request_t* req)
+{
+	nfapi_nmm_stop_response_t resp;
+	memset(&resp, 0, sizeof(resp));
+	resp.header.message_id = NFAPI_NMM_STOP_RESPONSE;
+	resp.header.phy_id = req->header.phy_id;
+	resp.error_code = NFAPI_P4_MSG_OK;
+	nfapi_pnf_nmm_stop_resp(config, &resp);
+	return 0;
+}
 	
 int vendor_ext(nfapi_pnf_config_t* config, nfapi_p4_p5_message_header_t* msg)
 {
@@ -1786,6 +2003,15 @@ int main(int argc, char *argv[])
 	config->param_req = &param_request;
 	config->config_req = &config_request;
 	config->start_req = &start_request;
+	
+	config->measurement_req = &measurement_request;
+	config->rssi_req = &rssi_request;
+	config->cell_search_req = &cell_search_request;
+	config->broadcast_detect_req = &broadcast_detect_request;
+	config->system_information_schedule_req = &system_information_schedule_request;
+	config->system_information_req = &system_information_request;
+	config->nmm_stop_req = &nmm_stop_request;
+	
 	config->vendor_ext = &vendor_ext;
 
 	config->trace = &pnf_sim_trace;
