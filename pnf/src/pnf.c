@@ -630,7 +630,7 @@ void pnf_handle_rssi_request(pnf_t* pnf, void *pRecvMsg, int recvMsgLen)
 		nfapi_pnf_config_t* config = &(pnf->_public);
 	
 		// unpack the message
-		if (nfapi_p5_message_unpack(pRecvMsg, recvMsgLen, &req, sizeof(req), &config->codec_config) >= 0)
+		if (nfapi_p4_message_unpack(pRecvMsg, recvMsgLen, &req, sizeof(req), &config->codec_config) >= 0)
 		{
 			if(config->state == NFAPI_PNF_RUNNING)
 			{
@@ -699,7 +699,7 @@ void pnf_handle_cell_search_request(pnf_t* pnf, void *pRecvMsg, int recvMsgLen)
 	
 		nfapi_pnf_config_t* config = &(pnf->_public);
 	
-		if (nfapi_p5_message_unpack(pRecvMsg, recvMsgLen, &req, sizeof(req), &config->codec_config) >= 0)
+		if (nfapi_p4_message_unpack(pRecvMsg, recvMsgLen, &req, sizeof(req), &config->codec_config) >= 0)
 		{
 			if(config->state == NFAPI_PNF_RUNNING)
 			{
@@ -769,7 +769,7 @@ void pnf_handle_broadcast_detect_request(pnf_t* pnf, void *pRecvMsg, int recvMsg
 	
 		nfapi_pnf_config_t* config = &(pnf->_public);
 	
-		if (nfapi_p5_message_unpack(pRecvMsg, recvMsgLen, &req, sizeof(req), &config->codec_config) >= 0)
+		if (nfapi_p4_message_unpack(pRecvMsg, recvMsgLen, &req, sizeof(req), &config->codec_config) >= 0)
 		{
 			if(config->state == NFAPI_PNF_RUNNING)
 			{
@@ -838,7 +838,7 @@ void pnf_handle_system_information_schedule_request(pnf_t* pnf, void *pRecvMsg, 
 	
 		nfapi_pnf_config_t* config = &(pnf->_public);
 	
-		if (nfapi_p5_message_unpack(pRecvMsg, recvMsgLen, &req, sizeof(req), &config->codec_config) >= 0)
+		if (nfapi_p4_message_unpack(pRecvMsg, recvMsgLen, &req, sizeof(req), &config->codec_config) >= 0)
 		{
 			if(config->state == NFAPI_PNF_RUNNING)
 			{
@@ -906,14 +906,14 @@ void pnf_handle_system_information_request(pnf_t* pnf, void *pRecvMsg, int recvM
 	
 		nfapi_pnf_config_t* config = &(pnf->_public);
 	
-		if (nfapi_p5_message_unpack(pRecvMsg, recvMsgLen, &req, sizeof(req), &config->codec_config) >= 0)
+		if (nfapi_p4_message_unpack(pRecvMsg, recvMsgLen, &req, sizeof(req), &config->codec_config) >= 0)
 		{
 			if(config->state == NFAPI_PNF_RUNNING)
 			{
 				nfapi_pnf_phy_config_t* phy = nfapi_pnf_phy_config_find(config, req.header.phy_id);
 				if(phy)
 				{
-					if(phy->state != NFAPI_PNF_PHY_RUNNING)
+					if(phy->state == NFAPI_PNF_PHY_RUNNING)
 					{
 						if(config->system_information_req)
 						{
@@ -975,7 +975,7 @@ void pnf_handle_nmm_stop_request(pnf_t* pnf, void *pRecvMsg, int recvMsgLen)
 	
 		nfapi_pnf_config_t* config = &(pnf->_public);
 	
-		if (nfapi_p5_message_unpack(pRecvMsg, recvMsgLen, &req, sizeof(req), &config->codec_config) >= 0)
+		if (nfapi_p4_message_unpack(pRecvMsg, recvMsgLen, &req, sizeof(req), &config->codec_config) >= 0)
 		{
 			if(config->state == NFAPI_PNF_RUNNING)
 			{
@@ -1179,6 +1179,22 @@ int pnf_pack_and_send_p5_message(pnf_t* pnf, nfapi_p4_p5_message_header_t* msg, 
 	if (packed_len < 0)
 	{
 		NFAPI_TRACE(NFAPI_TRACE_ERROR, "nfapi_p5_message_pack failed (%d)\n", packed_len);
+		return -1;
+	}
+
+	return pnf_send_message(pnf, pnf->tx_message_buffer, packed_len, 0/*msg->stream_id*/);
+}
+
+int pnf_pack_and_send_p4_message(pnf_t* pnf, nfapi_p4_p5_message_header_t* msg, uint32_t msg_len)
+{
+	int packed_len = nfapi_p4_message_pack(msg, msg_len,
+										   pnf->tx_message_buffer, 
+										   sizeof(pnf->tx_message_buffer), 
+										   &pnf->_public.codec_config);
+
+	if (packed_len < 0)
+	{
+		NFAPI_TRACE(NFAPI_TRACE_ERROR, "nfapi_p4_message_pack failed (%d)\n", packed_len);
 		return -1;
 	}
 

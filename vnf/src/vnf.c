@@ -434,7 +434,7 @@ void vnf_handle_rssi_response(void *pRecvMsg, int recvMsgLen, nfapi_vnf_config_t
 		nfapi_rssi_response_t msg;
 		
 		// unpack the message
-		if (nfapi_p5_message_unpack(pRecvMsg, recvMsgLen, &msg, sizeof(msg), &config->codec_config) >= 0)
+		if (nfapi_p4_message_unpack(pRecvMsg, recvMsgLen, &msg, sizeof(msg), &config->codec_config) >= 0)
 		{
 			if(config->rssi_resp)
 			{
@@ -466,7 +466,7 @@ void vnf_handle_rssi_indication(void *pRecvMsg, int recvMsgLen, nfapi_vnf_config
 		nfapi_rssi_indication_t msg;
 		
 		// unpack the message
-		if (nfapi_p5_message_unpack(pRecvMsg, recvMsgLen, &msg, sizeof(msg), &config->codec_config) >= 0)
+		if (nfapi_p4_message_unpack(pRecvMsg, recvMsgLen, &msg, sizeof(msg), &config->codec_config) >= 0)
 		{
 			if(config->rssi_ind)
 			{
@@ -498,7 +498,7 @@ void vnf_handle_cell_search_response(void *pRecvMsg, int recvMsgLen, nfapi_vnf_c
 		nfapi_cell_search_response_t msg;
 	
 		// unpack the message
-		if (nfapi_p5_message_unpack(pRecvMsg, recvMsgLen, &msg, sizeof(msg), &config->codec_config) >= 0)
+		if (nfapi_p4_message_unpack(pRecvMsg, recvMsgLen, &msg, sizeof(msg), &config->codec_config) >= 0)
 		{
 			if(config->cell_search_resp)
 			{
@@ -530,7 +530,7 @@ void vnf_handle_cell_search_indication(void *pRecvMsg, int recvMsgLen, nfapi_vnf
 		nfapi_cell_search_indication_t msg;
 		
 		// unpack the message
-		if (nfapi_p5_message_unpack(pRecvMsg, recvMsgLen, &msg, sizeof(msg), &config->codec_config) >= 0)
+		if (nfapi_p4_message_unpack(pRecvMsg, recvMsgLen, &msg, sizeof(msg), &config->codec_config) >= 0)
 		{
 			if(config->cell_search_ind)
 			{
@@ -562,7 +562,7 @@ void vnf_handle_broadcast_detect_response(void *pRecvMsg, int recvMsgLen, nfapi_
 		nfapi_broadcast_detect_response_t msg;
 
 		// unpack the message
-		if (nfapi_p5_message_unpack(pRecvMsg, recvMsgLen, &msg, sizeof(msg), &config->codec_config) >= 0)
+		if (nfapi_p4_message_unpack(pRecvMsg, recvMsgLen, &msg, sizeof(msg), &config->codec_config) >= 0)
 		{
 			if(config->broadcast_detect_resp)
 			{
@@ -594,7 +594,7 @@ void vnf_handle_broadcast_detect_indication(void *pRecvMsg, int recvMsgLen, nfap
 		nfapi_broadcast_detect_indication_t msg;
 
 		// unpack the message
-		if (nfapi_p5_message_unpack(pRecvMsg, recvMsgLen, &msg, sizeof(msg), &config->codec_config) >= 0)
+		if (nfapi_p4_message_unpack(pRecvMsg, recvMsgLen, &msg, sizeof(msg), &config->codec_config) >= 0)
 		{
 			if(config->broadcast_detect_ind)
 			{
@@ -627,7 +627,7 @@ void vnf_handle_system_information_schedule_response(void *pRecvMsg, int recvMsg
 		nfapi_system_information_schedule_response_t msg;
 		
 		// unpack the message
-		if (nfapi_p5_message_unpack(pRecvMsg, recvMsgLen, &msg, sizeof(msg), &config->codec_config) >= 0)
+		if (nfapi_p4_message_unpack(pRecvMsg, recvMsgLen, &msg, sizeof(msg), &config->codec_config) >= 0)
 		{
 			if(config->system_information_schedule_resp)
 			{
@@ -659,7 +659,7 @@ void vnf_handle_system_information_schedule_indication(void *pRecvMsg, int recvM
 		nfapi_system_information_schedule_indication_t msg;
 
 		// unpack the message
-		if (nfapi_p5_message_unpack(pRecvMsg, recvMsgLen, &msg, sizeof(msg), &config->codec_config) >= 0)
+		if (nfapi_p4_message_unpack(pRecvMsg, recvMsgLen, &msg, sizeof(msg), &config->codec_config) >= 0)
 		{
 			if(config->system_information_schedule_ind)
 			{
@@ -691,7 +691,7 @@ void vnf_handle_system_information_response(void *pRecvMsg, int recvMsgLen, nfap
 		nfapi_system_information_response_t msg;
 		
 		// unpack the message
-		if (nfapi_p5_message_unpack(pRecvMsg, recvMsgLen, &msg, sizeof(msg), &config->codec_config) >= 0)
+		if (nfapi_p4_message_unpack(pRecvMsg, recvMsgLen, &msg, sizeof(msg), &config->codec_config) >= 0)
 		{
 			if(config->system_information_resp)
 			{
@@ -723,7 +723,7 @@ void vnf_handle_system_information_indication(void *pRecvMsg, int recvMsgLen, nf
 		nfapi_system_information_indication_t msg;
 		
 		// unpack the message
-		if (nfapi_p5_message_unpack(pRecvMsg, recvMsgLen, &msg, sizeof(msg), &config->codec_config) < 0)
+		if (nfapi_p4_message_unpack(pRecvMsg, recvMsgLen, &msg, sizeof(msg), &config->codec_config) < 0)
 		{
 			NFAPI_TRACE(NFAPI_TRACE_ERROR, "%s: Unpack message failed, ignoring\n", __FUNCTION__);
 			return;
@@ -754,7 +754,7 @@ void vnf_handle_nmm_stop_response(void *pRecvMsg, int recvMsgLen, nfapi_vnf_conf
 		nfapi_nmm_stop_response_t msg;	
 		
 		// unpack the message
-		if (nfapi_p5_message_unpack(pRecvMsg, recvMsgLen, &msg, sizeof(nfapi_nmm_stop_response_t), &config->codec_config) >= 0)
+		if (nfapi_p4_message_unpack(pRecvMsg, recvMsgLen, &msg, sizeof(nfapi_nmm_stop_response_t), &config->codec_config) >= 0)
 		{
 			if(config->nmm_stop_resp)
 			{
@@ -1089,4 +1089,28 @@ int vnf_pack_and_send_p5_message(vnf_t* vnf, uint16_t p5_idx, nfapi_p4_p5_messag
 	}
 }
 
+
+int vnf_pack_and_send_p4_message(vnf_t* vnf, uint16_t p5_idx, nfapi_p4_p5_message_header_t* msg, uint16_t msg_len)
+{
+	nfapi_vnf_pnf_info_t* pnf = nfapi_vnf_pnf_list_find(&(vnf->_public), p5_idx);
+	
+	if(pnf)
+	{
+		// pack the message for transmission
+		int packedMessageLength = nfapi_p4_message_pack(msg, msg_len, vnf->tx_message_buffer, sizeof(vnf->tx_message_buffer), &vnf->_public.codec_config);
+
+		if (packedMessageLength < 0)
+		{
+			NFAPI_TRACE(NFAPI_TRACE_ERROR, "nfapi_p4_message_pack failed with return %d\n", packedMessageLength);
+			return -1;
+		}
+
+		return vnf_send_p5_msg(pnf, vnf->tx_message_buffer, packedMessageLength, 0/*msg->phy_id*/);
+	}
+	else
+	{
+		NFAPI_TRACE(NFAPI_TRACE_INFO, "%s() cannot find pnf info for p5_idx:%d\n", __FUNCTION__, p5_idx);
+		return -1;
+	}
+}
 

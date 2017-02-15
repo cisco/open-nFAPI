@@ -35,7 +35,7 @@ typedef struct mac
 	void (*tx_req)(mac_t* mac, nfapi_tx_request_t* req);
 } mac_t;
 
-mac_t* mac_create();
+mac_t* mac_create(uint8_t wireshark_test_mode);
 
 void mac_start_data(mac_t* mac, unsigned rx_port, const char* tx_addres, unsigned tx_port);
 
