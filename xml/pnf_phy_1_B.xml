@@ -55,7 +55,7 @@
 			<data>
 				<udp>
 					<rx_port>7744</rx_port>
-					<tx_addr>10.231.16.80</tx_addr>
+					<tx_addr>127.0.0.1</tx_addr>
 					<tx_port>7755</tx_port>
 				</udp>
 			</data>
