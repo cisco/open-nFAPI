@@ -24,7 +24,7 @@ before_install:
 addons:
   coverity_scan:
     project:
-      name: cisco/open-nFAPI
+      name: cisco-open-nFAPI
       version: 1.0
       description: Build submitted via Travis CI
     notification_email: xxx@cisco.com
