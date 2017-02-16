@@ -23,12 +23,12 @@ before_install:
 
 addons:
   coverity_scan:
-  project:
-    name: "open-nFAPI"
-    decription: "Build submitted via Travis CS"
-  build_command_prepend: "./configure && make"
-  build_command: "make check"
-  branch_pattern: coverity_scan
+    project:
+      name: "open-nFAPI"
+      description: "Build submitted via Travis CI"
+    build_command_prepend: "./configure && make"
+    build_command: "make check"
+    branch_pattern: coverity_scan
 
 script:
   - ./configure && make && make check
