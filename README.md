@@ -89,6 +89,8 @@ which address:port is being used
 
 Note : Pinning the simulators to unused cores will produce more consistent behaviour.
 
+Note : You may have to run the processes with sudo to be able to set the real time scheduling and priority
+
 ### vnf simulator
 
 To run the vnf simulator you need to specify the port the vnf will listen for p5 connection request upon and also the xml configuration file
