@@ -7,7 +7,7 @@ compiler:
   - g++
 
 addons:
-	coverity_scan:
+  coverity_scan:
 
 before_install:
   - sudo apt-get install doxygen 
