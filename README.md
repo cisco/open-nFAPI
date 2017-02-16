@@ -87,6 +87,8 @@ The vnf and pnf simulator can be run using the following commands. The pnf and v
 data over udp. Review the xml configuration files for the details of the port and address to configure. Console logging will show
 which address:port is being used
 
+Note : Pinning the simulators to unused cores will produce more consistent behaviour.
+
 ### vnf simulator
 
 To run the vnf simulator you need to specify the port the vnf will listen for p5 connection request upon and also the xml configuration file
