@@ -26,7 +26,8 @@ addons:
   project:
     name: "open-nFAPI"
     decription: "Build submitted via Travis CS"
-  notificatoin_email:
+  build_command_prepend: "./configure && make"
+  build_command: "make check"
   branch_pattern: coverity_scan
 
 script:
