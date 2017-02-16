@@ -14,7 +14,7 @@
 			<data>
 				<udp>
 					<rx_port>8891</rx_port>
-					<tx_addr>10.231.16.80</tx_addr>
+					<tx_addr>127.0.0.1</tx_addr>
 					<tx_port>8892</tx_port>
 				</udp>
 			</data>

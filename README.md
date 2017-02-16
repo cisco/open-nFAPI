@@ -71,6 +71,16 @@ To run the unit and integration tests
 make check
 ```
 
+You may notice in the console output of the final integration tests the following
+
+```
+*** Missing subframe 123 125
+```
+
+Out of the box the machine on which you are running has not be configured for real time operation as a result
+the vnf may not be scheduled at the correct times and hence it may risk 'missing' subframe opportunities. This
+warning indicates this has happened. 
+
 ## Running the simulator
 
 The vnf and pnf simulator can be run using the following commands. The pnf and vnf simulator support sourcing and sinking
