@@ -25,7 +25,7 @@ addons:
   coverity_scan:
   project:
     name: "open-nFAPI"
-    decription:" Build submitted via Travis CS"
+    decription: "Build submitted via Travis CS"
   notificatoin_email:
   branch_pattern: coverity_scan
 
