@@ -1,3 +1,11 @@
+
+env:
+  global:
+    # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created 
+    #   via the "travis encrypt" command using the project repo's public key
+    - secure: "c1jx1BX8HdwQLiwCQEAssA"
+		    
+
 language: cpp
 
 dist: trusty
@@ -6,9 +14,6 @@ sudo: required
 compiler:
   - g++
 
-addons:
-  coverity_scan:
-
 before_install:
   - sudo apt-get install doxygen 
   - sudo apt-get install libcunit1-dev 
@@ -16,6 +21,14 @@ before_install:
   - sudo apt-get install libsctp-dev
   - sudo apt-get install libboost-all-dev
   - autoreconf -i
+
+addons:
+  coverity_scan:
+  project:
+    name: "open-nFAPI"
+    decription:" Build submitted via Travis CS"
+  notificatoin_email
+  branch_pattern: coverity_scan
 
 script:
   - ./configure && make && make check
