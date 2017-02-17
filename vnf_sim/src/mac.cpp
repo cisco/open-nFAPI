@@ -25,6 +25,7 @@
 #include <ifaddrs.h>
 #include <netdb.h>
 #include <pthread.h>
+#include <unistd.h>
 
 #include <mutex>
 #include <queue>
@@ -177,6 +178,12 @@ extern "C"
 		printf("[MAC] Tx Data to %s.%d\n", tx_address, tx_port);
 
 		instance->rx_sock = socket(AF_INET, SOCK_DGRAM, 0);
+		
+		if(instance->rx_sock < 0)
+		{
+			printf("[MAC] Failed to create socket\n");
+			return;
+		}
 
 		struct sockaddr_in addr;
 		memset(&addr, 0, sizeof(0));
@@ -184,7 +191,12 @@ extern "C"
 		addr.sin_port = htons(rx_port);
 		addr.sin_addr.s_addr = INADDR_ANY;
 		
-		bind(instance->rx_sock, (struct sockaddr *)&addr, sizeof(struct sockaddr_in));
+		if(bind(instance->rx_sock, (struct sockaddr *)&addr, sizeof(struct sockaddr_in)) < 0)
+		{
+			printf("[MAC] Failed to bind to %d\n", rx_port);
+			close(instance->rx_sock);
+			return;
+		}
 
 		pthread_t mac_rx_thread;
 		pthread_create(&mac_rx_thread, NULL, &mac_rx_thread_start, instance);
@@ -1027,7 +1039,12 @@ extern "C"
 			//
 			instance->tx_byte_count += len;
 
-			sendto(instance->tx_sock, data, len, 0, (struct sockaddr*)&(instance->tx_addr), sizeof(instance->tx_addr));
+			int sendto_result = sendto(instance->tx_sock, data, len, 0, (struct sockaddr*)&(instance->tx_addr), sizeof(instance->tx_addr));
+			
+			if(sendto_result < 0)
+			{
+				// error
+			}
 		}
 
 	}

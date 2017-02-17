@@ -91,6 +91,7 @@ class phy_info
 
 		phy_info()
 			: first_subframe_ind(0), fapi(0),
+			  dl_ues_per_subframe(0), ul_ues_per_subframe(0), 
 			  timing_window(0), timing_info_mode(0), timing_info_period(0)
 		{
 		}
@@ -151,7 +152,7 @@ class pnf_info
 
 		pnf_info() 
 		: release(13), wireshark_test_mode(0),
-		  oui(0)
+		  max_total_power(0), oui(0)
 					
 		{
 		}
@@ -1986,7 +1987,7 @@ int pnf_sim_pack_p4_p5_vendor_extension(nfapi_p4_p5_message_header_t* header, ui
 	if(header->message_id == P5_VENDOR_EXT_RSP)
 	{
 		vendor_ext_p5_rsp* rsp = (vendor_ext_p5_rsp*)(header);
-		push16(rsp->error_code, ppWritePackedMsg, end);
+		return (!push16(rsp->error_code, ppWritePackedMsg, end));
 	}
 	return 0;
 }
@@ -1997,8 +1998,9 @@ int pnf_sim_unpack_p4_p5_vendor_extension(nfapi_p4_p5_message_header_t* header, 
 	if(header->message_id == P5_VENDOR_EXT_REQ)
 	{
 		vendor_ext_p5_req* req = (vendor_ext_p5_req*)(header);
-		pull16(ppReadPackedMessage, &req->dummy1, end);
-		pull16(ppReadPackedMessage, &req->dummy2, end);
+		return (!(pull16(ppReadPackedMessage, &req->dummy1, end) &&
+	  			  pull16(ppReadPackedMessage, &req->dummy2, end)));
+		 
 		//NFAPI_TRACE(NFAPI_TRACE_INFO, "%s (%d %d)\n", __FUNCTION__, req->dummy1, req->dummy2);
 	}
 	return 0;

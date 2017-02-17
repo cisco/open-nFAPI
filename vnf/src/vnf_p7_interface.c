@@ -280,9 +280,9 @@ int nfapi_vnf_p7_start(nfapi_vnf_p7_config_t* config)
 					NFAPI_TRACE(NFAPI_TRACE_WARN, "subframe pselect overrun %ld %ld\n", millisecond, pselect_stop_millisecond);
 					NFAPI_TRACE(NFAPI_TRACE_WARN, "subframe underrun %ld\n", millisecond);
 				}
-
 				last_millisecond = millisecond;
 				*/
+				
 				millisecond ++;
 			}
 		}

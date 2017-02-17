@@ -409,6 +409,12 @@ int vnf_p7_pack_and_send_p7_msg(vnf_p7_t* vnf_p7, nfapi_p7_message_header_t* hea
 		header->m_segment_sequence = NFAPI_P7_SET_MSS(0, 0, p7_connection->sequence_number);
 		
 		int len = nfapi_p7_message_pack(header, buffer, sizeof(buffer), &vnf_p7->_public.codec_config);
+		
+		if(len < 0) 
+		{
+			NFAPI_TRACE(NFAPI_TRACE_INFO, "%s() failed to pack p7 message phy_id:%d\n", __FUNCTION__, header->phy_id);
+			return -1;
+		}
 
 		if(len > vnf_p7->_public.segment_size)
 		{
@@ -1377,7 +1383,11 @@ int vnf_p7_read_dispatch_message(vnf_p7_t* vnf_p7)
 		{
 			// get the segment size
 			nfapi_p7_message_header_t header;
-			nfapi_p7_message_header_unpack(header_buffer, NFAPI_P7_HEADER_LENGTH, &header, sizeof(header), 0);
+			if(nfapi_p7_message_header_unpack(header_buffer, NFAPI_P7_HEADER_LENGTH, &header, sizeof(header), 0) < 0)
+			{
+				NFAPI_TRACE(NFAPI_TRACE_ERROR, "Unpack message header failed, ignoring\n");
+				return -1;
+			}
 
 			// resize the buffer if we have a large segment
 			if(header.message_length > vnf_p7->rx_message_buffer_size)

@@ -424,7 +424,14 @@ extern "C"
 		addr.sin_family = AF_INET;
 		addr.sin_port = htons(rx_port);
 		addr.sin_addr.s_addr = INADDR_ANY;
-		bind(instance->rx_sock, (struct sockaddr *)&addr, sizeof(struct sockaddr_in));
+		
+		int bind_result = bind(instance->rx_sock, (struct sockaddr *)&addr, sizeof(struct sockaddr_in));
+		
+		if(bind_result == -1)
+		{
+			printf("[FAPI] Failed to bind to port %d\n", rx_port);
+			return ;
+		}
 
 		instance->tx_sock = socket(AF_INET, SOCK_DGRAM, 0);
 		instance->tx_addr.sin_family = AF_INET;
@@ -596,7 +603,12 @@ extern "C"
 			//
 			instance->tx_byte_count += len;
 
-			sendto(instance->tx_sock, data, len, 0, (struct sockaddr*)&(instance->tx_addr), sizeof(instance->tx_addr));
+			int sendto_result = sendto(instance->tx_sock, data, len, 0, (struct sockaddr*)&(instance->tx_addr), sizeof(instance->tx_addr));
+			
+			if(sendto_result == -1)
+			{
+				// error
+			}
 		}
 
 		return 0;

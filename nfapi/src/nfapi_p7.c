@@ -4631,7 +4631,7 @@ static uint8_t  unpack_cqi_indication_body_value(void* tlv, uint8_t **ppReadPack
 		value->cqi_pdu_list = 0;
 	}
 
-	if(value->cqi_pdu_list > 0)
+	if(value->number_of_cqis > 0)
 	{
 		value->cqi_raw_pdu_list = (nfapi_cqi_indication_raw_pdu_t*)nfapi_p7_allocate(sizeof(nfapi_cqi_indication_raw_pdu_t) * value->number_of_cqis, config);
 		if(value->cqi_raw_pdu_list == NULL)

@@ -257,7 +257,7 @@ int vnf_sim_unpack_p4_p5_vendor_extension(nfapi_p4_p5_message_header_t* header, 
 	if(header->message_id == P5_VENDOR_EXT_RSP)
 	{
 		vendor_ext_p5_rsp* req = (vendor_ext_p5_rsp*)(header);
-		pull16(ppReadPackedMessage, &req->error_code, end);
+		return(!pull16(ppReadPackedMessage, &req->error_code, end));
 	}
 	return 0;
 }
@@ -269,8 +269,8 @@ int vnf_sim_pack_p4_p5_vendor_extension(nfapi_p4_p5_message_header_t* header, ui
 	{
 		vendor_ext_p5_req* req = (vendor_ext_p5_req*)(header);
 		//NFAPI_TRACE(NFAPI_TRACE_INFO, "%s %d %d\n", __FUNCTION__, req->dummy1, req->dummy2);
-		push16(req->dummy1, ppWritePackedMsg, end);
-		push16(req->dummy2, ppWritePackedMsg, end);
+		return (!(push16(req->dummy1, ppWritePackedMsg, end) &&
+				  push16(req->dummy2, ppWritePackedMsg, end)));
 	}
 	return 0;
 }
