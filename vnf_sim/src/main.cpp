@@ -38,6 +38,8 @@
 #include <boost/foreach.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
+#include <boost/exception/diagnostic_information.hpp> 
+#include <boost/exception_ptr.hpp> 
 
 extern "C" {
 #include <nfapi_vnf_interface.h>
@@ -1222,66 +1224,70 @@ int read_vnf_xml(vnf_info& vnf, const char* xml_file)
 	try
 	{
 		
-	std::ifstream input(xml_file);
-
-	using boost::property_tree::ptree;
-	ptree pt;
-
-	read_xml(input, pt);
+		std::ifstream input(xml_file);
 	
+		using boost::property_tree::ptree;
+		ptree pt;
 	
-
-	for(const auto& v : pt.get_child("vnf.vnf_p7_list"))
-	{
-		if(v.first == "vnf_p7")
+		read_xml(input, pt);
+		
+		
+	
+		for(const auto& v : pt.get_child("vnf.vnf_p7_list"))
 		{
-			vnf_p7_info vnf_p7;
-			vnf_p7.local_port = v.second.get<unsigned>("port");
-			vnf_p7.local_addr = v.second.get<std::string>("address");
-
-			vnf_p7.timing_window = v.second.get<unsigned>("timing_window");
-			vnf_p7.periodic_timing_enabled = v.second.get<unsigned>("periodic_timing_enabled");
-			vnf_p7.aperiodic_timing_enabled = v.second.get<unsigned>("aperiodic_timing_enabled");
-			vnf_p7.periodic_timing_period = v.second.get<unsigned>("periodic_timing_window");
-
-			
-			boost::optional<const boost::property_tree::ptree&> d = v.second.get_child_optional("data.udp");
-			if(d.is_initialized())
+			if(v.first == "vnf_p7")
 			{
-				vnf_p7.udp.enabled = true;
-				vnf_p7.udp.rx_port = d.get().get<unsigned>("rx_port");
-				vnf_p7.udp.tx_port = d.get().get<unsigned>("tx_port");
-				vnf_p7.udp.tx_addr = d.get().get<std::string>("tx_addr");
+				vnf_p7_info vnf_p7;
+				vnf_p7.local_port = v.second.get<unsigned>("port");
+				vnf_p7.local_addr = v.second.get<std::string>("address");
+	
+				vnf_p7.timing_window = v.second.get<unsigned>("timing_window");
+				vnf_p7.periodic_timing_enabled = v.second.get<unsigned>("periodic_timing_enabled");
+				vnf_p7.aperiodic_timing_enabled = v.second.get<unsigned>("aperiodic_timing_enabled");
+				vnf_p7.periodic_timing_period = v.second.get<unsigned>("periodic_timing_window");
+	
+				
+				boost::optional<const boost::property_tree::ptree&> d = v.second.get_child_optional("data.udp");
+				if(d.is_initialized())
+				{
+					vnf_p7.udp.enabled = true;
+					vnf_p7.udp.rx_port = d.get().get<unsigned>("rx_port");
+					vnf_p7.udp.tx_port = d.get().get<unsigned>("tx_port");
+					vnf_p7.udp.tx_addr = d.get().get<std::string>("tx_addr");
+				}
+				else
+				{
+					vnf_p7.udp.enabled = false;
+				}
+				
+				vnf.wireshark_test_mode = v.second.get<unsigned>("wireshark_test_mode", 0);
+	
+				vnf_p7.mac = mac_create(vnf.wireshark_test_mode);
+				vnf_p7.mac->dl_config_req = &mac_dl_config_req;
+				vnf_p7.mac->ul_config_req = &mac_ul_config_req;
+				vnf_p7.mac->hi_dci0_req = &mac_hi_dci0_req;
+				vnf_p7.mac->tx_req = &mac_tx_req;
+	
+				if(vnf_p7.udp.enabled)
+				{
+					mac_start_data(vnf_p7.mac, 
+								   vnf_p7.udp.rx_port, 
+								   vnf_p7.udp.tx_addr.c_str(), 
+								   vnf_p7.udp.tx_port);
+				}
+	
+				vnf.p7_vnfs.push_back(vnf_p7);
 			}
-			else
-			{
-				vnf_p7.udp.enabled = false;
-			}
-			
-			vnf.wireshark_test_mode = v.second.get<unsigned>("wireshark_test_mode", 0);
-
-			vnf_p7.mac = mac_create(vnf.wireshark_test_mode);
-			vnf_p7.mac->dl_config_req = &mac_dl_config_req;
-			vnf_p7.mac->ul_config_req = &mac_ul_config_req;
-			vnf_p7.mac->hi_dci0_req = &mac_hi_dci0_req;
-			vnf_p7.mac->tx_req = &mac_tx_req;
-
-			if(vnf_p7.udp.enabled)
-			{
-				mac_start_data(vnf_p7.mac, 
-							   vnf_p7.udp.rx_port, 
-							   vnf_p7.udp.tx_addr.c_str(), 
-							   vnf_p7.udp.tx_port);
-			}
-
-			vnf.p7_vnfs.push_back(vnf_p7);
 		}
-	}
 	}
 	catch(std::exception& e)
 	{
 		printf("%s", e.what());
 		return -1;
+	}
+	catch(boost::exception& e)
+	{
+		printf("%s", boost::diagnostic_information(e).c_str());
 	}
 
 	struct ifaddrs *ifaddr;

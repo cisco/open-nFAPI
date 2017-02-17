@@ -387,6 +387,14 @@ extern "C"
 
 		return &(instance->_public);
 	}
+	
+	void fapi_destroy(fapi_t* fapi)
+	{
+		fapi_internal_t* instance = (fapi_internal_t*)fapi;
+		
+		delete instance->fapi;
+		free(instance);
+	}
 
 	void* fapi_rx_thread_start(void* ptr)
 	{

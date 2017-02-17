@@ -181,6 +181,7 @@ class pnf_info
 			max_total_ul_layers = 0;
 			shared_bands = 0;
 			shared_pa = 0;
+			
 		}
 
 		int release;
