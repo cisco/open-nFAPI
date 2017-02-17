@@ -114,7 +114,10 @@ class vnf_p7_info
 	public:
 
 		vnf_p7_info()
-			: thread_started(false), mac(0)
+			: thread_started(false), 
+			  config(nfapi_vnf_p7_config_create(), 
+				     [] (nfapi_vnf_p7_config_t* f) { nfapi_vnf_p7_config_destory(f); }),
+			  mac(0)
 		{
 			local_port = 0;
 			
@@ -123,11 +126,20 @@ class vnf_p7_info
 			aperiodic_timing_enabled = 0;
 			periodic_timing_period = 0;
 			
-			config = nfapi_vnf_p7_config_create();
+			//config = nfapi_vnf_p7_config_create();
 		}
 		
+		vnf_p7_info(const vnf_p7_info& other)  = default;
 		
-		~vnf_p7_info()
+		vnf_p7_info(vnf_p7_info&& other) = default;
+		
+		vnf_p7_info& operator=(const vnf_p7_info&) = default;
+		
+		vnf_p7_info& operator=(vnf_p7_info&&) = default;
+		
+		
+		
+		virtual	~vnf_p7_info()
 		{
 			//NFAPI_TRACE(NFAPI_TRACE_INFO, "*** vnf_p7_info delete ***\n");
 			
@@ -151,7 +163,8 @@ class vnf_p7_info
 
 		bool thread_started;
 
-		nfapi_vnf_p7_config_t* config;
+		//nfapi_vnf_p7_config_t* config;
+		std::shared_ptr<nfapi_vnf_p7_config_t> config;
 
 		mac_t* mac;
 
@@ -291,28 +304,28 @@ void mac_dl_config_req(mac_t* mac, nfapi_dl_config_request_t* req)
 {
 	vnf_p7_info* info = (vnf_p7_info*)(mac->user_data);
 
-	nfapi_vnf_p7_dl_config_req(info->config, req);
+	nfapi_vnf_p7_dl_config_req(info->config.get(), req);
 }
 
 void mac_ul_config_req(mac_t* mac, nfapi_ul_config_request_t* req)
 {
 	vnf_p7_info* info = (vnf_p7_info*)(mac->user_data);
 
-	nfapi_vnf_p7_ul_config_req(info->config, req);
+	nfapi_vnf_p7_ul_config_req(info->config.get(), req);
 }
 
 void mac_hi_dci0_req(mac_t* mac, nfapi_hi_dci0_request_t* req)
 {
 	vnf_p7_info* info = (vnf_p7_info*)(mac->user_data);
 
-	nfapi_vnf_p7_hi_dci0_req(info->config, req);
+	nfapi_vnf_p7_hi_dci0_req(info->config.get(), req);
 }
 
 void mac_tx_req(mac_t* mac, nfapi_tx_request_t* req)
 {
 	vnf_p7_info* info = (vnf_p7_info*)(mac->user_data);
 
-	nfapi_vnf_p7_tx_req(info->config, req);
+	nfapi_vnf_p7_tx_req(info->config.get(), req);
 }
 
 int phy_subframe_indication(struct nfapi_vnf_p7_config* config, uint16_t phy_id, uint16_t sfn_sf)
@@ -459,7 +472,7 @@ void* vnf_p7_thread_start(void* ptr)
 	p7_vnf->config->allocate_p7_vendor_ext = &phy_allocate_p7_vendor_ext;
 	p7_vnf->config->deallocate_p7_vendor_ext = &phy_deallocate_p7_vendor_ext;
 
-	nfapi_vnf_p7_start((p7_vnf->config));
+	nfapi_vnf_p7_start(p7_vnf->config.get());
 
 	return 0;
 
@@ -494,7 +507,7 @@ int pnf_disconnection_indication_cb(nfapi_vnf_config_t* config, int p5_idx)
 		for(phy_info& phy : pnf.phys)
 		{
 			vnf_p7_info& p7_vnf = vnf->p7_vnfs[0];
-			nfapi_vnf_p7_del_pnf((p7_vnf.config), phy.id);
+			nfapi_vnf_p7_del_pnf((p7_vnf.config.get()), phy.id);
 		}
 	}
 
@@ -1170,7 +1183,7 @@ int start_resp_cb(nfapi_vnf_config_t* config, int p5_idx, nfapi_start_response_t
 
 			vnf_p7_info& p7_vnf = vnf->p7_vnfs[0];
 
-			nfapi_vnf_p7_add_pnf((p7_vnf.config), phy.remote_addr.c_str(), phy.remote_port, phy.id);
+			nfapi_vnf_p7_add_pnf((p7_vnf.config.get()), phy.remote_addr.c_str(), phy.remote_port, phy.id);
 			
 
 		}
