@@ -137,6 +137,13 @@ extern "C"
 		return &(instance->_public);
 	}
 	
+	void mac_destroy(mac_t* mac)
+	{
+		mac_internal_t* instance = (mac_internal_t*)ptr;
+		delete instance->mac;
+		free(instance);
+	}
+	
 	void* mac_rx_thread_start(void* ptr)
 	{
 		mac_internal_t* instance = (mac_internal_t*)ptr;

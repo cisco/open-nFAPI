@@ -773,6 +773,8 @@ int fapi_subframe_ind(fapi_t* fapi, fapi_subframe_ind_t* resp)
 
 
 	nfapi_pnf_p7_subframe_ind(data->p7_config, data->phy_id, resp->sfn_sf);
+	
+	return 0;
 
 }
 
@@ -955,7 +957,7 @@ int fapi_harq_ind(fapi_t* fapi, fapi_harq_ind_t* ind)
 		nfapi_pnf_p7_harq_ind(data->p7_config, &harq_ind);	
 	}
 	
-	
+	return 0;	
 }
 
 int fapi_crc_ind(fapi_t* fapi, fapi_crc_ind_t* ind)
@@ -1007,6 +1009,8 @@ int fapi_crc_ind(fapi_t* fapi, fapi_crc_ind_t* ind)
 	
 		free(crc_ind.crc_indication_body.crc_pdu_list);
 	}
+	
+	return 0;
 }
 int fapi_rx_ulsch_ind(fapi_t* fapi, fapi_rx_ulsch_ind_t* ind)
 {
@@ -1075,6 +1079,8 @@ int fapi_rx_ulsch_ind(fapi_t* fapi, fapi_rx_ulsch_ind_t* ind)
 	
 		free(rx_ind.rx_indication_body.rx_pdu_list);
 	}
+	
+	return 0;
 
 }
 int fapi_rx_cqi_ind(fapi_t* fapi, fapi_rx_cqi_ind_t* ind)
@@ -1141,6 +1147,8 @@ int fapi_rx_cqi_ind(fapi_t* fapi, fapi_rx_cqi_ind_t* ind)
 	{
 		nfapi_pnf_p7_cqi_ind(data->p7_config, &cqi_ind);
 	}
+	
+	return 0;
 }
 int fapi_rx_sr_ind(fapi_t* fapi, fapi_rx_sr_ind_t* ind)
 {
@@ -1177,8 +1185,9 @@ int fapi_rx_sr_ind(fapi_t* fapi, fapi_rx_sr_ind_t* ind)
 		nfapi_pnf_p7_sr_ind(data->p7_config, &sr_ind);	
 	}
 	
-
+	return 0;
 }
+
 int fapi_rach_ind(fapi_t* fapi, fapi_rach_ind_t* ind)
 {
 	pnf_phy_user_data_t* data = (pnf_phy_user_data_t*)(fapi->user_data);
@@ -1213,7 +1222,10 @@ int fapi_rach_ind(fapi_t* fapi, fapi_rach_ind_t* ind)
 	{
 		nfapi_pnf_p7_rach_ind(data->p7_config, &rach_ind);
 	}
+	
+	return 0;
 }
+
 int fapi_srs_ind(fapi_t* fapi, fapi_srs_ind_t* ind)
 {
 	pnf_phy_user_data_t* data = (pnf_phy_user_data_t*)(fapi->user_data);
@@ -1268,6 +1280,8 @@ int fapi_srs_ind(fapi_t* fapi, fapi_srs_ind_t* ind)
 	{
 		nfapi_pnf_p7_srs_ind(data->p7_config, &srs_ind);
 	}
+	
+	return 0;
 }
 
 
