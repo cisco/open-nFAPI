@@ -1299,6 +1299,7 @@ int pnf_connect(pnf_t* pnf)
 			if(setsockopt(pnf->p5_sock, SOL_SCTP, SCTP_EVENTS, (const void *)&events, sizeof(events)) < 0)
 			{
 				NFAPI_TRACE(NFAPI_TRACE_ERROR, "After setsockopt errno: %d\n", errno);
+				freeaddrinfo(servinfo);
 				return -1;
 			}
 		}
@@ -1308,6 +1309,7 @@ int pnf_connect(pnf_t* pnf)
 			if ((pnf->p5_sock = socket(p->ai_family, SOCK_STREAM, IPPROTO_IP)) < 0)
 			{
 				NFAPI_TRACE(NFAPI_TRACE_ERROR, "After P5 socket errno: %d\n", errno);
+				freeaddrinfo(servinfo);
 				return -1;
 			}
 		}
@@ -1321,12 +1323,14 @@ int pnf_connect(pnf_t* pnf)
 
 			if(errno == EINVAL)
 			{
+				freeaddrinfo(servinfo);
 				return -1;
 			}
 			else
 			{
 				if(pnf->terminate != 0)
 				{
+					freeaddrinfo(servinfo);
 					return 0;
 				}
 				else

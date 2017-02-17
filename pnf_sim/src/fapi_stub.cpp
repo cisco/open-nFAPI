@@ -397,7 +397,11 @@ extern "C"
 				pdu->len = len;
 				instance->fapi->push_rx_buffer(pdu);
 			}
-			printf("~");
+			else
+			{
+				instance->fapi->release_phy_pdu(pdu);
+			}
+
 		}
 	}
 
@@ -411,14 +415,12 @@ extern "C"
 		instance->rx_sock = socket(AF_INET, SOCK_DGRAM, 0);
 
 		struct sockaddr_in addr;
+		memset(&addr, 0, sizeof(addr));
 		addr.sin_family = AF_INET;
 		addr.sin_port = htons(rx_port);
 		addr.sin_addr.s_addr = INADDR_ANY;
 		bind(instance->rx_sock, (struct sockaddr *)&addr, sizeof(struct sockaddr_in));
 
-		pthread_t fapi_rx_thread;
-		//pthread_create(&fapi_rx_thread, NULL, &fapi_rx_thread_start, instance);
-		
 		instance->tx_sock = socket(AF_INET, SOCK_DGRAM, 0);
 		instance->tx_addr.sin_family = AF_INET;
 		instance->tx_addr.sin_port = htons(tx_port);

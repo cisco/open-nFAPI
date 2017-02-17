@@ -150,6 +150,10 @@ extern "C"
 				pdu->len = len;
 				instance->mac->push_rx_buffer(pdu);
 			}
+			else
+			{
+				instance->mac->release_mac_pdu(pdu);
+			}
 		}
 		return 0;
 	}
@@ -164,9 +168,11 @@ extern "C"
 		instance->rx_sock = socket(AF_INET, SOCK_DGRAM, 0);
 
 		struct sockaddr_in addr;
+		memset(&addr, 0, sizeof(0));
 		addr.sin_family = AF_INET;
 		addr.sin_port = htons(rx_port);
 		addr.sin_addr.s_addr = INADDR_ANY;
+		
 		bind(instance->rx_sock, (struct sockaddr *)&addr, sizeof(struct sockaddr_in));
 
 		pthread_t mac_rx_thread;

@@ -275,6 +275,7 @@ int nfapi_vnf_start(nfapi_vnf_config_t* config)
 	if (listen(p5ListenSock, 2) < 0) 
 	{
 		NFAPI_TRACE(NFAPI_TRACE_ERROR, "After listen errno: %d\n", errno);
+		close(p5ListenSock);
 		return 0;
 	}
 
@@ -315,6 +316,7 @@ int nfapi_vnf_start(nfapi_vnf_config_t* config)
 		if(select_result == -1)
 		{
 			NFAPI_TRACE(NFAPI_TRACE_INFO, "select result %d errno %d\n", select_result, errno);
+			close(p5ListenSock);
 			return 0;
 		}
 		else if(select_result)
