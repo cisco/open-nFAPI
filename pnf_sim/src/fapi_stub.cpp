@@ -35,9 +35,8 @@
 
 struct phy_pdu
 {
-	phy_pdu()
+	phy_pdu() : buffer_len(1500), buffer(0), len(0)
 	{
-		buffer_len = 1500;
 		buffer = (char*) malloc(buffer_len);
 	}
 	
@@ -46,8 +45,9 @@ struct phy_pdu
 		free(buffer);
 	}
 
-	char* buffer;
+
 	unsigned buffer_len;
+	char* buffer;
 	unsigned len;
 };
 
@@ -483,7 +483,7 @@ extern "C"
 				// LAA Capability
 			}
 		}
-		else if(instance == 0)
+		else
 		{
 			if(instance->config.duplex_mode == 0)
 			{

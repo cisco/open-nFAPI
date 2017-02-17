@@ -90,7 +90,8 @@ class phy_info
 	public:
 
 		phy_info()
-			: first_subframe_ind(0), fapi(0)
+			: first_subframe_ind(0), fapi(0),
+			  timing_window(0), timing_info_mode(0), timing_info_period(0)
 		{
 		}
 
@@ -148,7 +149,10 @@ class pnf_info
 {
 	public:
 
-		pnf_info() : release(13), wireshark_test_mode(0)
+		pnf_info() 
+		: release(13), wireshark_test_mode(0),
+		  oui(0)
+					
 		{
 		}
 

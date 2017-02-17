@@ -312,7 +312,8 @@ uint32_t pullarray16(uint8_t **in, uint16_t out[], uint32_t max_len, uint32_t le
 		uint32_t idx;
 		for(idx = 0; idx < len; ++idx)
 		{
-			pull16(in, &out[idx], end);
+			if(!pull16(in, &out[idx], end))
+				return 0;
 		}
 
 		return sizeof(uint16_t) * len;
@@ -340,7 +341,8 @@ uint32_t pullarrays16(uint8_t **in, int16_t out[], uint32_t max_len, uint32_t le
 		uint32_t idx;
 		for(idx = 0; idx < len; ++idx)
 		{
-			pulls16(in, &out[idx], end);
+			if(!pulls16(in, &out[idx], end))
+			return 0;
 		}
 
 		return sizeof(uint16_t) * len;

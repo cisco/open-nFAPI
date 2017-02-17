@@ -37,9 +37,8 @@ uint32_t rand_range(uint32_t min, uint32_t max)
 
 struct mac_pdu
 {
-	mac_pdu()
+	mac_pdu() : buffer_len(1500), buffer(0), len(0)
 	{
-		buffer_len = 1500;
 		buffer = (char*) malloc(buffer_len);
 	}
 	
@@ -48,8 +47,8 @@ struct mac_pdu
 		free(buffer);
 	}
 
-	char* buffer;
 	unsigned buffer_len;
+	char* buffer;
 	unsigned len;
 };
 

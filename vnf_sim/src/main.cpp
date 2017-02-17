@@ -114,6 +114,11 @@ class vnf_p7_info
 		vnf_p7_info()
 			: thread_started(false), mac(0)
 		{
+			timing_window = 0;
+			periodic_timing_enabled = 0;
+			aperiodic_timing_enabled = 0;
+			periodic_timing_period = 0;
+			
 			config = nfapi_vnf_p7_config_create();
 		}
 		
