@@ -42,6 +42,11 @@ struct mac_pdu
 		buffer_len = 1500;
 		buffer = (char*) malloc(buffer_len);
 	}
+	
+	virtual ~mac_pdu()
+	{
+		free(buffer);
+	}
 
 	char* buffer;
 	unsigned buffer_len;

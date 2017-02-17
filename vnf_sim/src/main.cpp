@@ -112,10 +112,21 @@ class vnf_p7_info
 	public:
 
 		vnf_p7_info()
-			: thread_started(false)
+			: thread_started(false), mac(0)
 		{
 			config = nfapi_vnf_p7_config_create();
 		}
+		
+		
+		~vnf_p7_info()
+		{
+			//NFAPI_TRACE(NFAPI_TRACE_INFO, "*** vnf_p7_info delete ***\n");
+			
+			//nfapi_vnf_p7_config_destory(config);
+			
+			// should we delete the mac?
+		}
+		
 
 		int local_port;
 		std::string local_addr;
@@ -1215,7 +1226,7 @@ void read_vnf_xml(vnf_info& vnf, const char* xml_file)
 		if(v.first == "vnf_p7")
 		{
 			vnf_p7_info vnf_p7;
-			vnf_p7.local_port = v.second.get<unsigned>("port");	
+			vnf_p7.local_port = v.second.get<unsigned>("port");
 			vnf_p7.local_addr = v.second.get<std::string>("address");
 
 			vnf_p7.timing_window = v.second.get<unsigned>("timing_window");

@@ -40,6 +40,11 @@ struct phy_pdu
 		buffer_len = 1500;
 		buffer = (char*) malloc(buffer_len);
 	}
+	
+	virtual ~phy_pdu()
+	{
+		free(buffer);
+	}
 
 	char* buffer;
 	unsigned buffer_len;

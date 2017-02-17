@@ -90,7 +90,7 @@ class phy_info
 	public:
 
 		phy_info()
-			: first_subframe_ind(0)
+			: first_subframe_ind(0), fapi(0)
 		{
 		}
 
@@ -148,7 +148,7 @@ class pnf_info
 {
 	public:
 
-		pnf_info() : release(13)
+		pnf_info() : release(13), wireshark_test_mode(0)
 		{
 		}
 
@@ -334,6 +334,8 @@ void* pnf_p7_thread_start(void* ptr)
 
 	nfapi_pnf_p7_config_t* config = (nfapi_pnf_p7_config_t*)ptr;
 	nfapi_pnf_p7_start(config);
+	
+	return 0;
 }
 
 
@@ -483,6 +485,8 @@ int pnf_param_request(nfapi_pnf_config_t* config, nfapi_pnf_param_request_t* req
 
 
 	nfapi_pnf_pnf_param_resp(config, &resp);
+	
+	return 0;
 }
 
 int pnf_config_request(nfapi_pnf_config_t* config, nfapi_pnf_config_request_t* req)
@@ -1451,6 +1455,8 @@ nfapi_p7_message_header_t* phy_allocate_p7_vendor_ext(uint16_t message_id, uint1
 		(*msg_size) = sizeof(vendor_ext_p7_req);
 		return (nfapi_p7_message_header_t*)malloc(sizeof(vendor_ext_p7_req));
 	}
+	
+	return 0;
 }
 
 void phy_deallocate_p7_vendor_ext(nfapi_p7_message_header_t* header)
@@ -1949,9 +1955,9 @@ int vendor_ext(nfapi_pnf_config_t* config, nfapi_p4_p5_message_header_t* msg)
 			}
 			break;
 	}
+	
+	return 0;
 }
-
-
 
 nfapi_p4_p5_message_header_t* pnf_sim_allocate_p4_p5_vendor_ext(uint16_t message_id, uint16_t* msg_size)
 {
@@ -1960,6 +1966,8 @@ nfapi_p4_p5_message_header_t* pnf_sim_allocate_p4_p5_vendor_ext(uint16_t message
 		(*msg_size) = sizeof(vendor_ext_p5_req);
 		return (nfapi_p4_p5_message_header_t*)malloc(sizeof(vendor_ext_p5_req));
 	}
+	
+	return 0;
 }
 
 void pnf_sim_deallocate_p4_p5_vendor_ext(nfapi_p4_p5_message_header_t* header)
