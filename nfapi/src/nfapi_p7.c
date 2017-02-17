@@ -2370,7 +2370,9 @@ int nfapi_p7_message_pack(void *pMessageBuf, void *pPackedBuf, uint32_t packedBu
 
 	// Update the message length in the header
 	pMessageHeader->message_length = packedMsgLen16;
-	push16(packedMsgLen16, &pPackedLengthField, end);
+	
+	if(!push16(packedMsgLen16, &pPackedLengthField, end))
+		return -1;
 
 	return (packedMsgLen);
 }
@@ -3732,9 +3734,16 @@ static uint8_t unpack_tx_request(uint8_t **ppReadPackedMsg, uint8_t *end, void *
 				{
 					nfapi_tx_request_pdu_t* pdu = &(pNfapiMsg->tx_request_body.tx_pdu_list[i]);
 					
-					if(!(pull16(ppReadPackedMsg, &pdu->pdu_length, end) &&
-						 pull16(ppReadPackedMsg, &pdu->pdu_index, end)))
+					uint16_t length = 0;
+					uint16_t index = 0;
+					
+					if(!(pull16(ppReadPackedMsg, &length, end) &&
+						 pull16(ppReadPackedMsg, &index, end)))
 						return 0;
+				
+					pdu->pdu_length = length;
+					pdu->pdu_index = index;
+				
 				
 					// TODO : Need to rethink this bit
 					pdu->num_segments = 1;
@@ -4165,43 +4174,55 @@ static uint8_t unpack_rx_indication_body_value(void* tlv, uint8_t **ppReadPacked
 		switch(generic_tl.tag)
 		{
 			case NFAPI_RX_UE_INFORMATION_TAG:
-				pdu = &(value->rx_pdu_list[i++]);
-				pdu->rx_ue_information.tl = generic_tl;
-				if(unpack_rx_ue_information_value(&pdu->rx_ue_information, ppReadPackedMsg, end) == 0)
-					return 0;
+				{
+					pdu = &(value->rx_pdu_list[i++]);
+					pdu->rx_ue_information.tl = generic_tl;
+					if(unpack_rx_ue_information_value(&pdu->rx_ue_information, ppReadPackedMsg, end) == 0)
+						return 0;
+				}
 				break;
 			case NFAPI_RX_INDICATION_REL8_TAG:
-				pdu->rx_indication_rel8.tl = generic_tl;
-				if(unpack_rx_indication_rel8_value(&pdu->rx_indication_rel8, ppReadPackedMsg, end) == 0)
-					return 0;
-
-				if(pdu->rx_indication_rel8.offset > 0)
 				{
-					// Need to check that the data is within the tlv
-					if(numberOfPdusAddress + pdu->rx_indication_rel8.offset + pdu->rx_indication_rel8.length <= rxBodyEnd)
+					if(pdu != 0)
 					{
-						// If this the first pdu set the rxPduEnd
-						if(numberOfPdusAddress + pdu->rx_indication_rel8.offset < rxPduEnd)
+						pdu->rx_indication_rel8.tl = generic_tl;
+						if(unpack_rx_indication_rel8_value(&pdu->rx_indication_rel8, ppReadPackedMsg, end) == 0)
+							return 0;
+		
+						if(pdu->rx_indication_rel8.offset > 0)
 						{
-							rxPduEnd = numberOfPdusAddress + pdu->rx_indication_rel8.offset;
-
-							if(rxPduEnd > end)
+							// Need to check that the data is within the tlv
+							if(numberOfPdusAddress + pdu->rx_indication_rel8.offset + pdu->rx_indication_rel8.length <= rxBodyEnd)
 							{
-								// pdu end is past buffer end
-								return 0;
+								// If this the first pdu set the rxPduEnd
+								if(numberOfPdusAddress + pdu->rx_indication_rel8.offset < rxPduEnd)
+								{
+									rxPduEnd = numberOfPdusAddress + pdu->rx_indication_rel8.offset;
+		
+									if(rxPduEnd > end)
+									{
+										// pdu end is past buffer end
+										return 0;
+									}
+								}
+							}
+							else
+							{
+								NFAPI_TRACE(NFAPI_TRACE_ERROR, "FIXME: the rx data is outside of the tlv\n");
 							}
 						}
-					}
-					else
-					{
-						NFAPI_TRACE(NFAPI_TRACE_ERROR, "FIXME: the rx data is outside of the tlv\n");
 					}
 				}
 				break;
 			case NFAPI_RX_INDICATION_REL9_TAG:
-				pdu->rx_indication_rel9.tl = generic_tl;
-				if(unpack_rx_indication_rel9_value(&pdu->rx_indication_rel9, ppReadPackedMsg, end) == 0)
-					return 0;
+				{
+					if(pdu != 0)
+					{
+						pdu->rx_indication_rel9.tl = generic_tl;
+						if(unpack_rx_indication_rel9_value(&pdu->rx_indication_rel9, ppReadPackedMsg, end) == 0)
+							return 0;
+					}
+				}
 				break;
 			default:
 				{
@@ -4680,12 +4701,12 @@ static uint8_t  unpack_cqi_indication_body_value(void* tlv, uint8_t **ppReadPack
 	{
 		if(value->cqi_pdu_list[idx].cqi_indication_rel8.tl.tag == NFAPI_CQI_INDICATION_REL8_TAG)
 		{
-			if(pullarray8(ppReadPackedMsg, value->cqi_raw_pdu_list[idx].pdu, NFAPI_CQI_RAW_MAX_LEN, value->cqi_pdu_list[idx].cqi_indication_rel8.length, end) == 0)
+			if(pullarray8(ppReadPackedMsg, &(value->cqi_raw_pdu_list[idx].pdu[0]), NFAPI_CQI_RAW_MAX_LEN, value->cqi_pdu_list[idx].cqi_indication_rel8.length, end) == 0)
 				return 0;
 		}
 		else if(value->cqi_pdu_list[idx].cqi_indication_rel9.tl.tag == NFAPI_CQI_INDICATION_REL9_TAG)
 		{
-			if(pullarray8(ppReadPackedMsg, value->cqi_raw_pdu_list[idx].pdu, NFAPI_CQI_RAW_MAX_LEN, value->cqi_pdu_list[idx].cqi_indication_rel9.length, end) == 0)
+			if(pullarray8(ppReadPackedMsg, &(value->cqi_raw_pdu_list[idx].pdu[0]), NFAPI_CQI_RAW_MAX_LEN, value->cqi_pdu_list[idx].cqi_indication_rel9.length, end) == 0)
 				return 0;
 		}
 	}

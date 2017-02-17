@@ -369,7 +369,8 @@ uint32_t pusharray16(uint16_t in[], uint32_t max_len, uint32_t len, uint8_t **ou
 		uint32_t idx;
 		for(idx = 0; idx < len; ++idx)
 		{
-			push16(in[idx], out, end);
+			if(!push16(in[idx], out, end))
+				return 0;
 		}
 		return sizeof(uint16_t) * len;
 	}

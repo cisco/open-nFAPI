@@ -831,7 +831,8 @@ int nfapi_p5_message_pack(void *pMessageBuf, uint32_t messageBufLen, void *pPack
 		}
 
 		// Update the message length in the header
-		push16(packedMsgLen16, &pPackedLengthField, pPackMessageEnd);
+		if(!push16(packedMsgLen16, &pPackedLengthField, pPackMessageEnd))
+			return -1;
 
 		// return the packed length
 		return (packedMsgLen);
