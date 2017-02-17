@@ -32,6 +32,9 @@
 #include <boost/foreach.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
+#include <boost/exception/diagnostic_information.hpp> 
+#include <boost/exception_ptr.hpp> 
+
 
 #include <vendor_ext.h>
 
