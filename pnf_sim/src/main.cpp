@@ -94,6 +94,17 @@ class phy_info
 			  dl_ues_per_subframe(0), ul_ues_per_subframe(0), 
 			  timing_window(0), timing_info_mode(0), timing_info_period(0)
 		{
+			
+			local_port = 0;
+			remote_port = 0;
+	
+			duplex_mode = 0;
+			dl_channel_bw_support = 0;
+			ul_channel_bw_support = 0;
+			num_dl_layers_supported = 0;
+			num_ul_layers_supported = 0;
+			release_supported = 0;
+			nmm_modes_supported = 0;
 		}
 
 		uint16_t index;
@@ -155,6 +166,21 @@ class pnf_info
 		  max_total_power(0), oui(0)
 					
 		{
+			release = 0;
+	
+			sync_mode = 0;
+			location_mode = 0;
+			dl_config_timing = 0;
+			ul_config_timing = 0;
+			tx_timing = 0;
+			hi_dci0_timing = 0;
+	
+			max_phys = 0;
+			max_total_bw = 0;
+			max_total_dl_layers = 0;
+			max_total_ul_layers = 0;
+			shared_bands = 0;
+			shared_pa = 0;
 		}
 
 		int release;

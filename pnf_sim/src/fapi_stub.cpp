@@ -28,6 +28,7 @@
 #include <ifaddrs.h>
 #include <netdb.h>
 #include <pthread.h>
+#include <unistd.h>
 
 #include <mutex>
 #include <queue>
@@ -418,6 +419,12 @@ extern "C"
 		printf("[FAPI] Tx Data to %s:%d\n", tx_address, tx_port);
 
 		instance->rx_sock = socket(AF_INET, SOCK_DGRAM, 0);
+		
+		if(instance->rx_sock < 0)
+		{
+			printf("[FAPI] Failed to create socket\n");
+			return;
+		}
 
 		struct sockaddr_in addr;
 		memset(&addr, 0, sizeof(addr));
@@ -430,6 +437,7 @@ extern "C"
 		if(bind_result == -1)
 		{
 			printf("[FAPI] Failed to bind to port %d\n", rx_port);
+			close(instance->rx_sock);
 			return ;
 		}
 

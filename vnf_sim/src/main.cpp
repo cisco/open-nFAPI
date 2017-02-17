@@ -114,6 +114,8 @@ class vnf_p7_info
 		vnf_p7_info()
 			: thread_started(false), mac(0)
 		{
+			local_port = 0;
+			
 			timing_window = 0;
 			periodic_timing_enabled = 0;
 			aperiodic_timing_enabled = 0;
@@ -1212,11 +1214,14 @@ int vendor_ext_cb(nfapi_vnf_config_t* config, int p5_idx, nfapi_p4_p5_message_he
 
 	}
 
-	return 0;;
+	return 0;
 }
 
-void read_vnf_xml(vnf_info& vnf, const char* xml_file)
+int read_vnf_xml(vnf_info& vnf, const char* xml_file)
 {
+	try
+	{
+		
 	std::ifstream input(xml_file);
 
 	using boost::property_tree::ptree;
@@ -1272,6 +1277,12 @@ void read_vnf_xml(vnf_info& vnf, const char* xml_file)
 			vnf.p7_vnfs.push_back(vnf_p7);
 		}
 	}
+	}
+	catch(std::exception& e)
+	{
+		printf("%s", e.what());
+		return -1;
+	}
 
 	struct ifaddrs *ifaddr;
 	getifaddrs(&ifaddr);
@@ -1288,6 +1299,8 @@ void read_vnf_xml(vnf_info& vnf, const char* xml_file)
 		}
 		ifaddr = ifaddr->ifa_next;
 	}
+	
+	return 0;
 
 }
 
@@ -1304,7 +1317,11 @@ int main(int argc, char *argv[])
 
 	vnf_info vnf;
 
-	read_vnf_xml(vnf, argv[2]);	
+	if(read_vnf_xml(vnf, argv[2]) < 0)
+	{
+		printf("Failed to read xml file>\n");
+		return 0;
+	}
 
 	nfapi_vnf_config_t* config = nfapi_vnf_config_create();
 
