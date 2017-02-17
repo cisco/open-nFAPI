@@ -217,108 +217,123 @@ struct pnf_phy_user_data_t
 	nfapi_pnf_p7_config_t* p7_config;
 };
 
-void read_pnf_xml(pnf_info& pnf, const char* xml_file)
+int read_pnf_xml(pnf_info& pnf, const char* xml_file)
 {
-	std::ifstream input(xml_file);
-
-	using boost::property_tree::ptree;
-	ptree pt;
-
-	read_xml(input, pt);
-	
-	pnf.wireshark_test_mode = pt.get<unsigned>("pnf.wireshark_test_mode", 0);
-
-	
-	pnf.sync_mode = pt.get<unsigned>("pnf.sync_mode");
-	pnf.location_mode= pt.get<unsigned>("pnf.location_mode");
-	//pnf.sync_mode = pt.get<unsigned>("pnf.location_coordinates");
-
-	pnf.dl_config_timing= pt.get<unsigned>("pnf.dl_config_timing");
-	pnf.ul_config_timing = pt.get<unsigned>("pnf.ul_config_timing");
-	pnf.tx_timing = pt.get<unsigned>("pnf.tx_timing");
-	pnf.hi_dci0_timing = pt.get<unsigned>("pnf.hi_dci0_timing");
-
-	pnf.max_phys = pt.get<unsigned>("pnf.max_phys");
-	pnf.max_total_bw = pt.get<unsigned>("pnf.max_total_bandwidth");
-	pnf.max_total_dl_layers = pt.get<unsigned>("pnf.max_total_num_dl_layers");
-	pnf.max_total_ul_layers = pt.get<unsigned>("pnf.max_total_num_ul_layers");
-
-	pnf.shared_bands = pt.get<unsigned>("pnf.shared_bands");
-	pnf.shared_pa = pt.get<unsigned>("pnf.shared_pas");
-
-	pnf.max_total_power = pt.get<signed>("pnf.maximum_total_power");
-
-	//"oui");
-
-	for(const auto& v : pt.get_child("pnf.phys"))
+	try
 	{
-		if(v.first == "phy")
+		std::ifstream input(xml_file);
+	
+		using boost::property_tree::ptree;
+		ptree pt;
+	
+		read_xml(input, pt);
+		
+		pnf.wireshark_test_mode = pt.get<unsigned>("pnf.wireshark_test_mode", 0);
+	
+		
+		pnf.sync_mode = pt.get<unsigned>("pnf.sync_mode");
+		pnf.location_mode= pt.get<unsigned>("pnf.location_mode");
+		//pnf.sync_mode = pt.get<unsigned>("pnf.location_coordinates");
+	
+		pnf.dl_config_timing= pt.get<unsigned>("pnf.dl_config_timing");
+		pnf.ul_config_timing = pt.get<unsigned>("pnf.ul_config_timing");
+		pnf.tx_timing = pt.get<unsigned>("pnf.tx_timing");
+		pnf.hi_dci0_timing = pt.get<unsigned>("pnf.hi_dci0_timing");
+	
+		pnf.max_phys = pt.get<unsigned>("pnf.max_phys");
+		pnf.max_total_bw = pt.get<unsigned>("pnf.max_total_bandwidth");
+		pnf.max_total_dl_layers = pt.get<unsigned>("pnf.max_total_num_dl_layers");
+		pnf.max_total_ul_layers = pt.get<unsigned>("pnf.max_total_num_ul_layers");
+	
+		pnf.shared_bands = pt.get<unsigned>("pnf.shared_bands");
+		pnf.shared_pa = pt.get<unsigned>("pnf.shared_pas");
+	
+		pnf.max_total_power = pt.get<signed>("pnf.maximum_total_power");
+	
+		//"oui");
+	
+		for(const auto& v : pt.get_child("pnf.phys"))
 		{
-			phy_info phy;
-			
-			
+			if(v.first == "phy")
+			{
+				phy_info phy;
 				
-			phy.index = v.second.get<unsigned>("index");
-			phy.local_port = v.second.get<unsigned>("port");
-			phy.local_addr = v.second.get<std::string>("address");
-			phy.duplex_mode = v.second.get<unsigned>("duplex_mode");
-
-			phy.dl_channel_bw_support = v.second.get<unsigned>("downlink_channel_bandwidth_support");
-			phy.ul_channel_bw_support = v.second.get<unsigned>("uplink_channel_bandwidth_support");
-			phy.num_dl_layers_supported = v.second.get<unsigned>("number_of_dl_layers");
-			phy.num_ul_layers_supported = v.second.get<unsigned>("number_of_ul_layers");
-			phy.release_supported = v.second.get<unsigned>("3gpp_release_supported");
-			phy.nmm_modes_supported = v.second.get<unsigned>("nmm_modes_supported");
-
-			for(const auto& v2 : v.second.get_child("rfs"))
-			{
-				if(v2.first == "index")
-					phy.rfs.push_back(v2.second.get_value<unsigned>());
+				
+					
+				phy.index = v.second.get<unsigned>("index");
+				phy.local_port = v.second.get<unsigned>("port");
+				phy.local_addr = v.second.get<std::string>("address");
+				phy.duplex_mode = v.second.get<unsigned>("duplex_mode");
+	
+				phy.dl_channel_bw_support = v.second.get<unsigned>("downlink_channel_bandwidth_support");
+				phy.ul_channel_bw_support = v.second.get<unsigned>("uplink_channel_bandwidth_support");
+				phy.num_dl_layers_supported = v.second.get<unsigned>("number_of_dl_layers");
+				phy.num_ul_layers_supported = v.second.get<unsigned>("number_of_ul_layers");
+				phy.release_supported = v.second.get<unsigned>("3gpp_release_supported");
+				phy.nmm_modes_supported = v.second.get<unsigned>("nmm_modes_supported");
+	
+				for(const auto& v2 : v.second.get_child("rfs"))
+				{
+					if(v2.first == "index")
+						phy.rfs.push_back(v2.second.get_value<unsigned>());
+				}
+				for(const auto& v2 : v.second.get_child("excluded_rfs"))
+				{
+					if(v2.first == "index")
+						phy.excluded_rfs.push_back(v2.second.get_value<unsigned>());
+				}
+	
+				boost::optional<const boost::property_tree::ptree&> d = v.second.get_child_optional("data.udp");
+				if(d.is_initialized())
+				{
+					phy.udp.enabled = true;
+					phy.udp.rx_port = d.get().get<unsigned>("rx_port");
+					phy.udp.tx_port = d.get().get<unsigned>("tx_port");
+					phy.udp.tx_addr = d.get().get<std::string>("tx_addr");
+				}
+				else
+				{
+					phy.udp.enabled = false;
+				}
+	
+				phy.dl_ues_per_subframe = v.second.get<unsigned>("dl_ues_per_subframe");
+				phy.ul_ues_per_subframe = v.second.get<unsigned>("ul_ues_per_subframe");
+	
+				pnf.phys.push_back(phy);
 			}
-			for(const auto& v2 : v.second.get_child("excluded_rfs"))
-			{
-				if(v2.first == "index")
-					phy.excluded_rfs.push_back(v2.second.get_value<unsigned>());
-			}
-
-			boost::optional<const boost::property_tree::ptree&> d = v.second.get_child_optional("data.udp");
-			if(d.is_initialized())
-			{
-				phy.udp.enabled = true;
-				phy.udp.rx_port = d.get().get<unsigned>("rx_port");
-				phy.udp.tx_port = d.get().get<unsigned>("tx_port");
-				phy.udp.tx_addr = d.get().get<std::string>("tx_addr");
-			}
-			else
-			{
-				phy.udp.enabled = false;
-			}
-
-			phy.dl_ues_per_subframe = v.second.get<unsigned>("dl_ues_per_subframe");
-			phy.ul_ues_per_subframe = v.second.get<unsigned>("ul_ues_per_subframe");
-
-			pnf.phys.push_back(phy);
-		}
-	}	
-	for(const auto& v : pt.get_child("pnf.rfs"))
-	{
-		if(v.first == "rf")
+		}	
+		for(const auto& v : pt.get_child("pnf.rfs"))
 		{
-			rf_info rf;
-
-			rf.index = v.second.get<unsigned>("index");
-			rf.band = v.second.get<unsigned>("band");
-			rf.max_transmit_power = v.second.get<signed>("max_transmit_power");
-			rf.min_transmit_power = v.second.get<signed>("min_transmit_power");
-			rf.num_antennas_supported = v.second.get<unsigned>("num_antennas_supported");
-			rf.min_downlink_frequency = v.second.get<unsigned>("min_downlink_frequency");
-			rf.max_downlink_frequency = v.second.get<unsigned>("max_downlink_frequency");
-			rf.min_uplink_frequency = v.second.get<unsigned>("max_uplink_frequency");
-			rf.max_uplink_frequency = v.second.get<unsigned>("min_uplink_frequency");
-
-			pnf.rfs.push_back(rf);
-		}
-	}	
+			if(v.first == "rf")
+			{
+				rf_info rf;
+	
+				rf.index = v.second.get<unsigned>("index");
+				rf.band = v.second.get<unsigned>("band");
+				rf.max_transmit_power = v.second.get<signed>("max_transmit_power");
+				rf.min_transmit_power = v.second.get<signed>("min_transmit_power");
+				rf.num_antennas_supported = v.second.get<unsigned>("num_antennas_supported");
+				rf.min_downlink_frequency = v.second.get<unsigned>("min_downlink_frequency");
+				rf.max_downlink_frequency = v.second.get<unsigned>("max_downlink_frequency");
+				rf.min_uplink_frequency = v.second.get<unsigned>("max_uplink_frequency");
+				rf.max_uplink_frequency = v.second.get<unsigned>("min_uplink_frequency");
+	
+				pnf.rfs.push_back(rf);
+			}
+		}	
+	}
+	catch(std::exception& e)
+	{
+		printf("%s", e.what());
+		return -1;
+	}
+	catch(boost::exception& e)
+	{
+		printf("%s", boost::diagnostic_information(e).c_str());
+		return -1;
+	}
+	
+	return 0;
 }
 
 
@@ -2043,7 +2058,11 @@ int main(int argc, char *argv[])
 	set_thread_priority(50);
 
 	pnf_info pnf;
-	read_pnf_xml(pnf, argv[3]);	
+	if(read_pnf_xml(pnf, argv[3]) < 0)
+	{
+		printf("Failed to read xml file>\n");
+		return 0;
+	}
 
 
 	nfapi_pnf_config_t* config = nfapi_pnf_config_create();
