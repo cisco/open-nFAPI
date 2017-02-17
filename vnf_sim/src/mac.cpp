@@ -139,7 +139,7 @@ extern "C"
 	
 	void mac_destroy(mac_t* mac)
 	{
-		mac_internal_t* instance = (mac_internal_t*)ptr;
+		mac_internal_t* instance = (mac_internal_t*)mac;
 		delete instance->mac;
 		free(instance);
 	}
