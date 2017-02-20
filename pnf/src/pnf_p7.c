@@ -374,6 +374,12 @@ int pnf_p7_pack_and_send_p7_message(pnf_p7_t* pnf_p7, nfapi_p7_message_header_t*
 
 	if (len < 0)
 	{
+		if(pthread_mutex_unlock(&(pnf_p7->pack_mutex)) != 0)
+		{
+			NFAPI_TRACE(NFAPI_TRACE_INFO, "failed to unlock mutex\n");
+			return -1;
+		}
+		
 		NFAPI_TRACE(NFAPI_TRACE_ERROR, "nfapi_p7_message_pack failed with return %d\n", len );
 		return -1;
 	}
