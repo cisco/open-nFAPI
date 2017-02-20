@@ -2373,6 +2373,15 @@ int nfapi_p7_message_pack(void *pMessageBuf, void *pPackedBuf, uint32_t packedBu
 	
 	if(!push16(packedMsgLen16, &pPackedLengthField, end))
 		return -1;
+		
+	if(1)
+	{
+		//quick test
+		if(pMessageHeader->message_length != packedMsgLen)
+		{
+			NFAPI_TRACE(NFAPI_TRACE_ERROR, "nfapi packedMsgLen(%d) != message_length(%d) id %d\n", packedMsgLen, pMessageHeader->message_length, pMessageHeader->message_id);
+		}
+	}
 
 	return (packedMsgLen);
 }
@@ -3741,15 +3750,6 @@ static uint8_t unpack_tx_request(uint8_t **ppReadPackedMsg, uint8_t *end, void *
 						 pull16(ppReadPackedMsg, &index, end)))
 						return 0;
 
-
-					if(length > NFAPI_MAX_TX_PDU_LENGTH)
-					{
-						// This is a coverity suggested check to make sure that in the cases where we decode corrupt data
-						// that we don't end up allocating the world.
-						NFAPI_TRACE(NFAPI_TRACE_ERROR, "unpack_tx_request: pdu length is greater thatn NFAPI_MAX_TX_PDU_LENGTH\n");
-						return 0;
-					}
-				
 					pdu->pdu_length = length;
 					pdu->pdu_index = index;
 					

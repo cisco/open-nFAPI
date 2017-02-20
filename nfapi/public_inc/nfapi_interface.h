@@ -32,8 +32,6 @@
 #define NFAPI_MAX_BF_VECTORS 8
 #define NFAPI_MAX_CC 1
 
-// This the larget transport block size in 36.213 (4 Layer, max TBS)
-#define NFAPI_MAX_TX_PDU_LENGTH 391656
 
 
 #define NFAPI_MAX_RSSI 8
@@ -2100,7 +2098,8 @@ typedef struct {
 	nfapi_p7_message_header_t header;
 	uint32_t t1;
 	uint32_t t2;
-	uint32_t t3;	nfapi_vendor_extension_tlv_t vendor_extension;
+	uint32_t t3;	
+	nfapi_vendor_extension_tlv_t vendor_extension;
 } nfapi_ul_node_sync_t;
 
 typedef struct {

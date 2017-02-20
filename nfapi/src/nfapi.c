@@ -213,7 +213,7 @@ uint8_t pulls8(uint8_t **in, int8_t *out, uint8_t *end)
 		return 0;
 	}
 }
-#include <assert.h>
+
 uint8_t pull16(uint8_t **in, uint16_t *out, uint8_t *end)
 {
 	uint8_t *pIn = *in;
@@ -227,7 +227,6 @@ uint8_t pull16(uint8_t **in, uint16_t *out, uint8_t *end)
 	}
 	else
 	{
-		assert(0);
 		NFAPI_TRACE(NFAPI_TRACE_ERROR, "%s no space in buffer\n", __FUNCTION__);
 		return 0;
 	}
