@@ -38,6 +38,8 @@
 #include <boost/foreach.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
+#include <boost/exception/diagnostic_information.hpp> 
+#include <boost/exception_ptr.hpp> 
 
 extern "C" {
 #include <nfapi_vnf_interface.h>
@@ -112,10 +114,40 @@ class vnf_p7_info
 	public:
 
 		vnf_p7_info()
-			: thread_started(false)
+			: thread_started(false), 
+			  config(nfapi_vnf_p7_config_create(), 
+				     [] (nfapi_vnf_p7_config_t* f) { nfapi_vnf_p7_config_destory(f); }),
+			  mac(0)
 		{
-			config = nfapi_vnf_p7_config_create();
+			local_port = 0;
+			
+			timing_window = 0;
+			periodic_timing_enabled = 0;
+			aperiodic_timing_enabled = 0;
+			periodic_timing_period = 0;
+			
+			//config = nfapi_vnf_p7_config_create();
 		}
+		
+		vnf_p7_info(const vnf_p7_info& other)  = default;
+		
+		vnf_p7_info(vnf_p7_info&& other) = default;
+		
+		vnf_p7_info& operator=(const vnf_p7_info&) = default;
+		
+		vnf_p7_info& operator=(vnf_p7_info&&) = default;
+		
+		
+		
+		virtual	~vnf_p7_info()
+		{
+			//NFAPI_TRACE(NFAPI_TRACE_INFO, "*** vnf_p7_info delete ***\n");
+			
+			//nfapi_vnf_p7_config_destory(config);
+			
+			// should we delete the mac?
+		}
+		
 
 		int local_port;
 		std::string local_addr;
@@ -131,7 +163,8 @@ class vnf_p7_info
 
 		bool thread_started;
 
-		nfapi_vnf_p7_config_t* config;
+		//nfapi_vnf_p7_config_t* config;
+		std::shared_ptr<nfapi_vnf_p7_config_t> config;
 
 		mac_t* mac;
 
@@ -241,7 +274,7 @@ int vnf_sim_unpack_p4_p5_vendor_extension(nfapi_p4_p5_message_header_t* header, 
 	if(header->message_id == P5_VENDOR_EXT_RSP)
 	{
 		vendor_ext_p5_rsp* req = (vendor_ext_p5_rsp*)(header);
-		pull16(ppReadPackedMessage, &req->error_code, end);
+		return(!pull16(ppReadPackedMessage, &req->error_code, end));
 	}
 	return 0;
 }
@@ -253,8 +286,8 @@ int vnf_sim_pack_p4_p5_vendor_extension(nfapi_p4_p5_message_header_t* header, ui
 	{
 		vendor_ext_p5_req* req = (vendor_ext_p5_req*)(header);
 		//NFAPI_TRACE(NFAPI_TRACE_INFO, "%s %d %d\n", __FUNCTION__, req->dummy1, req->dummy2);
-		push16(req->dummy1, ppWritePackedMsg, end);
-		push16(req->dummy2, ppWritePackedMsg, end);
+		return (!(push16(req->dummy1, ppWritePackedMsg, end) &&
+				  push16(req->dummy2, ppWritePackedMsg, end)));
 	}
 	return 0;
 }
@@ -271,28 +304,28 @@ void mac_dl_config_req(mac_t* mac, nfapi_dl_config_request_t* req)
 {
 	vnf_p7_info* info = (vnf_p7_info*)(mac->user_data);
 
-	nfapi_vnf_p7_dl_config_req(info->config, req);
+	nfapi_vnf_p7_dl_config_req(info->config.get(), req);
 }
 
 void mac_ul_config_req(mac_t* mac, nfapi_ul_config_request_t* req)
 {
 	vnf_p7_info* info = (vnf_p7_info*)(mac->user_data);
 
-	nfapi_vnf_p7_ul_config_req(info->config, req);
+	nfapi_vnf_p7_ul_config_req(info->config.get(), req);
 }
 
 void mac_hi_dci0_req(mac_t* mac, nfapi_hi_dci0_request_t* req)
 {
 	vnf_p7_info* info = (vnf_p7_info*)(mac->user_data);
 
-	nfapi_vnf_p7_hi_dci0_req(info->config, req);
+	nfapi_vnf_p7_hi_dci0_req(info->config.get(), req);
 }
 
 void mac_tx_req(mac_t* mac, nfapi_tx_request_t* req)
 {
 	vnf_p7_info* info = (vnf_p7_info*)(mac->user_data);
 
-	nfapi_vnf_p7_tx_req(info->config, req);
+	nfapi_vnf_p7_tx_req(info->config.get(), req);
 }
 
 int phy_subframe_indication(struct nfapi_vnf_p7_config* config, uint16_t phy_id, uint16_t sfn_sf)
@@ -439,7 +472,7 @@ void* vnf_p7_thread_start(void* ptr)
 	p7_vnf->config->allocate_p7_vendor_ext = &phy_allocate_p7_vendor_ext;
 	p7_vnf->config->deallocate_p7_vendor_ext = &phy_deallocate_p7_vendor_ext;
 
-	nfapi_vnf_p7_start((p7_vnf->config));
+	nfapi_vnf_p7_start(p7_vnf->config.get());
 
 	return 0;
 
@@ -474,7 +507,7 @@ int pnf_disconnection_indication_cb(nfapi_vnf_config_t* config, int p5_idx)
 		for(phy_info& phy : pnf.phys)
 		{
 			vnf_p7_info& p7_vnf = vnf->p7_vnfs[0];
-			nfapi_vnf_p7_del_pnf((p7_vnf.config), phy.id);
+			nfapi_vnf_p7_del_pnf((p7_vnf.config.get()), phy.id);
 		}
 	}
 
@@ -1150,7 +1183,7 @@ int start_resp_cb(nfapi_vnf_config_t* config, int p5_idx, nfapi_start_response_t
 
 			vnf_p7_info& p7_vnf = vnf->p7_vnfs[0];
 
-			nfapi_vnf_p7_add_pnf((p7_vnf.config), phy.remote_addr.c_str(), phy.remote_port, phy.id);
+			nfapi_vnf_p7_add_pnf((p7_vnf.config.get()), phy.remote_addr.c_str(), phy.remote_port, phy.id);
 			
 
 		}
@@ -1196,65 +1229,78 @@ int vendor_ext_cb(nfapi_vnf_config_t* config, int p5_idx, nfapi_p4_p5_message_he
 
 	}
 
-	return 0;;
+	return 0;
 }
 
-void read_vnf_xml(vnf_info& vnf, const char* xml_file)
+int read_vnf_xml(vnf_info& vnf, const char* xml_file)
 {
-	std::ifstream input(xml_file);
-
-	using boost::property_tree::ptree;
-	ptree pt;
-
-	read_xml(input, pt);
-	
-	
-
-	for(const auto& v : pt.get_child("vnf.vnf_p7_list"))
+	try
 	{
-		if(v.first == "vnf_p7")
+		
+		std::ifstream input(xml_file);
+	
+		using boost::property_tree::ptree;
+		ptree pt;
+	
+		read_xml(input, pt);
+		
+		
+	
+		for(const auto& v : pt.get_child("vnf.vnf_p7_list"))
 		{
-			vnf_p7_info vnf_p7;
-			vnf_p7.local_port = v.second.get<unsigned>("port");	
-			vnf_p7.local_addr = v.second.get<std::string>("address");
-
-			vnf_p7.timing_window = v.second.get<unsigned>("timing_window");
-			vnf_p7.periodic_timing_enabled = v.second.get<unsigned>("periodic_timing_enabled");
-			vnf_p7.aperiodic_timing_enabled = v.second.get<unsigned>("aperiodic_timing_enabled");
-			vnf_p7.periodic_timing_period = v.second.get<unsigned>("periodic_timing_window");
-
-			
-			boost::optional<const boost::property_tree::ptree&> d = v.second.get_child_optional("data.udp");
-			if(d.is_initialized())
+			if(v.first == "vnf_p7")
 			{
-				vnf_p7.udp.enabled = true;
-				vnf_p7.udp.rx_port = d.get().get<unsigned>("rx_port");
-				vnf_p7.udp.tx_port = d.get().get<unsigned>("tx_port");
-				vnf_p7.udp.tx_addr = d.get().get<std::string>("tx_addr");
+				vnf_p7_info vnf_p7;
+				vnf_p7.local_port = v.second.get<unsigned>("port");
+				vnf_p7.local_addr = v.second.get<std::string>("address");
+	
+				vnf_p7.timing_window = v.second.get<unsigned>("timing_window");
+				vnf_p7.periodic_timing_enabled = v.second.get<unsigned>("periodic_timing_enabled");
+				vnf_p7.aperiodic_timing_enabled = v.second.get<unsigned>("aperiodic_timing_enabled");
+				vnf_p7.periodic_timing_period = v.second.get<unsigned>("periodic_timing_window");
+	
+				
+				boost::optional<const boost::property_tree::ptree&> d = v.second.get_child_optional("data.udp");
+				if(d.is_initialized())
+				{
+					vnf_p7.udp.enabled = true;
+					vnf_p7.udp.rx_port = d.get().get<unsigned>("rx_port");
+					vnf_p7.udp.tx_port = d.get().get<unsigned>("tx_port");
+					vnf_p7.udp.tx_addr = d.get().get<std::string>("tx_addr");
+				}
+				else
+				{
+					vnf_p7.udp.enabled = false;
+				}
+				
+				vnf.wireshark_test_mode = v.second.get<unsigned>("wireshark_test_mode", 0);
+	
+				vnf_p7.mac = mac_create(vnf.wireshark_test_mode);
+				vnf_p7.mac->dl_config_req = &mac_dl_config_req;
+				vnf_p7.mac->ul_config_req = &mac_ul_config_req;
+				vnf_p7.mac->hi_dci0_req = &mac_hi_dci0_req;
+				vnf_p7.mac->tx_req = &mac_tx_req;
+	
+				if(vnf_p7.udp.enabled)
+				{
+					mac_start_data(vnf_p7.mac, 
+								   vnf_p7.udp.rx_port, 
+								   vnf_p7.udp.tx_addr.c_str(), 
+								   vnf_p7.udp.tx_port);
+				}
+	
+				vnf.p7_vnfs.push_back(vnf_p7);
 			}
-			else
-			{
-				vnf_p7.udp.enabled = false;
-			}
-			
-			vnf.wireshark_test_mode = v.second.get<unsigned>("wireshark_test_mode", 0);
-
-			vnf_p7.mac = mac_create(vnf.wireshark_test_mode);
-			vnf_p7.mac->dl_config_req = &mac_dl_config_req;
-			vnf_p7.mac->ul_config_req = &mac_ul_config_req;
-			vnf_p7.mac->hi_dci0_req = &mac_hi_dci0_req;
-			vnf_p7.mac->tx_req = &mac_tx_req;
-
-			if(vnf_p7.udp.enabled)
-			{
-				mac_start_data(vnf_p7.mac, 
-							   vnf_p7.udp.rx_port, 
-							   vnf_p7.udp.tx_addr.c_str(), 
-							   vnf_p7.udp.tx_port);
-			}
-
-			vnf.p7_vnfs.push_back(vnf_p7);
 		}
+	}
+	catch(std::exception& e)
+	{
+		printf("%s", e.what());
+		return -1;
+	}
+	catch(boost::exception& e)
+	{
+		printf("%s", boost::diagnostic_information(e).c_str());
 	}
 
 	struct ifaddrs *ifaddr;
@@ -1272,6 +1318,8 @@ void read_vnf_xml(vnf_info& vnf, const char* xml_file)
 		}
 		ifaddr = ifaddr->ifa_next;
 	}
+	
+	return 0;
 
 }
 
@@ -1288,7 +1336,11 @@ int main(int argc, char *argv[])
 
 	vnf_info vnf;
 
-	read_vnf_xml(vnf, argv[2]);	
+	if(read_vnf_xml(vnf, argv[2]) < 0)
+	{
+		printf("Failed to read xml file>\n");
+		return 0;
+	}
 
 	nfapi_vnf_config_t* config = nfapi_vnf_config_create();
 

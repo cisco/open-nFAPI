@@ -33,6 +33,7 @@
 #define NFAPI_MAX_CC 1
 
 
+
 #define NFAPI_MAX_RSSI 8
 #define NFAPI_MAX_PSC_LIST 32
 #define NFAPI_MAX_PCI_LIST 32
@@ -2097,7 +2098,8 @@ typedef struct {
 	nfapi_p7_message_header_t header;
 	uint32_t t1;
 	uint32_t t2;
-	uint32_t t3;	nfapi_vendor_extension_tlv_t vendor_extension;
+	uint32_t t3;	
+	nfapi_vendor_extension_tlv_t vendor_extension;
 } nfapi_ul_node_sync_t;
 
 typedef struct {
@@ -3376,14 +3378,16 @@ uint32_t nfapi_p7_calculate_checksum(uint8_t* buffer, uint32_t len);
  *
  *  \param buffer Pointer to the packed message
  *  \param len The length of the message
+  *  \return 0 means success, -1 means failure.
  */
-void nfapi_p7_update_checksum(uint8_t* buffer, uint32_t len);
+int nfapi_p7_update_checksum(uint8_t* buffer, uint32_t len);
 
 /*! \brief Updates the transmition time stamp in the p7 message header
  *
  *  \param buffer Pointer to the packed message
  *  \param timestamp The time stamp value
+  *  \return 0 means success, -1 means failure.
  */
-void nfapi_p7_update_transmit_timestamp(uint8_t* buffer, uint32_t timestamp);
+int nfapi_p7_update_transmit_timestamp(uint8_t* buffer, uint32_t timestamp);
 
 #endif /* _NFAPI_INTERFACE_H_ */

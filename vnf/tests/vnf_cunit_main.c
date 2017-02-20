@@ -605,7 +605,7 @@ void* vnf_test_start_p7_thread(void* ptr)
 
 int test_subframe_indication(nfapi_vnf_p7_config_t* config, uint16_t phy_id, uint16_t sfn_sf)
 {
-	printf("[VNF:%d] (%d:%d) SUBFRAME_IND\n", phy_id, SFNSF2SFN(sfn_sf), SFNSF2SF(sfn_sf));
+	//printf("[VNF:%d] (%d:%d) SUBFRAME_IND\n", phy_id, SFNSF2SFN(sfn_sf), SFNSF2SF(sfn_sf));
 
 	nfapi_dl_config_request_t dl_config_req;
 	memset(&dl_config_req, 0, sizeof(dl_config_req));
@@ -640,38 +640,38 @@ int test_subframe_indication(nfapi_vnf_p7_config_t* config, uint16_t phy_id, uin
 
 int test_harq_indication(nfapi_vnf_p7_config_t* config, nfapi_harq_indication_t* ind)
 {
-	printf("[VNF:%d] (%d:%d) HARQ_IND\n", ind->header.phy_id, SFNSF2SFN(ind->sfn_sf), SFNSF2SF(ind->sfn_sf));
+	//printf("[VNF:%d] (%d:%d) HARQ_IND\n", ind->header.phy_id, SFNSF2SFN(ind->sfn_sf), SFNSF2SF(ind->sfn_sf));
 	return 0;
 }
 
 int test_crc_indication(nfapi_vnf_p7_config_t* config, nfapi_crc_indication_t* ind)
 {
-	printf("[VNF:%d] (%d:%d) CRC_IND\n", ind->header.phy_id, SFNSF2SFN(ind->sfn_sf), SFNSF2SF(ind->sfn_sf));
+	//printf("[VNF:%d] (%d:%d) CRC_IND\n", ind->header.phy_id, SFNSF2SFN(ind->sfn_sf), SFNSF2SF(ind->sfn_sf));
 	return 0;
 }
 int test_rx_indication(nfapi_vnf_p7_config_t* config, nfapi_rx_indication_t* ind)
 {
-	printf("[VNF:%d] (%d:%d) RX_IND\n", ind->header.phy_id, SFNSF2SFN(ind->sfn_sf), SFNSF2SF(ind->sfn_sf));
+	//printf("[VNF:%d] (%d:%d) RX_IND\n", ind->header.phy_id, SFNSF2SFN(ind->sfn_sf), SFNSF2SF(ind->sfn_sf));
 	return 0;
 }
 int test_rach_indication(nfapi_vnf_p7_config_t* config, nfapi_rach_indication_t* ind)
 {
-	printf("[VNF:%d] (%d:%d) RACH_IND\n", ind->header.phy_id, SFNSF2SFN(ind->sfn_sf), SFNSF2SF(ind->sfn_sf));
+	//printf("[VNF:%d] (%d:%d) RACH_IND\n", ind->header.phy_id, SFNSF2SFN(ind->sfn_sf), SFNSF2SF(ind->sfn_sf));
 	return 0;
 }
 int test_srs_indication(nfapi_vnf_p7_config_t* config, nfapi_srs_indication_t* ind)
 {
-	printf("[VNF:%d] (%d:%d) SRS_IND\n", ind->header.phy_id, SFNSF2SFN(ind->sfn_sf), SFNSF2SF(ind->sfn_sf));
+	//printf("[VNF:%d] (%d:%d) SRS_IND\n", ind->header.phy_id, SFNSF2SFN(ind->sfn_sf), SFNSF2SF(ind->sfn_sf));
 	return 0;
 }
 int test_sr_indication(nfapi_vnf_p7_config_t* config, nfapi_sr_indication_t* ind)
 {
-	printf("[VNF:%d] (%d:%d) SR_IND\n", ind->header.phy_id, SFNSF2SFN(ind->sfn_sf), SFNSF2SF(ind->sfn_sf));
+	//printf("[VNF:%d] (%d:%d) SR_IND\n", ind->header.phy_id, SFNSF2SFN(ind->sfn_sf), SFNSF2SF(ind->sfn_sf));
 	return 0;
 }
 int test_cqi_indication(nfapi_vnf_p7_config_t* config, nfapi_cqi_indication_t* ind)
 {
-	printf("[VNF:%d] (%d:%d) CQI_IND\n", ind->header.phy_id, SFNSF2SFN(ind->sfn_sf), SFNSF2SF(ind->sfn_sf));
+	//printf("[VNF:%d] (%d:%d) CQI_IND\n", ind->header.phy_id, SFNSF2SFN(ind->sfn_sf), SFNSF2SF(ind->sfn_sf));
 	return 0;
 }
 
@@ -1109,7 +1109,7 @@ void vnf_test_start_connect(void)
 								{
 									nfapi_dl_config_request_t msg;
 									nfapi_p7_message_unpack(buffer, len, &msg, sizeof(msg), 0);
-									printf("[PNF:%d] (%d/%d) NFAPI_DL_CONFIG_REQUEST\n", header.phy_id, SFNSF2SFN(msg.sfn_sf), SFNSF2SF(msg.sfn_sf));
+									//printf("[PNF:%d] (%d/%d) NFAPI_DL_CONFIG_REQUEST\n", header.phy_id, SFNSF2SFN(msg.sfn_sf), SFNSF2SF(msg.sfn_sf));
 
 									if(SFNSF2SFN(msg.sfn_sf) == 500)
 										exit = 1;
@@ -1204,21 +1204,21 @@ void vnf_test_start_connect(void)
 								{
 									nfapi_ul_config_request_t msg;
 									nfapi_p7_message_unpack(buffer, len, &msg, sizeof(msg), 0);
-									printf("[PNF:%d] (%d/%d) NFAPI_UL_CONFIG_REQUEST\n", header.phy_id, SFNSF2SFN(msg.sfn_sf), SFNSF2SF(msg.sfn_sf));
+									//printf("[PNF:%d] (%d/%d) NFAPI_UL_CONFIG_REQUEST\n", header.phy_id, SFNSF2SFN(msg.sfn_sf), SFNSF2SF(msg.sfn_sf));
 								}
 								break;
 							case NFAPI_HI_DCI0_REQUEST:
 								{
 									nfapi_hi_dci0_request_t msg;
 									nfapi_p7_message_unpack(buffer, len, &msg, sizeof(msg), 0);
-									printf("[PNF:%d] (%d/%d) NFAPI_HI_DCI0_REQUEST\n", header.phy_id, SFNSF2SFN(msg.sfn_sf), SFNSF2SF(msg.sfn_sf));
+									//printf("[PNF:%d] (%d/%d) NFAPI_HI_DCI0_REQUEST\n", header.phy_id, SFNSF2SFN(msg.sfn_sf), SFNSF2SF(msg.sfn_sf));
 								}
 								break;
 							case NFAPI_TX_REQUEST:
 								{
 									nfapi_tx_request_t msg;
 									nfapi_p7_message_unpack(buffer, len, &msg, sizeof(msg), 0);
-									printf("[PNF:%d] (%d/%d) NFAPI_TX_REQUEST\n", header.phy_id, SFNSF2SFN(msg.sfn_sf), SFNSF2SF(msg.sfn_sf));
+									//printf("[PNF:%d] (%d/%d) NFAPI_TX_REQUEST\n", header.phy_id, SFNSF2SFN(msg.sfn_sf), SFNSF2SF(msg.sfn_sf));
 								}
 								break;
 						}

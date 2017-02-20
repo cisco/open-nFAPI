@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/cisco/open-nFAPI.svg?branch=master)](https://travis-ci.org/cisco/open-nFAPI)
-
+[![Coverity Status](https://scan.coverity.com/projects/11791/badge.svg)](https://scan.coverity.com/projects/cisco-open-nfapi)
 
 # open-nFAPI
  
@@ -120,5 +120,6 @@ sim_common			common simulation for used by the vnf and pnf sim
 vnf_sim				a vnf simulator including a stub mac implementation
 pnf_sim				a pnf simualtor including a fapi interface defintion and stub implementation
 xml					xml configuration files for the vnf and pnf simulator
+wireshark           code for a wireshark dissector for the nFAPI protocol
 ```
 

@@ -36,6 +36,7 @@ typedef struct mac
 } mac_t;
 
 mac_t* mac_create(uint8_t wireshark_test_mode);
+void mac_destroy(mac_t* mac);
 
 void mac_start_data(mac_t* mac, unsigned rx_port, const char* tx_addres, unsigned tx_port);
 

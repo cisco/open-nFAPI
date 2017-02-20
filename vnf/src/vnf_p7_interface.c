@@ -120,12 +120,15 @@ int nfapi_vnf_p7_start(nfapi_vnf_p7_config_t* config)
 		NFAPI_TRACE(NFAPI_TRACE_ERROR, "After setsockopt (IP_TOS) errno: %d\n", errno);
 		return -1;
 	}
+	
 	NFAPI_TRACE(NFAPI_TRACE_INFO, "VNF P7 setsockopt succeeded...\n");
 
+	// Create the address structure
 	struct sockaddr_in addr;
+	memset(&addr, 0, sizeof(addr));
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(config->port);
-	addr.sin_addr.s_addr = INADDR_ANY; // gpMyAddrSock->sin_addr.s_addr;
+	addr.sin_addr.s_addr = INADDR_ANY;
 
 	// bind to the configured port
 	NFAPI_TRACE(NFAPI_TRACE_INFO, "VNF P7 binding too %s:%d\n", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
@@ -277,9 +280,9 @@ int nfapi_vnf_p7_start(nfapi_vnf_p7_config_t* config)
 					NFAPI_TRACE(NFAPI_TRACE_WARN, "subframe pselect overrun %ld %ld\n", millisecond, pselect_stop_millisecond);
 					NFAPI_TRACE(NFAPI_TRACE_WARN, "subframe underrun %ld\n", millisecond);
 				}
-
 				last_millisecond = millisecond;
 				*/
+				
 				millisecond ++;
 			}
 		}

@@ -209,6 +209,7 @@ int nfapi_vnf_start(nfapi_vnf_config_t* config)
 		if (setsockopt(p5ListenSock, IPPROTO_SCTP, SCTP_EVENTS, &events, sizeof(struct sctp_event_subscribe)) < 0)
 		{
 			NFAPI_TRACE(NFAPI_TRACE_ERROR, "After setsockopt (SCTP_EVENTS) errno: %d\n", errno);
+			close(p5ListenSock);
 			return 0;
 		}
 		NFAPI_TRACE(NFAPI_TRACE_NOTE, "VNF Setting the SCTP_INITMSG\n");
@@ -217,13 +218,15 @@ int nfapi_vnf_start(nfapi_vnf_config_t* config)
 		initMsg.sinit_max_instreams = 5; //MAX_SCTP_STREAMS;  // number of output streams can be greater
 		if (setsockopt(p5ListenSock, IPPROTO_SCTP, SCTP_INITMSG, &initMsg, sizeof(initMsg)) < 0)
 		{
-			NFAPI_TRACE(NFAPI_TRACE_ERROR, "After setsockopt (SCTP_INITMSG) errno: %d\n", errno);
+			NFAPI_TRACE(NFAPI_TRACE_ERROR, "After setsockopt (SCTP_INITMSG) errno: %d\n", errno)
+			close(p5ListenSock);
 			return 0;
 		}
 		noDelay = 1;
 		if (setsockopt(p5ListenSock, IPPROTO_SCTP, SCTP_NODELAY, &noDelay, sizeof(noDelay)) < 0)
 		{
 			NFAPI_TRACE(NFAPI_TRACE_ERROR, "After setsockopt (STCP_NODELAY) errno: %d\n", errno);
+			close(p5ListenSock);
 			return 0;
 		}
 		struct sctp_event_subscribe events;
@@ -233,6 +236,7 @@ int nfapi_vnf_start(nfapi_vnf_config_t* config)
 		if(setsockopt(p5ListenSock, SOL_SCTP, SCTP_EVENTS, (const void *)&events, sizeof(events)) < 0)
 		{
 			NFAPI_TRACE(NFAPI_TRACE_ERROR, "After setsockopt errno: %d\n", errno);
+			close(p5ListenSock);
 			return -1;
 		}
 
@@ -250,6 +254,7 @@ int nfapi_vnf_start(nfapi_vnf_config_t* config)
 		if (bind(p5ListenSock, (struct sockaddr *)&addr6, sizeof(struct sockaddr_in6)) < 0)
 		{
 			NFAPI_TRACE(NFAPI_TRACE_ERROR, "After bind errno: %d\n", errno);
+			close(p5ListenSock);
 			return 0;
 		}
 	}
@@ -265,6 +270,7 @@ int nfapi_vnf_start(nfapi_vnf_config_t* config)
 		//if (sctp_bindx(p5ListenSock, (struct sockaddr *)&addr, sizeof(struct sockaddr_in), SCTP_BINDX_ADD_ADDR) < 0)
 		{
 			NFAPI_TRACE(NFAPI_TRACE_ERROR, "After bind errno: %d\n", errno);
+			close(p5ListenSock);
 			return 0;
 		}
 	}
@@ -275,6 +281,7 @@ int nfapi_vnf_start(nfapi_vnf_config_t* config)
 	if (listen(p5ListenSock, 2) < 0) 
 	{
 		NFAPI_TRACE(NFAPI_TRACE_ERROR, "After listen errno: %d\n", errno);
+		close(p5ListenSock);
 		return 0;
 	}
 
@@ -315,6 +322,7 @@ int nfapi_vnf_start(nfapi_vnf_config_t* config)
 		if(select_result == -1)
 		{
 			NFAPI_TRACE(NFAPI_TRACE_INFO, "select result %d errno %d\n", select_result, errno);
+			close(p5ListenSock);
 			return 0;
 		}
 		else if(select_result)

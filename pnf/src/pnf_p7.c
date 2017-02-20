@@ -344,7 +344,7 @@ int pnf_p7_send_message(pnf_p7_t* pnf_p7, uint8_t* msg, uint32_t len)
 	}
 	
 	socklen_t remote_addr_len = sizeof(struct sockaddr_in);
-
+	
 	int sendto_result;
 	if ((sendto_result = sendto((int)pnf_p7->p7_sock, (const char*)msg, len, 0, (const struct sockaddr*)&remote_addr, remote_addr_len)) < 0)
 	{
@@ -363,10 +363,23 @@ int pnf_p7_pack_and_send_p7_message(pnf_p7_t* pnf_p7, nfapi_p7_message_header_t*
 {
 	header->m_segment_sequence = NFAPI_P7_SET_MSS(0, 0, pnf_p7->sequence_number);
 
+	// Need to guard against different threads calling the encode function at the same time
+	if(pthread_mutex_lock(&(pnf_p7->pack_mutex)) != 0)
+	{
+		NFAPI_TRACE(NFAPI_TRACE_INFO, "failed to lock mutex\n");
+		return -1;
+	}
+
 	int len = nfapi_p7_message_pack(header, pnf_p7->tx_message_buffer, sizeof(pnf_p7->tx_message_buffer), &pnf_p7->_public.codec_config);
 
 	if (len < 0)
 	{
+		if(pthread_mutex_unlock(&(pnf_p7->pack_mutex)) != 0)
+		{
+			NFAPI_TRACE(NFAPI_TRACE_INFO, "failed to unlock mutex\n");
+			return -1;
+		}
+		
 		NFAPI_TRACE(NFAPI_TRACE_ERROR, "nfapi_p7_message_pack failed with return %d\n", len );
 		return -1;
 	}
@@ -426,6 +439,12 @@ int pnf_p7_pack_and_send_p7_message(pnf_p7_t* pnf_p7, nfapi_p7_message_header_t*
 	}
 
 	pnf_p7->sequence_number++;
+	
+	if(pthread_mutex_unlock(&(pnf_p7->pack_mutex)) != 0)
+	{
+		NFAPI_TRACE(NFAPI_TRACE_INFO, "failed to unlock mutex\n");
+		return -1;
+	}
 
 	return 0;
 }
@@ -1380,7 +1399,7 @@ void pnf_nfapi_p7_read_dispatch_message(pnf_p7_t* pnf_p7, uint32_t now_hr_time)
 		else if(recvfrom_result == 0)
 		{
 			// recv zero length message
-			recvfrom(pnf_p7->p7_sock, header_buffer, 0, MSG_DONTWAIT, (struct sockaddr*)&remote_addr, &remote_addr_size);
+			recvfrom_result = recvfrom(pnf_p7->p7_sock, header_buffer, 0, MSG_DONTWAIT, (struct sockaddr*)&remote_addr, &remote_addr_size);
 		}
 
 		if(recvfrom_result == -1)
@@ -1409,9 +1428,15 @@ int pnf_p7_message_pump(pnf_p7_t* pnf_p7)
 	// initialize the mutex lock
 	if(pthread_mutex_init(&(pnf_p7->mutex), NULL) != 0)
 	{
-		NFAPI_TRACE(NFAPI_TRACE_ERROR, "After P7 mutext init: %d\n", errno);
+		NFAPI_TRACE(NFAPI_TRACE_ERROR, "After P7 mutex init: %d\n", errno);
 		return -1;
 	}
+	
+	if(pthread_mutex_init(&(pnf_p7->pack_mutex), NULL) != 0)
+	{
+		NFAPI_TRACE(NFAPI_TRACE_ERROR, "After P7 mutex init: %d\n", errno);
+		return -1;
+	}	
 
 	// create the pnf p7 socket
 	if ((pnf_p7->p7_sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
@@ -1518,6 +1543,11 @@ int pnf_p7_message_pump(pnf_p7_t* pnf_p7)
 	if (close(pnf_p7->p7_sock) < 0)
 	{
 		NFAPI_TRACE(NFAPI_TRACE_ERROR, "close failed errno: %d\n", errno);
+	}
+
+	if(pthread_mutex_destroy(&(pnf_p7->pack_mutex)) != 0)
+	{
+		NFAPI_TRACE(NFAPI_TRACE_ERROR, "mutex destroy failed errno: %d\n", errno);
 	}
 
 	if(pthread_mutex_destroy(&(pnf_p7->mutex)) != 0)

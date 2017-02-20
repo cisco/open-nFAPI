@@ -28,6 +28,7 @@
 #include <ifaddrs.h>
 #include <netdb.h>
 #include <pthread.h>
+#include <unistd.h>
 
 #include <mutex>
 #include <queue>
@@ -35,14 +36,19 @@
 
 struct phy_pdu
 {
-	phy_pdu()
+	phy_pdu() : buffer_len(1500), buffer(0), len(0)
 	{
-		buffer_len = 1500;
 		buffer = (char*) malloc(buffer_len);
 	}
+	
+	virtual ~phy_pdu()
+	{
+		free(buffer);
+	}
 
-	char* buffer;
+
 	unsigned buffer_len;
+	char* buffer;
 	unsigned len;
 };
 
@@ -379,7 +385,15 @@ extern "C"
 
 		instance->fapi = new fapi_private();
 
-		return &(instance->_public);
+		return (fapi_t*)instance;
+	}
+	
+	void fapi_destroy(fapi_t* fapi)
+	{
+		fapi_internal_t* instance = (fapi_internal_t*)fapi;
+		
+		delete instance->fapi;
+		free(instance);
 	}
 
 	void* fapi_rx_thread_start(void* ptr)
@@ -397,7 +411,11 @@ extern "C"
 				pdu->len = len;
 				instance->fapi->push_rx_buffer(pdu);
 			}
-			printf("~");
+			else
+			{
+				instance->fapi->release_phy_pdu(pdu);
+			}
+
 		}
 	}
 
@@ -409,16 +427,28 @@ extern "C"
 		printf("[FAPI] Tx Data to %s:%d\n", tx_address, tx_port);
 
 		instance->rx_sock = socket(AF_INET, SOCK_DGRAM, 0);
+		
+		if(instance->rx_sock < 0)
+		{
+			printf("[FAPI] Failed to create socket\n");
+			return;
+		}
 
 		struct sockaddr_in addr;
+		memset(&addr, 0, sizeof(addr));
 		addr.sin_family = AF_INET;
 		addr.sin_port = htons(rx_port);
 		addr.sin_addr.s_addr = INADDR_ANY;
-		bind(instance->rx_sock, (struct sockaddr *)&addr, sizeof(struct sockaddr_in));
-
-		pthread_t fapi_rx_thread;
-		//pthread_create(&fapi_rx_thread, NULL, &fapi_rx_thread_start, instance);
 		
+		int bind_result = bind(instance->rx_sock, (struct sockaddr *)&addr, sizeof(struct sockaddr_in));
+		
+		if(bind_result == -1)
+		{
+			printf("[FAPI] Failed to bind to port %d\n", rx_port);
+			close(instance->rx_sock);
+			return ;
+		}
+
 		instance->tx_sock = socket(AF_INET, SOCK_DGRAM, 0);
 		instance->tx_addr.sin_family = AF_INET;
 		instance->tx_addr.sin_port = htons(tx_port);
@@ -476,7 +506,7 @@ extern "C"
 				// LAA Capability
 			}
 		}
-		else if(instance == 0)
+		else
 		{
 			if(instance->config.duplex_mode == 0)
 			{
@@ -589,7 +619,12 @@ extern "C"
 			//
 			instance->tx_byte_count += len;
 
-			sendto(instance->tx_sock, data, len, 0, (struct sockaddr*)&(instance->tx_addr), sizeof(instance->tx_addr));
+			int sendto_result = sendto(instance->tx_sock, data, len, 0, (struct sockaddr*)&(instance->tx_addr), sizeof(instance->tx_addr));
+			
+			if(sendto_result == -1)
+			{
+				// error
+			}
 		}
 
 		return 0;

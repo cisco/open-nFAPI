@@ -213,7 +213,7 @@ uint8_t pulls8(uint8_t **in, int8_t *out, uint8_t *end)
 		return 0;
 	}
 }
-#include <assert.h>
+
 uint8_t pull16(uint8_t **in, uint16_t *out, uint8_t *end)
 {
 	uint8_t *pIn = *in;
@@ -227,7 +227,6 @@ uint8_t pull16(uint8_t **in, uint16_t *out, uint8_t *end)
 	}
 	else
 	{
-		assert(0);
 		NFAPI_TRACE(NFAPI_TRACE_ERROR, "%s no space in buffer\n", __FUNCTION__);
 		return 0;
 	}
@@ -312,7 +311,8 @@ uint32_t pullarray16(uint8_t **in, uint16_t out[], uint32_t max_len, uint32_t le
 		uint32_t idx;
 		for(idx = 0; idx < len; ++idx)
 		{
-			pull16(in, &out[idx], end);
+			if(!pull16(in, &out[idx], end))
+				return 0;
 		}
 
 		return sizeof(uint16_t) * len;
@@ -340,7 +340,8 @@ uint32_t pullarrays16(uint8_t **in, int16_t out[], uint32_t max_len, uint32_t le
 		uint32_t idx;
 		for(idx = 0; idx < len; ++idx)
 		{
-			pulls16(in, &out[idx], end);
+			if(!pulls16(in, &out[idx], end))
+			return 0;
 		}
 
 		return sizeof(uint16_t) * len;
@@ -367,7 +368,8 @@ uint32_t pusharray16(uint16_t in[], uint32_t max_len, uint32_t len, uint8_t **ou
 		uint32_t idx;
 		for(idx = 0; idx < len; ++idx)
 		{
-			push16(in[idx], out, end);
+			if(!push16(in[idx], out, end))
+				return 0;
 		}
 		return sizeof(uint16_t) * len;
 	}

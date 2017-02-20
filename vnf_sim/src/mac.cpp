@@ -25,6 +25,7 @@
 #include <ifaddrs.h>
 #include <netdb.h>
 #include <pthread.h>
+#include <unistd.h>
 
 #include <mutex>
 #include <queue>
@@ -37,14 +38,18 @@ uint32_t rand_range(uint32_t min, uint32_t max)
 
 struct mac_pdu
 {
-	mac_pdu()
+	mac_pdu() : buffer_len(1500), buffer(0), len(0)
 	{
-		buffer_len = 1500;
 		buffer = (char*) malloc(buffer_len);
 	}
+	
+	virtual ~mac_pdu()
+	{
+		free(buffer);
+	}
 
-	char* buffer;
 	unsigned buffer_len;
+	char* buffer;
 	unsigned len;
 };
 
@@ -134,7 +139,14 @@ extern "C"
 	{
 		mac_internal_t* instance = (mac_internal_t*)malloc(sizeof(mac_internal_t));
 		instance->mac = new mac_private((wireshark_test_mode >= 1));
-		return &(instance->_public);
+		return (mac_t*)instance;
+	}
+	
+	void mac_destroy(mac_t* mac)
+	{
+		mac_internal_t* instance = (mac_internal_t*)mac;
+		delete instance->mac;
+		free(instance);
 	}
 	
 	void* mac_rx_thread_start(void* ptr)
@@ -150,6 +162,10 @@ extern "C"
 				pdu->len = len;
 				instance->mac->push_rx_buffer(pdu);
 			}
+			else
+			{
+				instance->mac->release_mac_pdu(pdu);
+			}
 		}
 		return 0;
 	}
@@ -162,12 +178,25 @@ extern "C"
 		printf("[MAC] Tx Data to %s.%d\n", tx_address, tx_port);
 
 		instance->rx_sock = socket(AF_INET, SOCK_DGRAM, 0);
+		
+		if(instance->rx_sock < 0)
+		{
+			printf("[MAC] Failed to create socket\n");
+			return;
+		}
 
 		struct sockaddr_in addr;
+		memset(&addr, 0, sizeof(0));
 		addr.sin_family = AF_INET;
 		addr.sin_port = htons(rx_port);
 		addr.sin_addr.s_addr = INADDR_ANY;
-		bind(instance->rx_sock, (struct sockaddr *)&addr, sizeof(struct sockaddr_in));
+		
+		if(bind(instance->rx_sock, (struct sockaddr *)&addr, sizeof(struct sockaddr_in)) < 0)
+		{
+			printf("[MAC] Failed to bind to %d\n", rx_port);
+			close(instance->rx_sock);
+			return;
+		}
 
 		pthread_t mac_rx_thread;
 		pthread_create(&mac_rx_thread, NULL, &mac_rx_thread_start, instance);
@@ -1010,7 +1039,12 @@ extern "C"
 			//
 			instance->tx_byte_count += len;
 
-			sendto(instance->tx_sock, data, len, 0, (struct sockaddr*)&(instance->tx_addr), sizeof(instance->tx_addr));
+			int sendto_result = sendto(instance->tx_sock, data, len, 0, (struct sockaddr*)&(instance->tx_addr), sizeof(instance->tx_addr));
+			
+			if(sendto_result < 0)
+			{
+				// error
+			}
 		}
 
 	}
