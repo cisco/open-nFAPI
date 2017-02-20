@@ -139,7 +139,7 @@ extern "C"
 	{
 		mac_internal_t* instance = (mac_internal_t*)malloc(sizeof(mac_internal_t));
 		instance->mac = new mac_private((wireshark_test_mode >= 1));
-		return &(instance->_public);
+		return (mac_t*)instance;
 	}
 	
 	void mac_destroy(mac_t* mac)

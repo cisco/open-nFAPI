@@ -32,6 +32,9 @@
 #define NFAPI_MAX_BF_VECTORS 8
 #define NFAPI_MAX_CC 1
 
+// This the larget transport block size in 36.213 (4 Layer, max TBS)
+#define NFAPI_MAX_TX_PDU_LENGTH 391656
+
 
 #define NFAPI_MAX_RSSI 8
 #define NFAPI_MAX_PSC_LIST 32
