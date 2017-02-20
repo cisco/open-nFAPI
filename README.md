@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/cisco/open-nFAPI.svg?branch-master)](https://travis-ci.org/cisco/open-nFAPI)
+[![Build Status](https://travis-ci.org/cisco/open-nFAPI.svg?branch=master)](https://travis-ci.org/cisco/open-nFAPI)
 [![Coverity Status](https://scan.coverity.com/projects/11791/badge.svg)](https://scan.coverity.com/projects/cisco-open-nfapi)
 
 # open-nFAPI
