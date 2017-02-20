@@ -3376,14 +3376,16 @@ uint32_t nfapi_p7_calculate_checksum(uint8_t* buffer, uint32_t len);
  *
  *  \param buffer Pointer to the packed message
  *  \param len The length of the message
+  *  \return 0 means success, -1 means failure.
  */
-void nfapi_p7_update_checksum(uint8_t* buffer, uint32_t len);
+int nfapi_p7_update_checksum(uint8_t* buffer, uint32_t len);
 
 /*! \brief Updates the transmition time stamp in the p7 message header
  *
  *  \param buffer Pointer to the packed message
  *  \param timestamp The time stamp value
+  *  \return 0 means success, -1 means failure.
  */
-void nfapi_p7_update_transmit_timestamp(uint8_t* buffer, uint32_t timestamp);
+int nfapi_p7_update_transmit_timestamp(uint8_t* buffer, uint32_t timestamp);
 
 #endif /* _NFAPI_INTERFACE_H_ */

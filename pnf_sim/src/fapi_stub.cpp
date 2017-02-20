@@ -385,7 +385,8 @@ extern "C"
 
 		instance->fapi = new fapi_private();
 
-		return &(instance->_public);
+		//return &(instance->_public);
+		return (fapi_t*)instance;
 	}
 	
 	void fapi_destroy(fapi_t* fapi)

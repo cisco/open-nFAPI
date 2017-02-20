@@ -56,18 +56,18 @@ uint32_t nfapi_calculate_checksum(uint8_t* buffer, uint16_t len)
 	return ~(chksum);
 }
 
-void nfapi_p7_update_checksum(uint8_t* buffer, uint32_t len)
+int nfapi_p7_update_checksum(uint8_t* buffer, uint32_t len)
 {
 	uint32_t checksum = nfapi_calculate_checksum(buffer, len);
 
 	uint8_t* p_write = &buffer[8];
-	push32(checksum, &p_write, buffer + len);
+	return (push32(checksum, &p_write, buffer + len) > 0 ? 0 : -1);
 }
 
-void nfapi_p7_update_transmit_timestamp(uint8_t* buffer, uint32_t timestamp)
+int nfapi_p7_update_transmit_timestamp(uint8_t* buffer, uint32_t timestamp)
 {
 	uint8_t* p_write = &buffer[12];
-	push32(timestamp, &p_write, buffer + 16);
+	return (push32(timestamp, &p_write, buffer + 16) > 0 ? 0 : -1);
 }
 
 uint32_t nfapi_p7_calculate_checksum(uint8_t* buffer, uint32_t len)

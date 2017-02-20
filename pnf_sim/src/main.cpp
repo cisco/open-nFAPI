@@ -97,8 +97,11 @@ class phy_info
 			  dl_ues_per_subframe(0), ul_ues_per_subframe(0), 
 			  timing_window(0), timing_info_mode(0), timing_info_period(0)
 		{
-			
+			index = 0;
+			id = 0;
+
 			local_port = 0;
+			remote_addr = 0;
 			remote_port = 0;
 	
 			duplex_mode = 0;
