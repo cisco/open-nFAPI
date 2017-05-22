@@ -806,6 +806,34 @@ typedef struct nfapi_vnf_p7_config
 	 */	
 	int (*lbt_dl_indication)(struct nfapi_vnf_p7_config* config, nfapi_lbt_dl_indication_t* ind);
 	
+	/*! A callback for the NB_HARQ.indication
+     *  \param config A pointer to the vnf p7 configuration
+	 *  \param ind A data structure for the decoded LBT_DL.indication This will 
+	 *              have been allocated on the stack. 
+	 *  \return not currently used.
+	 * 
+	 *  The ind may contain pointers to dyanmically allocated sub structures  
+	 *  such as the pdu. The dyanmically allocated structure will 
+	 *  be deallocated on return. If the client wishes to 'keep' the structures 
+	 *  then the substructure pointers should be set to 0 and then the client should
+	 *  use the codec_config.deallocate function to release it at a future point
+	 */	
+	int (*nb_harq_indication)(struct nfapi_vnf_p7_config* config, nfapi_nb_harq_indication_t* ind);	
+	
+	/*! A callback for the NRACH.indication
+     *  \param config A pointer to the vnf p7 configuration
+	 *  \param ind A data structure for the decoded LBT_DL.indication This will 
+	 *              have been allocated on the stack. 
+	 *  \return not currently used.
+	 * 
+	 *  The ind may contain pointers to dyanmically allocated sub structures  
+	 *  such as the pdu. The dyanmically allocated structure will 
+	 *  be deallocated on return. If the client wishes to 'keep' the structures 
+	 *  then the substructure pointers should be set to 0 and then the client should
+	 *  use the codec_config.deallocate function to release it at a future point
+	 */	
+	int (*nrach_indication)(struct nfapi_vnf_p7_config* config, nfapi_nrach_indication_t* ind);		
+	
 	/*! A callback for any vendor extension messages
      *  \param config A pointer to the vnf p7 configuration
 	 *  \param msg A data structure for the decoded vendor extention message allocated

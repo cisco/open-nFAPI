@@ -189,6 +189,28 @@ int nfapi_pnf_p7_lbt_dl_ind(nfapi_pnf_p7_config_t* config, nfapi_lbt_dl_indicati
 	pnf_p7_t* _this = (pnf_p7_t*)(config);
 	return pnf_p7_pack_and_send_p7_message(_this, (nfapi_p7_message_header_t*)ind, sizeof(nfapi_lbt_dl_indication_t));
 }
+int nfapi_pnf_p7_nb_harq_ind(nfapi_pnf_p7_config_t* config, nfapi_nb_harq_indication_t* ind)
+{
+	if(config == NULL || ind == NULL)
+	{
+		NFAPI_TRACE(NFAPI_TRACE_ERROR, "%s: invalid input params\n", __FUNCTION__);
+		return -1;
+	}
+
+	pnf_p7_t* _this = (pnf_p7_t*)(config);
+	return pnf_p7_pack_and_send_p7_message(_this, (nfapi_p7_message_header_t*)ind, sizeof(nfapi_nb_harq_indication_t));
+}
+int nfapi_pnf_p7_nrach_ind(nfapi_pnf_p7_config_t* config, nfapi_nrach_indication_t* ind)
+{
+	if(config == NULL || ind == NULL)
+	{
+		NFAPI_TRACE(NFAPI_TRACE_ERROR, "%s: invalid input params\n", __FUNCTION__);
+		return -1;
+	}
+
+	pnf_p7_t* _this = (pnf_p7_t*)(config);
+	return pnf_p7_pack_and_send_p7_message(_this, (nfapi_p7_message_header_t*)ind, sizeof(nfapi_nrach_indication_t));
+}
 int nfapi_pnf_p7_vendor_extension(nfapi_pnf_p7_config_t* config, nfapi_p7_message_header_t* msg)
 {
 	if(config == NULL || msg == NULL)

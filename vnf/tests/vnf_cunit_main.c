@@ -644,6 +644,13 @@ int test_harq_indication(nfapi_vnf_p7_config_t* config, nfapi_harq_indication_t*
 	return 0;
 }
 
+int test_nb_harq_indication(nfapi_vnf_p7_config_t* config, nfapi_nb_harq_indication_t* ind)
+{
+	//printf("[VNF:%d] (%d:%d) HARQ_IND\n", ind->header.phy_id, SFNSF2SFN(ind->sfn_sf), SFNSF2SF(ind->sfn_sf));
+	return 0;
+}
+
+
 int test_crc_indication(nfapi_vnf_p7_config_t* config, nfapi_crc_indication_t* ind)
 {
 	//printf("[VNF:%d] (%d:%d) CRC_IND\n", ind->header.phy_id, SFNSF2SFN(ind->sfn_sf), SFNSF2SF(ind->sfn_sf));
@@ -655,6 +662,11 @@ int test_rx_indication(nfapi_vnf_p7_config_t* config, nfapi_rx_indication_t* ind
 	return 0;
 }
 int test_rach_indication(nfapi_vnf_p7_config_t* config, nfapi_rach_indication_t* ind)
+{
+	//printf("[VNF:%d] (%d:%d) RACH_IND\n", ind->header.phy_id, SFNSF2SFN(ind->sfn_sf), SFNSF2SF(ind->sfn_sf));
+	return 0;
+}
+int test_nrach_indication(nfapi_vnf_p7_config_t* config, nfapi_nrach_indication_t* ind)
 {
 	//printf("[VNF:%d] (%d:%d) RACH_IND\n", ind->header.phy_id, SFNSF2SFN(ind->sfn_sf), SFNSF2SF(ind->sfn_sf));
 	return 0;
@@ -814,6 +826,10 @@ void start_vnf_p7(vnf_test_config_vnf_t* vnf)
 	vnf->config->srs_indication = &test_srs_indication;
 	vnf->config->sr_indication = &test_sr_indication;
 	vnf->config->cqi_indication = &test_cqi_indication;
+	
+	vnf->config->nb_harq_indication = &test_nb_harq_indication;
+	vnf->config->nrach_indication = &test_nrach_indication;
+	
 
 	vnf->config->segment_size = 1400;
 	vnf->config->max_num_segments = 6;
@@ -1198,6 +1214,23 @@ void vnf_test_start_connect(void)
 										len = nfapi_p7_message_pack(&timing_info, buffer, buffer_size, 0);
 										send_p7_segmented_msg(phy_info->p7_tx_sock, &buffer[0], len, segment_size, (struct sockaddr*)&phy_info->p7_tx_sockaddr, sizeof(phy_info->p7_tx_sockaddr));
 									}
+									
+									nfapi_nb_harq_indication_t nb_harq_ind;
+									memset(&nb_harq_ind, 0, sizeof(nb_harq_ind));
+									nb_harq_ind.header.message_id = NFAPI_NB_HARQ_INDICATION;
+									nb_harq_ind.header.phy_id = msg.header.phy_id;
+									nb_harq_ind.sfn_sf = msg.sfn_sf;
+									len = nfapi_p7_message_pack(&nb_harq_ind, buffer, buffer_size, 0);
+									send_p7_segmented_msg(phy_info->p7_tx_sock, &buffer[0], len, segment_size, (struct sockaddr*)&phy_info->p7_tx_sockaddr, sizeof(phy_info->p7_tx_sockaddr));
+
+									nfapi_nrach_indication_t nrach_ind;
+									memset(&nrach_ind, 0, sizeof(nrach_ind));
+									nrach_ind.header.message_id = NFAPI_NRACH_INDICATION;
+									nrach_ind.header.phy_id = msg.header.phy_id;
+									nrach_ind.sfn_sf = msg.sfn_sf;
+									len = nfapi_p7_message_pack(&nrach_ind, buffer, buffer_size, 0);
+									send_p7_segmented_msg(phy_info->p7_tx_sock, &buffer[0], len, segment_size, (struct sockaddr*)&phy_info->p7_tx_sockaddr, sizeof(phy_info->p7_tx_sockaddr));
+
 								}
 								break;
 							case NFAPI_UL_CONFIG_REQUEST:

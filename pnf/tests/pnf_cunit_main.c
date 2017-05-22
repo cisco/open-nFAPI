@@ -1393,6 +1393,50 @@ void recieve_lbt_dl_ind(int p7Sock, int phy_id, struct sockaddr_in* addr, sockle
 	}
 }
 
+void send_nb_harq_ind(phy_info_t* phy_info, uint16_t sfn_sf)
+{
+	nfapi_nb_harq_indication_t ind;
+	memset(&ind, 0, sizeof(ind));
+	ind.header.message_id = NFAPI_NB_HARQ_INDICATION;
+	ind.header.phy_id = phy_info->phy_id;
+	ind.sfn_sf = sfn_sf;
+
+	nfapi_pnf_p7_nb_harq_ind((phy_info->config), &ind);
+}
+void recieve_nb_harq_ind(int p7Sock, int phy_id, struct sockaddr_in* addr, socklen_t addr_size)
+{
+	nfapi_nb_harq_indication_t ind;
+	recv_p7_message(p7Sock, &(ind.header), sizeof(ind));
+	
+	CU_ASSERT_EQUAL(ind.header.message_id, NFAPI_NB_HARQ_INDICATION);
+	if(ind.header.message_id == NFAPI_NB_HARQ_INDICATION)
+	{
+		printf("decoded nfapi_nb_harq_indication\n");
+	}
+}
+
+void send_nrach_ind(phy_info_t* phy_info, uint16_t sfn_sf)
+{
+	nfapi_nrach_indication_t ind;
+	memset(&ind, 0, sizeof(ind));
+	ind.header.message_id = NFAPI_NRACH_INDICATION;
+	ind.header.phy_id = phy_info->phy_id;
+	ind.sfn_sf = sfn_sf;
+
+	nfapi_pnf_p7_nrach_ind((phy_info->config), &ind);
+}
+void recieve_nrach_ind(int p7Sock, int phy_id, struct sockaddr_in* addr, socklen_t addr_size)
+{
+	nfapi_nrach_indication_t ind;
+	recv_p7_message(p7Sock, &(ind.header), sizeof(ind));
+	
+	CU_ASSERT_EQUAL(ind.header.message_id, NFAPI_NRACH_INDICATION);
+	if(ind.header.message_id == NFAPI_NRACH_INDICATION)
+	{
+		printf("decoded nfapi_nrach_indication\n");
+	}
+}
+
 void pnf_test_start_connect(void) 
 {
 	pnf_info_t pnf_info;
@@ -1525,6 +1569,13 @@ void pnf_test_start_connect(void)
 	
 	send_lbt_dl_ind(&pnf_info.phys[0], sfn_sf);
 	recieve_lbt_dl_ind(p7Sock, 0, &p7_addr, p7_addrSize);
+	
+	send_nb_harq_ind(&pnf_info.phys[0], sfn_sf);
+	recieve_nb_harq_ind(p7Sock, 0, &p7_addr, p7_addrSize);
+
+	send_nrach_ind(&pnf_info.phys[0], sfn_sf);
+	recieve_nrach_ind(p7Sock, 0, &p7_addr, p7_addrSize);
+
 
 	// send out of window dl_config, should expect the timing info
 	send_dl_config_req(p7Sock, 0, &p7_addr, p7_addrSize, SFNSF(600, 0));
@@ -1839,6 +1890,13 @@ void pnf_test_p7_segmentation_test_1(void)
 	
 	send_lbt_dl_ind(&pnf_info.phys[0], sfn_sf);
 	recieve_lbt_dl_ind(p7Sock, 0, &p7_addr, p7_addrSize);
+
+	send_nb_harq_ind(&pnf_info.phys[0], sfn_sf);
+	recieve_nb_harq_ind(p7Sock, 0, &p7_addr, p7_addrSize);
+
+	send_nrach_ind(&pnf_info.phys[0], sfn_sf);
+	recieve_nrach_ind(p7Sock, 0, &p7_addr, p7_addrSize);
+
 
 	// send out of window dl_config, should expect the timing info
 	send_dl_config_req(p7Sock, 0, &p7_addr, p7_addrSize, SFNSF(600, 0));
