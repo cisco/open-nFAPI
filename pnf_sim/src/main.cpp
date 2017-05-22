@@ -534,6 +534,32 @@ int pnf_param_request(nfapi_pnf_config_t* config, nfapi_pnf_param_request_t* req
 			resp.pnf_phy_rel13.phy[i].drms_enhancement_supported = 0;
 			resp.pnf_phy_rel13.phy[i].srs_enhancement_supported = 1;
 		}
+		
+		resp.pnf_phy_rel13_nb_iot.tl.tag = NFAPI_PNF_PHY_REL13_NB_IOT_TAG;
+		resp.pnf_phy_rel13_nb_iot.number_of_phys = pnf->phys.size();		
+		
+		for(int i = 0; i < pnf->phys.size(); ++i)
+		{
+			resp.pnf_phy_rel13_nb_iot.phy[i].phy_config_index = pnf->phys[i].index; 
+			
+			resp.pnf_phy_rel13_nb_iot.phy[i].number_of_rfs = pnf->phys[i].rfs.size();
+			for(int j = 0; j < pnf->phys[i].rfs.size(); ++j)
+			{
+				resp.pnf_phy_rel13_nb_iot.phy[i].rf_config[j].rf_config_index = pnf->phys[i].rfs[j];
+			}
+	
+			resp.pnf_phy_rel13_nb_iot.phy[i].number_of_rf_exclusions = pnf->phys[i].excluded_rfs.size();
+			for(int j = 0; j < pnf->phys[i].excluded_rfs.size(); ++j)
+			{
+				resp.pnf_phy_rel13_nb_iot.phy[i].excluded_rf_config[j].rf_config_index = pnf->phys[i].excluded_rfs[j];
+			}
+			
+			resp.pnf_phy_rel13_nb_iot.phy[i].number_of_dl_layers_supported = pnf->phys[i].num_dl_layers_supported;
+			resp.pnf_phy_rel13_nb_iot.phy[i].number_of_ul_layers_supported = pnf->phys[i].num_ul_layers_supported;
+			resp.pnf_phy_rel13_nb_iot.phy[i].maximum_3gpp_release_supported = pnf->phys[i].release_supported;
+			resp.pnf_phy_rel13_nb_iot.phy[i].nmm_modes_supported = pnf->phys[i].nmm_modes_supported;
+
+		}
 	}
 
 

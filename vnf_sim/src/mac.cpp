@@ -229,13 +229,12 @@ extern "C"
 		uint16_t i = 0;
 		for(i = 0; i < dl_config_req.dl_config_request_body.number_pdu; ++i)
 		{
-			dl_config_pdus[i].pdu_type = rand_range(0, 7);
+			dl_config_pdus[i].pdu_type = rand_range(0, 11);
 			
 			switch(dl_config_pdus[i].pdu_type)
 			{
 				case NFAPI_DL_CONFIG_DCI_DL_PDU_TYPE:
 				{
-					//dl_config_pdus[i].pdu_type = NFAPI_DL_CONFIG_DCI_DL_PDU_TYPE;
 					dl_config_pdus[i].dci_dl_pdu.dci_dl_pdu_rel8.tl.tag = NFAPI_DL_CONFIG_REQUEST_DCI_DL_PDU_REL8_TAG;
 					dl_config_pdus[i].dci_dl_pdu.dci_dl_pdu_rel8.dci_format = rand_range(0, 9);
 					dl_config_pdus[i].dci_dl_pdu.dci_dl_pdu_rel8.cce_idx = rand_range(0, 255);
@@ -297,7 +296,6 @@ extern "C"
 				
 				case NFAPI_DL_CONFIG_BCH_PDU_TYPE:
 				{
-					//dl_config_pdus[1].pdu_type = NFAPI_DL_CONFIG_BCH_PDU_TYPE;
 					dl_config_pdus[i].bch_pdu.bch_pdu_rel8.tl.tag = NFAPI_DL_CONFIG_REQUEST_BCH_PDU_REL8_TAG;
 					dl_config_pdus[i].bch_pdu.bch_pdu_rel8.length = rand_range(0, 42);
 					dl_config_pdus[i].bch_pdu.bch_pdu_rel8.pdu_index = rand_range(0, 65535);
@@ -307,7 +305,6 @@ extern "C"
 				
 				case NFAPI_DL_CONFIG_MCH_PDU_TYPE:
 				{
-					//dl_config_pdus[2].pdu_type = NFAPI_DL_CONFIG_MCH_PDU_TYPE;
 					dl_config_pdus[i].mch_pdu.mch_pdu_rel8.tl.tag = NFAPI_DL_CONFIG_REQUEST_MCH_PDU_REL8_TAG;
 					dl_config_pdus[i].mch_pdu.mch_pdu_rel8.length = rand_range(0, 42);
 					dl_config_pdus[i].mch_pdu.mch_pdu_rel8.pdu_index = rand_range(0, 65535);
@@ -322,7 +319,6 @@ extern "C"
 			
 				case NFAPI_DL_CONFIG_DLSCH_PDU_TYPE:
 				{
-					//dl_config_pdus[3].pdu_type = NFAPI_DL_CONFIG_DLSCH_PDU_TYPE;
 					dl_config_pdus[i].dlsch_pdu.dlsch_pdu_rel8.tl.tag = NFAPI_DL_CONFIG_REQUEST_DLSCH_PDU_REL8_TAG;
 					dl_config_pdus[i].dlsch_pdu.dlsch_pdu_rel8.length = rand_range(0, 42);
 					dl_config_pdus[i].dlsch_pdu.dlsch_pdu_rel8.pdu_index = rand_range(0, 65535);
@@ -385,7 +381,6 @@ extern "C"
 			
 				case NFAPI_DL_CONFIG_PCH_PDU_TYPE:
 				{
-					//dl_config_pdus[4].pdu_type = NFAPI_DL_CONFIG_PCH_PDU_TYPE;
 					dl_config_pdus[i].pch_pdu.pch_pdu_rel8.tl.tag = NFAPI_DL_CONFIG_REQUEST_PCH_PDU_REL8_TAG;
 					dl_config_pdus[i].pch_pdu.pch_pdu_rel8.length = rand_range(0, 42);
 					dl_config_pdus[i].pch_pdu.pch_pdu_rel8.pdu_index = rand_range(0, 65535);
@@ -413,7 +408,6 @@ extern "C"
 			
 				case NFAPI_DL_CONFIG_PRS_PDU_TYPE:
 				{
-					//dl_config_pdus[5].pdu_type = NFAPI_DL_CONFIG_PRS_PDU_TYPE;
 					dl_config_pdus[i].prs_pdu.prs_pdu_rel9.tl.tag = NFAPI_DL_CONFIG_REQUEST_PRS_PDU_REL9_TAG;
 					dl_config_pdus[i].prs_pdu.prs_pdu_rel9.transmission_power = rand_range(0, 10000);	
 					dl_config_pdus[i].prs_pdu.prs_pdu_rel9.prs_bandwidth = rand_range(6, 100);
@@ -424,7 +418,6 @@ extern "C"
 	
 				case NFAPI_DL_CONFIG_CSI_RS_PDU_TYPE:
 				{
-					//dl_config_pdus[6].pdu_type = NFAPI_DL_CONFIG_CSI_RS_PDU_TYPE;
 					dl_config_pdus[i].csi_rs_pdu.csi_rs_pdu_rel10.tl.tag = NFAPI_DL_CONFIG_REQUEST_CSI_RS_PDU_REL10_TAG;
 					dl_config_pdus[i].csi_rs_pdu.csi_rs_pdu_rel10.csi_rs_antenna_port_count_r10 = rand_range(1, 16);
 					dl_config_pdus[i].csi_rs_pdu.csi_rs_pdu_rel10.csi_rs_resource_config_r10 = 0;
@@ -444,7 +437,6 @@ extern "C"
 	
 				case NFAPI_DL_CONFIG_EPDCCH_DL_PDU_TYPE:
 				{
-					//dl_config_pdus[7].pdu_type = NFAPI_DL_CONFIG_EPDCCH_DL_PDU_TYPE;
 					dl_config_pdus[i].epdcch_pdu.epdcch_pdu_rel8.tl.tag = NFAPI_DL_CONFIG_REQUEST_EPDCCH_PDU_REL8_TAG;
 					dl_config_pdus[i].epdcch_pdu.epdcch_pdu_rel9.tl.tag = NFAPI_DL_CONFIG_REQUEST_EPDCCH_PDU_REL9_TAG;
 					dl_config_pdus[i].epdcch_pdu.epdcch_pdu_rel10.tl.tag = NFAPI_DL_CONFIG_REQUEST_EPDCCH_PDU_REL10_TAG;
@@ -455,13 +447,74 @@ extern "C"
 					dl_config_pdus[i].epdcch_pdu.epdcch_params_rel13.tl.tag = NFAPI_DL_CONFIG_REQUEST_EPDCCH_PARAM_REL13_TAG;
 				}
 				break;
+				
+				case NFAPI_DL_CONFIG_MPDCCH_PDU_TYPE:
+				{
+					
+				}
+				break;
+				
+				case NFAPI_DL_CONFIG_NBCH_PDU_TYPE:
+				{
+					dl_config_pdus[i].nbch_pdu.nbch_pdu_rel13.tl.tag = NFAPI_DL_CONFIG_REQUEST_NBCH_PDU_REL13_TAG;
+					dl_config_pdus[i].nbch_pdu.nbch_pdu_rel13.length = rand_range(0, 5555);
+					dl_config_pdus[i].nbch_pdu.nbch_pdu_rel13.pdu_index = rand_range(0, 65535);
+					dl_config_pdus[i].nbch_pdu.nbch_pdu_rel13.transmission_power = rand_range(0, 10000);
+					dl_config_pdus[i].nbch_pdu.nbch_pdu_rel13.hyper_sfn_2_lsbs = rand_range(0, 3);
+				}
+				break;
+				
+				case NFAPI_DL_CONFIG_NPDCCH_PDU_TYPE:
+				{
+					dl_config_pdus[i].npdcch_pdu.npdcch_pdu_rel13.tl.tag = NFAPI_DL_CONFIG_REQUEST_NPDCCH_PDU_REL13_TAG;
+					dl_config_pdus[i].npdcch_pdu.npdcch_pdu_rel13.length = rand_range(0, 5555);
+					dl_config_pdus[i].npdcch_pdu.npdcch_pdu_rel13.pdu_index = rand_range(0, 65535);
+					dl_config_pdus[i].npdcch_pdu.npdcch_pdu_rel13.ncce_index = rand_range(0, 1);
+					dl_config_pdus[i].npdcch_pdu.npdcch_pdu_rel13.aggregation_level = rand_range(1, 2);
+					dl_config_pdus[i].npdcch_pdu.npdcch_pdu_rel13.start_symbol = rand_range(0, 4);
+					dl_config_pdus[i].npdcch_pdu.npdcch_pdu_rel13.rnti_type = rand_range(0, 3);
+					dl_config_pdus[i].npdcch_pdu.npdcch_pdu_rel13.rnti = rand_range(1, 65535);
+					dl_config_pdus[i].npdcch_pdu.npdcch_pdu_rel13.scrambling_reinitialization_batch_index = rand_range(1, 4);
+					dl_config_pdus[i].npdcch_pdu.npdcch_pdu_rel13.nrs_antenna_ports_assumed_by_the_ue = rand_range(1, 2);
+					dl_config_pdus[i].npdcch_pdu.npdcch_pdu_rel13.dci_format = rand_range(0, 1);
+					dl_config_pdus[i].npdcch_pdu.npdcch_pdu_rel13.scheduling_delay = rand_range(0, 7);
+					dl_config_pdus[i].npdcch_pdu.npdcch_pdu_rel13.resource_assignment = rand_range(0, 7);
+					dl_config_pdus[i].npdcch_pdu.npdcch_pdu_rel13.repetition_number = rand_range(0, 15); 
+					dl_config_pdus[i].npdcch_pdu.npdcch_pdu_rel13.mcs = rand_range(0, 13);
+					dl_config_pdus[i].npdcch_pdu.npdcch_pdu_rel13.new_data_indicator = rand_range(0, 1);
+					dl_config_pdus[i].npdcch_pdu.npdcch_pdu_rel13.harq_ack_resource = rand_range(0, 15);
+					dl_config_pdus[i].npdcch_pdu.npdcch_pdu_rel13.npdcch_order_indication = rand_range(0, 1);
+					dl_config_pdus[i].npdcch_pdu.npdcch_pdu_rel13.starting_number_of_nprach_repetitions = rand_range(0, 3);
+					dl_config_pdus[i].npdcch_pdu.npdcch_pdu_rel13.subcarrier_indication_of_nprach = rand_range(0, 63);
+					dl_config_pdus[i].npdcch_pdu.npdcch_pdu_rel13.paging_direct_indication_differentation_flag = rand_range(0, 1);
+					dl_config_pdus[i].npdcch_pdu.npdcch_pdu_rel13.direct_indication = rand_range(0, 255);
+					dl_config_pdus[i].npdcch_pdu.npdcch_pdu_rel13.dci_subframe_repetition_number  = rand_range(0, 7);
+					dl_config_pdus[i].npdcch_pdu.npdcch_pdu_rel13.total_dci_length_including_padding = rand_range(0, 255);
+				}
+				break;
+				
+				case NFAPI_DL_CONFIG_NDLSCH_PDU_TYPE:
+				{
+					dl_config_pdus[i].ndlsch_pdu.ndlsch_pdu_rel13.tl.tag = NFAPI_DL_CONFIG_REQUEST_NDLSCH_PDU_REL13_TAG;
+					dl_config_pdus[i].ndlsch_pdu.ndlsch_pdu_rel13.length = rand_range(0, 5555);
+					dl_config_pdus[i].ndlsch_pdu.ndlsch_pdu_rel13.pdu_index = rand_range(0, 65535);
+					dl_config_pdus[i].ndlsch_pdu.ndlsch_pdu_rel13.start_symbol = rand_range(0, 4);
+					dl_config_pdus[i].ndlsch_pdu.ndlsch_pdu_rel13.rnti_type = rand_range(0, 1);
+					dl_config_pdus[i].ndlsch_pdu.ndlsch_pdu_rel13.rnti = rand_range(1, 65535);
+					dl_config_pdus[i].ndlsch_pdu.ndlsch_pdu_rel13.resource_assignment = rand_range(0, 7);
+					dl_config_pdus[i].ndlsch_pdu.ndlsch_pdu_rel13.repetition_number = rand_range(0, 15);
+					dl_config_pdus[i].ndlsch_pdu.ndlsch_pdu_rel13.modulation = 2;
+					dl_config_pdus[i].ndlsch_pdu.ndlsch_pdu_rel13.number_of_subframes_for_resource_assignment = rand_range(1, 10);
+					dl_config_pdus[i].ndlsch_pdu.ndlsch_pdu_rel13.scrambling_sequence_initialization_cinit = rand_range(0, 65535);
+					dl_config_pdus[i].ndlsch_pdu.ndlsch_pdu_rel13.sf_idx = rand_range(1, 10240);
+					dl_config_pdus[i].ndlsch_pdu.ndlsch_pdu_rel13.nrs_antenna_ports_assumed_by_the_ue = rand_range(1, 2);
+				}
+				break;
+				
 			};
 		}
 
-		//dl_config_pdus[8].pdu_type = NFAPI_DL_CONFIG_MPDCCH_PDU_TYPE;
-		//dl_config_pdus[8].mpdcch_pdu.mdpcch_pdu_rel13.tl.tag = NFAPI_DL_CONFIG_REQUEST_MDPCCH_PDU_REL13_TAG;
 
-		
 		dl_config_req.dl_config_request_body.dl_config_pdu_list = dl_config_pdus;		
 		mac->dl_config_req(mac, &dl_config_req);
 		

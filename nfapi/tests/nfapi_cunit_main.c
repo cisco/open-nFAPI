@@ -32,6 +32,7 @@ int clean_suite(void) { return 0; }
 
 #define MAX_PACKED_MESSAGE_SIZE	8192
 
+#define IN_OUT_ASSERT(_V) { CU_ASSERT_EQUAL(in._V, out._V); }
 
 typedef struct 
 {
@@ -440,6 +441,57 @@ void nfapi_test_rssi_request_geran()
 	}
 }
 
+void nfapi_test_rssi_request_nb_iot()
+{
+	uint16_t idx, idx2;
+	nfapi_rssi_request_t in;
+	nfapi_rssi_request_t out;
+
+	in.header.phy_id = NFAPI_PHY_ID_NA;
+	in.header.message_id = NFAPI_RSSI_REQUEST;
+	in.header.message_length = 0;
+	in.header.spare = 0;
+
+	in.rat_type = NFAPI_RAT_TYPE_NB_IOT;
+
+	in.nb_iot_rssi_request.tl.tag = NFAPI_NB_IOT_RSSI_REQUEST_TAG;
+	in.nb_iot_rssi_request.frequency_band_indicator = 34;
+	in.nb_iot_rssi_request.measurement_period = 900;
+	in.nb_iot_rssi_request.timeout = 4321;
+	in.nb_iot_rssi_request.number_of_earfcns = 3;
+	in.nb_iot_rssi_request.earfcn[0].earfcn = 42;
+	in.nb_iot_rssi_request.earfcn[0].number_of_ro_dl = 1;
+	in.nb_iot_rssi_request.earfcn[0].ro_dl[0] = 2;
+	in.nb_iot_rssi_request.earfcn[1].earfcn = 43;
+	in.nb_iot_rssi_request.earfcn[1].number_of_ro_dl = 0;
+	in.nb_iot_rssi_request.earfcn[2].earfcn = 44;
+	in.nb_iot_rssi_request.earfcn[2].number_of_ro_dl = 2;
+	in.nb_iot_rssi_request.earfcn[2].ro_dl[0] = 0;
+	in.nb_iot_rssi_request.earfcn[2].ro_dl[1] = 4;
+
+
+	int packedMessageLength = nfapi_p4_message_pack(&in, sizeof(in), gTestNfapiMessageTx, MAX_PACKED_MESSAGE_SIZE, 0);
+
+	nfapi_p4_message_unpack(gTestNfapiMessageTx, packedMessageLength, &out, sizeof(out), 0);
+
+	IN_OUT_ASSERT(header.message_id);
+	IN_OUT_ASSERT(rat_type);
+	IN_OUT_ASSERT(nb_iot_rssi_request.frequency_band_indicator);
+	IN_OUT_ASSERT(nb_iot_rssi_request.measurement_period);
+	IN_OUT_ASSERT(nb_iot_rssi_request.timeout);
+	IN_OUT_ASSERT(nb_iot_rssi_request.number_of_earfcns);
+
+	for(idx = 0; idx < out.nb_iot_rssi_request.number_of_earfcns; ++idx)
+	{
+		IN_OUT_ASSERT(nb_iot_rssi_request.earfcn[idx].earfcn);
+		IN_OUT_ASSERT(nb_iot_rssi_request.earfcn[idx].number_of_ro_dl);
+		
+		for(idx2 = 0; idx2 < out.nb_iot_rssi_request.earfcn[idx].number_of_ro_dl; ++idx2)
+			IN_OUT_ASSERT(nb_iot_rssi_request.earfcn[idx].ro_dl[idx2]);
+	}
+}
+
+
 void nfapi_test_rssi_response()
 {
 	nfapi_rssi_response_t in;
@@ -639,6 +691,48 @@ void nfapi_test_cell_search_request_geran()
 	}
 }
 
+void nfapi_test_cell_search_request_nb_iot()
+{
+	uint16_t idx;
+	nfapi_cell_search_request_t in;
+	nfapi_cell_search_request_t out;
+
+	in.header.phy_id = NFAPI_PHY_ID_NA;
+	in.header.message_id = NFAPI_CELL_SEARCH_REQUEST;
+	in.header.message_length = 0;
+	in.header.spare = 0;
+
+	in.rat_type = NFAPI_RAT_TYPE_NB_IOT;
+
+	in.nb_iot_cell_search_request.tl.tag = NFAPI_NB_IOT_CELL_SEARCH_REQUEST_TAG;
+	in.nb_iot_cell_search_request.earfcn = 54;
+	in.nb_iot_cell_search_request.ro_dl = 3;
+	in.nb_iot_cell_search_request.exhaustive_search = 1;
+	in.nb_iot_cell_search_request.timeout = 123;
+	in.nb_iot_cell_search_request.number_of_pci = 3;
+	in.nb_iot_cell_search_request.pci[0] = 3;
+	in.nb_iot_cell_search_request.pci[1] = 6;
+	in.nb_iot_cell_search_request.pci[2] = 9;
+
+	int packedMessageLength = nfapi_p4_message_pack(&in, sizeof(in), gTestNfapiMessageTx, MAX_PACKED_MESSAGE_SIZE, 0);
+
+	int unpackResult = nfapi_p4_message_unpack(gTestNfapiMessageTx, packedMessageLength, &out, sizeof(out), 0);
+	CU_ASSERT_NOT_EQUAL(unpackResult, -1);
+
+	IN_OUT_ASSERT(header.message_id);
+	IN_OUT_ASSERT(rat_type);
+	IN_OUT_ASSERT(nb_iot_cell_search_request.earfcn);
+	IN_OUT_ASSERT(nb_iot_cell_search_request.ro_dl);
+	IN_OUT_ASSERT(nb_iot_cell_search_request.exhaustive_search);
+	IN_OUT_ASSERT(nb_iot_cell_search_request.timeout);
+	IN_OUT_ASSERT(nb_iot_cell_search_request.number_of_pci);
+
+	for(idx = 0; idx < out.nb_iot_cell_search_request.number_of_pci; ++idx)
+	{
+		IN_OUT_ASSERT(nb_iot_cell_search_request.pci[idx]);
+	}
+}
+
 void nfapi_test_cell_search_response()
 {
 	nfapi_cell_search_response_t in;
@@ -686,6 +780,7 @@ void nfapi_test_cell_search_indication_lte()
 
 	in.utran_cell_search_indication.tl.tag = 0;
 	in.geran_cell_search_indication.tl.tag = 0;
+	in.nb_iot_cell_search_indication.tl.tag = 0;
 	in.pnf_cell_search_state.tl.tag = 0;
 
 
@@ -732,6 +827,7 @@ void nfapi_test_cell_search_indication_utran()
 
 	in.lte_cell_search_indication.tl.tag = 0;
 	in.geran_cell_search_indication.tl.tag = 0;
+	in.nb_iot_cell_search_indication.tl.tag = 0;
 	in.pnf_cell_search_state.tl.tag = NFAPI_PNF_CELL_SEARCH_STATE_TAG;
 	in.pnf_cell_search_state.length = 12;
 	in.pnf_cell_search_state.value[0] = 34;
@@ -789,6 +885,7 @@ void nfapi_test_cell_search_indication_geran()
 
 	in.lte_cell_search_indication.tl.tag = 0;
 	in.utran_cell_search_indication.tl.tag = 0;
+	in.nb_iot_cell_search_indication.tl.tag = 0;
 	in.pnf_cell_search_state.tl.tag = NFAPI_PNF_CELL_SEARCH_STATE_TAG;
 	in.pnf_cell_search_state.length = 63;
 
@@ -813,9 +910,65 @@ void nfapi_test_cell_search_indication_geran()
 
 	CU_ASSERT_EQUAL(in.lte_cell_search_indication.tl.tag, out.lte_cell_search_indication.tl.tag);
 	CU_ASSERT_EQUAL(in.utran_cell_search_indication.tl.tag, out.utran_cell_search_indication.tl.tag);
+	CU_ASSERT_EQUAL(in.nb_iot_cell_search_indication.tl.tag, out.nb_iot_cell_search_indication.tl.tag);
 	CU_ASSERT_EQUAL(in.pnf_cell_search_state.tl.tag, out.pnf_cell_search_state.tl.tag);
 	CU_ASSERT_EQUAL(in.pnf_cell_search_state.length, out.pnf_cell_search_state.length);
 
+	for(idx = 0; idx < out.pnf_cell_search_state.length; ++idx)
+	{
+		CU_ASSERT_EQUAL(in.pnf_cell_search_state.value[idx], out.pnf_cell_search_state.value[idx]);
+	}
+}
+
+void nfapi_test_cell_search_indication_nb_iot()
+{
+	uint16_t idx = 0;
+	nfapi_cell_search_indication_t in;
+	nfapi_cell_search_indication_t out;
+
+	in.header.phy_id = NFAPI_PHY_ID_NA;
+	in.header.message_id = NFAPI_CELL_SEARCH_INDICATION;
+	in.header.message_length = 0;
+	in.header.spare = 0;
+
+	in.error_code = NFAPI_P4_MSG_OK;
+	in.nb_iot_cell_search_indication.tl.tag = NFAPI_NB_IOT_CELL_SEARCH_INDICATION_TAG;
+	in.nb_iot_cell_search_indication.number_of_nb_iot_cells_found = 1;
+	in.nb_iot_cell_search_indication.nb_iot_found_cells[0].pci = 123;
+	in.nb_iot_cell_search_indication.nb_iot_found_cells[0].rsrp = 2;
+	in.nb_iot_cell_search_indication.nb_iot_found_cells[0].rsrq = 89;
+	in.nb_iot_cell_search_indication.nb_iot_found_cells[0].frequency_offset = 2389;
+
+	in.lte_cell_search_indication.tl.tag = 0;
+	in.utran_cell_search_indication.tl.tag = 0;
+	in.geran_cell_search_indication.tl.tag = 0;
+	
+	in.pnf_cell_search_state.tl.tag = NFAPI_PNF_CELL_SEARCH_STATE_TAG;
+	in.pnf_cell_search_state.length = 63;
+
+	int packedMessageLength = nfapi_p4_message_pack(&in, sizeof(in), gTestNfapiMessageTx, MAX_PACKED_MESSAGE_SIZE, 0);
+
+	nfapi_p4_message_unpack(gTestNfapiMessageTx, packedMessageLength, &out, sizeof(out), 0);
+
+	IN_OUT_ASSERT(header.message_id);
+	IN_OUT_ASSERT(error_code);
+	IN_OUT_ASSERT(nb_iot_cell_search_indication.tl.tag);
+	IN_OUT_ASSERT(nb_iot_cell_search_indication.number_of_nb_iot_cells_found);
+
+	for(idx = 0; idx < out.nb_iot_cell_search_indication.number_of_nb_iot_cells_found; ++idx)
+	{
+		IN_OUT_ASSERT(nb_iot_cell_search_indication.nb_iot_found_cells[idx].pci);
+		IN_OUT_ASSERT(nb_iot_cell_search_indication.nb_iot_found_cells[idx].rsrp);
+		IN_OUT_ASSERT(nb_iot_cell_search_indication.nb_iot_found_cells[idx].rsrq);
+		IN_OUT_ASSERT(nb_iot_cell_search_indication.nb_iot_found_cells[idx].frequency_offset);
+	}
+
+	IN_OUT_ASSERT(lte_cell_search_indication.tl.tag);
+	IN_OUT_ASSERT(utran_cell_search_indication.tl.tag);
+	IN_OUT_ASSERT(geran_cell_search_indication.tl.tag);
+	IN_OUT_ASSERT(pnf_cell_search_state.tl.tag);
+	IN_OUT_ASSERT(pnf_cell_search_state.length);
+	
 	for(idx = 0; idx < out.pnf_cell_search_state.length; ++idx)
 	{
 		CU_ASSERT_EQUAL(in.pnf_cell_search_state.value[idx], out.pnf_cell_search_state.value[idx]);
@@ -1072,6 +1225,55 @@ void nfapi_test_broadcast_detect_request_utran()
 	}
 
 }
+
+void nfapi_test_broadcast_detect_request_nb_iot()
+{
+	uint16_t idx;
+	nfapi_broadcast_detect_request_t in;
+	memset(&in, 0, sizeof(in));
+	nfapi_broadcast_detect_request_t out;
+
+	in.header.phy_id = NFAPI_PHY_ID_NA;
+	in.header.message_id = NFAPI_BROADCAST_DETECT_REQUEST;
+	in.header.message_length = 0;
+	in.header.spare = 0;
+
+	in.rat_type = NFAPI_RAT_TYPE_NB_IOT;
+
+	in.nb_iot_broadcast_detect_request.tl.tag = NFAPI_NB_IOT_BROADCAST_DETECT_REQUEST_TAG;
+	in.nb_iot_broadcast_detect_request.earfcn = 123;
+	in.nb_iot_broadcast_detect_request.ro_dl = 12;
+	in.nb_iot_broadcast_detect_request.pci = 12;
+	in.nb_iot_broadcast_detect_request.timeout = 1246;
+
+	in.pnf_cell_search_state.tl.tag = NFAPI_PNF_CELL_SEARCH_STATE_TAG;
+	in.pnf_cell_search_state.length = 60;
+
+	int packedMessageLength = nfapi_p4_message_pack(&in, sizeof(in), gTestNfapiMessageTx, MAX_PACKED_MESSAGE_SIZE, 0);
+	CU_ASSERT_NOT_EQUAL(packedMessageLength, 0);
+	CU_ASSERT_NOT_EQUAL(packedMessageLength, -1);
+
+	int unpackResult = nfapi_p4_message_unpack(gTestNfapiMessageTx, packedMessageLength, &out, sizeof(out), 0);
+	CU_ASSERT_NOT_EQUAL(unpackResult, 0);
+	CU_ASSERT_NOT_EQUAL(unpackResult, -1);
+
+	CU_ASSERT_EQUAL(in.header.message_id, out.header.message_id);
+	CU_ASSERT_EQUAL(in.rat_type, out.rat_type);
+	CU_ASSERT_EQUAL(in.nb_iot_broadcast_detect_request.earfcn, out.nb_iot_broadcast_detect_request.earfcn);
+	CU_ASSERT_EQUAL(in.nb_iot_broadcast_detect_request.ro_dl, out.nb_iot_broadcast_detect_request.ro_dl);
+	CU_ASSERT_EQUAL(in.nb_iot_broadcast_detect_request.pci, out.nb_iot_broadcast_detect_request.pci);
+	CU_ASSERT_EQUAL(in.nb_iot_broadcast_detect_request.timeout, out.nb_iot_broadcast_detect_request.timeout);
+
+	CU_ASSERT_EQUAL(in.pnf_cell_search_state.length, out.pnf_cell_search_state.length);
+
+	for(idx = 0; idx < out.pnf_cell_search_state.length; ++idx)
+	{
+		CU_ASSERT_EQUAL(in.pnf_cell_search_state.value[idx], out.pnf_cell_search_state.value[idx]);
+	}
+
+}
+
+
 void nfapi_test_broadcast_detect_request_state_overrun()
 {
 	nfapi_broadcast_detect_request_t out;
@@ -1225,6 +1427,47 @@ void nfapi_test_broadcast_detect_indication_utran()
 
 	CU_ASSERT_EQUAL(in.pnf_cell_broadcast_state.tl.tag, out.pnf_cell_broadcast_state.tl.tag);
 }
+void nfapi_test_broadcast_detect_indication_nb_iot()
+{
+	uint16_t idx;
+	nfapi_broadcast_detect_indication_t in;
+	nfapi_broadcast_detect_indication_t out;
+
+	in.header.phy_id = NFAPI_PHY_ID_NA;
+	in.header.message_id = NFAPI_BROADCAST_DETECT_INDICATION;
+	in.header.message_length = 0;
+	in.header.spare = 0;
+
+	in.error_code = NFAPI_P4_MSG_RAT_NOT_SUPPORTED;
+
+	in.lte_broadcast_detect_indication.tl.tag = 0;
+	in.utran_broadcast_detect_indication.tl.tag = 0;
+	in.nb_iot_broadcast_detect_indication.tl.tag = NFAPI_NB_IOT_BROADCAST_DETECT_INDICATION_TAG;
+	in.nb_iot_broadcast_detect_indication.number_of_tx_antenna = 2;
+	in.nb_iot_broadcast_detect_indication.mib_length = 16;
+	in.nb_iot_broadcast_detect_indication.sfn_offset = 4;
+	in.pnf_cell_broadcast_state.tl.tag = 0;
+
+	int packedMessageLength = nfapi_p4_message_pack(&in, sizeof(in), gTestNfapiMessageTx, MAX_PACKED_MESSAGE_SIZE, 0);
+
+	nfapi_p4_message_unpack(gTestNfapiMessageTx, packedMessageLength, &out, sizeof(out), 0);
+
+	CU_ASSERT_EQUAL(in.header.message_id, out.header.message_id);
+	CU_ASSERT_EQUAL(in.error_code, out.error_code);
+	CU_ASSERT_EQUAL(in.lte_broadcast_detect_indication.tl.tag, out.lte_broadcast_detect_indication.tl.tag);
+	CU_ASSERT_EQUAL(in.utran_broadcast_detect_indication.tl.tag, out.utran_broadcast_detect_indication.tl.tag);
+	CU_ASSERT_EQUAL(in.nb_iot_broadcast_detect_indication.tl.tag, out.nb_iot_broadcast_detect_indication.tl.tag);
+	CU_ASSERT_EQUAL(in.nb_iot_broadcast_detect_indication.number_of_tx_antenna, out.nb_iot_broadcast_detect_indication.number_of_tx_antenna);
+	CU_ASSERT_EQUAL(in.nb_iot_broadcast_detect_indication.mib_length, out.nb_iot_broadcast_detect_indication.mib_length);
+	for(idx = 0; idx < out.nb_iot_broadcast_detect_indication.mib_length; ++idx)
+	{
+		CU_ASSERT_EQUAL(in.nb_iot_broadcast_detect_indication.mib[idx], out.nb_iot_broadcast_detect_indication.mib[idx]);
+	}
+	CU_ASSERT_EQUAL(in.nb_iot_broadcast_detect_indication.sfn_offset, out.nb_iot_broadcast_detect_indication.sfn_offset);
+
+
+	CU_ASSERT_EQUAL(in.pnf_cell_broadcast_state.tl.tag, out.pnf_cell_broadcast_state.tl.tag);
+}
 void nfapi_test_broadcast_detect_indication_utran_overrun()
 {
 	nfapi_broadcast_detect_indication_t out;
@@ -1263,6 +1506,8 @@ void nfapi_test_system_information_schedule_request_lte()
 
 	in.rat_type = NFAPI_RAT_TYPE_LTE;
 
+	in.nb_iot_system_information_schedule_request.tl.tag = 0;
+
 	in.lte_system_information_schedule_request.tl.tag = NFAPI_LTE_SYSTEM_INFORMATION_SCHEDULE_REQUEST_TAG;
 	in.lte_system_information_schedule_request.earfcn = 16;
 	in.lte_system_information_schedule_request.pci = 4;
@@ -1297,6 +1542,53 @@ void nfapi_test_system_information_schedule_request_lte()
 		CU_ASSERT_EQUAL(in.pnf_cell_broadcast_state.value[idx], out.pnf_cell_broadcast_state.value[idx]);
 	}
 }
+
+void nfapi_test_system_information_schedule_request_nb_iot()
+{
+	uint16_t idx;
+	nfapi_system_information_schedule_request_t in;
+	nfapi_system_information_schedule_request_t out;
+
+	in.header.phy_id = NFAPI_PHY_ID_NA;
+	in.header.message_id = NFAPI_SYSTEM_INFORMATION_SCHEDULE_REQUEST;
+	in.header.message_length = 0;
+	in.header.spare = 0;
+
+	in.rat_type = NFAPI_RAT_TYPE_NB_IOT;
+
+	in.lte_system_information_schedule_request.tl.tag = 0;
+	in.nb_iot_system_information_schedule_request.tl.tag = NFAPI_NB_IOT_SYSTEM_INFORMATION_SCHEDULE_REQUEST_TAG;
+	in.nb_iot_system_information_schedule_request.earfcn = 16;
+	in.nb_iot_system_information_schedule_request.ro_dl = 4;
+	in.nb_iot_system_information_schedule_request.pci = 4;
+	in.nb_iot_system_information_schedule_request.scheduling_info_sib1_nb = 4;
+	in.nb_iot_system_information_schedule_request.timeout = 0;
+	in.pnf_cell_broadcast_state.tl.tag = NFAPI_PNF_CELL_BROADCAST_STATE_TAG;
+	in.pnf_cell_broadcast_state.length = 7;
+
+	int packedMessageLength = nfapi_p4_message_pack(&in, sizeof(in), gTestNfapiMessageTx, MAX_PACKED_MESSAGE_SIZE, 0);
+
+	nfapi_p4_message_unpack(gTestNfapiMessageTx, packedMessageLength, &out, sizeof(out), 0);
+
+	CU_ASSERT_EQUAL(in.header.message_id, out.header.message_id);
+	CU_ASSERT_EQUAL(in.rat_type, out.rat_type);
+	CU_ASSERT_EQUAL(in.lte_system_information_schedule_request.tl.tag, out.lte_system_information_schedule_request.tl.tag);
+	CU_ASSERT_EQUAL(in.nb_iot_system_information_schedule_request.tl.tag, out.nb_iot_system_information_schedule_request.tl.tag);
+	CU_ASSERT_EQUAL(in.nb_iot_system_information_schedule_request.earfcn, out.nb_iot_system_information_schedule_request.earfcn);
+	CU_ASSERT_EQUAL(in.nb_iot_system_information_schedule_request.ro_dl, out.nb_iot_system_information_schedule_request.ro_dl);
+	CU_ASSERT_EQUAL(in.nb_iot_system_information_schedule_request.pci, out.nb_iot_system_information_schedule_request.pci);
+	CU_ASSERT_EQUAL(in.nb_iot_system_information_schedule_request.scheduling_info_sib1_nb, out.nb_iot_system_information_schedule_request.scheduling_info_sib1_nb);
+	CU_ASSERT_EQUAL(in.nb_iot_system_information_schedule_request.timeout, out.nb_iot_system_information_schedule_request.timeout);
+
+
+	CU_ASSERT_EQUAL(in.pnf_cell_broadcast_state.tl.tag, out.pnf_cell_broadcast_state.tl.tag);
+	CU_ASSERT_EQUAL(in.pnf_cell_broadcast_state.length, out.pnf_cell_broadcast_state.length);
+	for(idx = 0; idx < out.pnf_cell_broadcast_state.length; ++idx)
+	{
+		CU_ASSERT_EQUAL(in.pnf_cell_broadcast_state.value[idx], out.pnf_cell_broadcast_state.value[idx]);
+	}
+}
+
 void nfapi_test_system_information_schedule_request_state_overrun()
 {
 	nfapi_system_information_schedule_request_t out;
@@ -1361,6 +1653,7 @@ void nfapi_test_system_information_schedule_indication_lte()
 
 	in.error_code = 0;
 
+	in.nb_iot_system_information_indication.tl.tag = 0;
 	in.lte_system_information_indication.tl.tag = NFAPI_LTE_SYSTEM_INFORMATION_INDICATION_TAG;
 	in.lte_system_information_indication.sib_type = 16;
 	in.lte_system_information_indication.sib_length = 4;
@@ -1378,6 +1671,40 @@ void nfapi_test_system_information_schedule_indication_lte()
 	for(idx = 0; idx < out.lte_system_information_indication.sib_length; ++idx)
 	{
 		CU_ASSERT_EQUAL(in.lte_system_information_indication.sib[idx], out.lte_system_information_indication.sib[idx]);
+	}
+}
+void nfapi_test_system_information_schedule_indication_nb_iot()
+{
+	uint16_t idx;
+	nfapi_system_information_schedule_indication_t in;
+	nfapi_system_information_schedule_indication_t out;
+
+	in.header.phy_id = NFAPI_PHY_ID_NA;
+	in.header.message_id = NFAPI_SYSTEM_INFORMATION_SCHEDULE_INDICATION;
+	in.header.message_length = 0;
+	in.header.spare = 0;
+
+	in.error_code = 0;
+
+	in.lte_system_information_indication.tl.tag = 0;
+	in.nb_iot_system_information_indication.tl.tag = NFAPI_NB_IOT_SYSTEM_INFORMATION_INDICATION_TAG;
+	in.nb_iot_system_information_indication.sib_type = 16;
+	in.nb_iot_system_information_indication.sib_length = 4;
+
+	int packedMessageLength = nfapi_p4_message_pack(&in, sizeof(in), gTestNfapiMessageTx, MAX_PACKED_MESSAGE_SIZE, 0);
+
+	nfapi_p4_message_unpack(gTestNfapiMessageTx, packedMessageLength, &out, sizeof(out), 0);
+
+	CU_ASSERT_EQUAL(in.header.message_id, out.header.message_id);
+	CU_ASSERT_EQUAL(in.error_code, out.error_code);
+	CU_ASSERT_EQUAL(in.lte_system_information_indication.tl.tag, out.lte_system_information_indication.tl.tag);
+	CU_ASSERT_EQUAL(in.nb_iot_system_information_indication.tl.tag, out.nb_iot_system_information_indication.tl.tag);
+	CU_ASSERT_EQUAL(in.nb_iot_system_information_indication.sib_type, out.nb_iot_system_information_indication.sib_type);
+	CU_ASSERT_EQUAL(in.nb_iot_system_information_indication.sib_length, out.nb_iot_system_information_indication.sib_length);
+
+	for(idx = 0; idx < out.nb_iot_system_information_indication.sib_length; ++idx)
+	{
+		CU_ASSERT_EQUAL(in.nb_iot_system_information_indication.sib[idx], out.nb_iot_system_information_indication.sib[idx]);
 	}
 }
 void nfapi_test_system_information_request_lte()
@@ -1566,6 +1893,73 @@ void nfapi_test_system_information_request_state_overrun()
 	int result = nfapi_p4_message_unpack(buffer, 34, &out, sizeof(out), 0);
 	CU_ASSERT_EQUAL(result, -1);
 }
+
+void nfapi_test_system_information_request_nb_iot()
+{
+	uint16_t idx, idx2;
+	nfapi_system_information_request_t in;
+	nfapi_system_information_request_t out;
+
+	in.header.phy_id = NFAPI_PHY_ID_NA;
+	in.header.message_id = NFAPI_SYSTEM_INFORMATION_REQUEST;
+	in.header.message_length = 0;
+	in.header.spare = 0;
+
+	in.rat_type = NFAPI_RAT_TYPE_NB_IOT;
+
+	in.nb_iot_system_information_request.tl.tag = NFAPI_NB_IOT_SYSTEM_INFORMATION_REQUEST_TAG;
+	in.nb_iot_system_information_request.earfcn = 16;
+	in.nb_iot_system_information_request.ro_dl = 1;
+	in.nb_iot_system_information_request.pci = 4;
+	in.nb_iot_system_information_request.number_of_si_periodicity = 1;
+	in.nb_iot_system_information_request.si_periodicity[0].si_periodicity = 3;
+	in.nb_iot_system_information_request.si_periodicity[0].si_repetition_pattern = 0;
+	in.nb_iot_system_information_request.si_periodicity[0].si_tb_size = 0;
+	in.nb_iot_system_information_request.si_periodicity[0].number_of_si_index = 2;
+	in.nb_iot_system_information_request.si_periodicity[0].si_index[0] = 2;
+	in.nb_iot_system_information_request.si_periodicity[0].si_index[1] = 20;
+	in.nb_iot_system_information_request.si_window_length = 0;
+	in.nb_iot_system_information_request.timeout = 2000;
+
+	in.pnf_cell_broadcast_state.tl.tag = NFAPI_PNF_CELL_BROADCAST_STATE_TAG;
+	in.pnf_cell_broadcast_state.length = 7;
+
+	int packedMessageLength = nfapi_p4_message_pack(&in, sizeof(in), gTestNfapiMessageTx, MAX_PACKED_MESSAGE_SIZE, 0);
+
+	nfapi_p4_message_unpack(gTestNfapiMessageTx, packedMessageLength, &out, sizeof(out), 0);
+
+	IN_OUT_ASSERT(header.message_id);
+	IN_OUT_ASSERT(rat_type);
+	IN_OUT_ASSERT(nb_iot_system_information_request.tl.tag);
+	IN_OUT_ASSERT(nb_iot_system_information_request.earfcn);
+	IN_OUT_ASSERT(nb_iot_system_information_request.ro_dl);
+	IN_OUT_ASSERT(nb_iot_system_information_request.pci);
+	IN_OUT_ASSERT(nb_iot_system_information_request.number_of_si_periodicity);
+	
+	for(idx = 0; idx < in.nb_iot_system_information_request.number_of_si_periodicity; ++idx)
+	{
+		IN_OUT_ASSERT(nb_iot_system_information_request.si_periodicity[idx].si_periodicity);
+		IN_OUT_ASSERT(nb_iot_system_information_request.si_periodicity[idx].si_repetition_pattern);
+		IN_OUT_ASSERT(nb_iot_system_information_request.si_periodicity[idx].si_tb_size);
+		IN_OUT_ASSERT(nb_iot_system_information_request.si_periodicity[idx].number_of_si_index);
+		
+		for(idx2 = 0; idx2 < in.nb_iot_system_information_request.si_periodicity[idx].number_of_si_index; ++idx2)
+			IN_OUT_ASSERT(nb_iot_system_information_request.si_periodicity[idx].si_index[idx2]);
+	}
+
+	IN_OUT_ASSERT(nb_iot_system_information_request.si_window_length);
+	IN_OUT_ASSERT(nb_iot_system_information_request.timeout);
+
+
+	CU_ASSERT_EQUAL(in.pnf_cell_broadcast_state.tl.tag, out.pnf_cell_broadcast_state.tl.tag);
+	CU_ASSERT_EQUAL(in.pnf_cell_broadcast_state.length, out.pnf_cell_broadcast_state.length);
+	for(idx = 0; idx < out.pnf_cell_broadcast_state.length; ++idx)
+	{
+		CU_ASSERT_EQUAL(in.pnf_cell_broadcast_state.value[idx], out.pnf_cell_broadcast_state.value[idx]);
+	}
+}
+
+
 void nfapi_test_system_information_response()
 {
 	nfapi_system_information_response_t in;
@@ -1765,6 +2159,48 @@ void nfapi_test_system_information_indication_geran_overrun()
 	int result = nfapi_p4_message_unpack(buffer, 34, &out, sizeof(out), 0);
 	CU_ASSERT_EQUAL(result, -1);
 }
+
+void nfapi_test_system_information_indication_nb_iot()
+{
+	uint16_t idx;
+	nfapi_system_information_indication_t in;
+	nfapi_system_information_indication_t out;
+
+	in.header.phy_id = NFAPI_PHY_ID_NA;
+	in.header.message_id = NFAPI_SYSTEM_INFORMATION_INDICATION;
+	in.header.message_length = 0;
+	in.header.spare = 0;
+
+	in.error_code = NFAPI_P4_MSG_RAT_NOT_SUPPORTED;
+	in.nb_iot_system_information_indication.tl.tag = NFAPI_NB_IOT_SYSTEM_INFORMATION_INDICATION_TAG;
+	in.nb_iot_system_information_indication.sib_type = 2;
+	in.nb_iot_system_information_indication.sib_length = 15;
+
+	in.lte_system_information_indication.tl.tag = 0;
+	in.utran_system_information_indication.tl.tag = 0;
+	in.geran_system_information_indication.tl.tag = 0;
+
+	int packedMessageLength = nfapi_p4_message_pack(&in, sizeof(in), gTestNfapiMessageTx, MAX_PACKED_MESSAGE_SIZE, 0);
+
+	nfapi_p4_message_unpack(gTestNfapiMessageTx, packedMessageLength, &out, sizeof(out), 0);
+
+	CU_ASSERT_EQUAL(in.header.message_id, out.header.message_id);
+	CU_ASSERT_EQUAL(in.error_code, out.error_code);
+	CU_ASSERT_EQUAL(in.nb_iot_system_information_indication.tl.tag, out.nb_iot_system_information_indication.tl.tag);
+	CU_ASSERT_EQUAL(in.nb_iot_system_information_indication.sib_type, out.nb_iot_system_information_indication.sib_type);
+	CU_ASSERT_EQUAL(in.nb_iot_system_information_indication.sib_length, out.nb_iot_system_information_indication.sib_length);
+
+	for(idx = 0; idx < out.nb_iot_system_information_indication.sib_length; ++idx)
+	{
+		CU_ASSERT_EQUAL(in.nb_iot_system_information_indication.sib[idx], out.nb_iot_system_information_indication.sib[idx]);
+	}
+
+	CU_ASSERT_EQUAL(in.lte_system_information_indication.tl.tag, out.lte_system_information_indication.tl.tag);
+	CU_ASSERT_EQUAL(in.utran_system_information_indication.tl.tag, out.utran_system_information_indication.tl.tag);
+	CU_ASSERT_EQUAL(in.geran_system_information_indication.tl.tag, out.geran_system_information_indication.tl.tag);
+
+}
+
 void nfapi_test_nmm_stop_request()
 {
 	nfapi_nmm_stop_request_t in;
@@ -1955,6 +2391,19 @@ void nfapi_test_pnf_param_response()
 	in.pnf_phy_rel13.phy[0].csi_rs_enhancement_supported = 8;
 	in.pnf_phy_rel13.phy[0].drms_enhancement_supported = 9;
 	in.pnf_phy_rel13.phy[0].srs_enhancement_supported = 10;
+	
+	in.pnf_phy_rel13_nb_iot.tl.tag = NFAPI_PNF_PHY_REL13_NB_IOT_TAG;
+	in.pnf_phy_rel13_nb_iot.number_of_phys = 2;
+	in.pnf_phy_rel13_nb_iot.phy[0].phy_config_index = 0;
+	in.pnf_phy_rel13_nb_iot.phy[0].number_of_rfs = 2;
+	in.pnf_phy_rel13_nb_iot.phy[0].rf_config[0].rf_config_index = 0;
+	in.pnf_phy_rel13_nb_iot.phy[0].number_of_rf_exclusions = 1;
+	in.pnf_phy_rel13_nb_iot.phy[0].rf_config[0].rf_config_index = 1;
+	in.pnf_phy_rel13_nb_iot.phy[0].number_of_dl_layers_supported = 2;
+	in.pnf_phy_rel13_nb_iot.phy[0].number_of_ul_layers_supported = 1;
+	in.pnf_phy_rel13_nb_iot.phy[0].maximum_3gpp_release_supported = 3;
+	in.pnf_phy_rel13_nb_iot.phy[0].nmm_modes_supported = 2;
+
 
 	int packedMessageLength = nfapi_p5_message_pack(&in, sizeof(in), gTestNfapiMessageTx, MAX_PACKED_MESSAGE_SIZE, 0);
 
@@ -2083,6 +2532,34 @@ void nfapi_test_pnf_param_response()
 		CU_ASSERT_EQUAL(in.pnf_phy_rel13.phy[idx].drms_enhancement_supported, out.pnf_phy_rel13.phy[idx].drms_enhancement_supported);
 		CU_ASSERT_EQUAL(in.pnf_phy_rel13.phy[idx].srs_enhancement_supported, out.pnf_phy_rel13.phy[idx].srs_enhancement_supported);
 	}
+
+	CU_ASSERT_EQUAL(in.pnf_phy_rel13_nb_iot.tl.tag, out.pnf_phy_rel13_nb_iot.tl.tag);
+	CU_ASSERT_EQUAL(in.pnf_phy_rel13_nb_iot.number_of_phys, out.pnf_phy_rel13_nb_iot.number_of_phys);
+	
+	for(idx = 0; idx < out.pnf_phy_rel13_nb_iot.number_of_phys; ++idx)
+	{
+		CU_ASSERT_EQUAL(in.pnf_phy_rel13_nb_iot.phy[idx].phy_config_index, out.pnf_phy_rel13_nb_iot.phy[idx].phy_config_index);
+		CU_ASSERT_EQUAL(in.pnf_phy_rel13_nb_iot.phy[idx].number_of_rfs, out.pnf_phy_rel13_nb_iot.phy[idx].number_of_rfs);
+
+	
+		for(idx2 = 0; idx2 < out.pnf_phy_rel13_nb_iot.phy[idx].number_of_rfs; ++idx2)
+		{
+			CU_ASSERT_EQUAL(in.pnf_phy_rel13_nb_iot.phy[idx].rf_config[idx2].rf_config_index, out.pnf_phy_rel13_nb_iot.phy[idx].rf_config[idx2].rf_config_index);
+		}
+		CU_ASSERT_EQUAL(in.pnf_phy_rel13_nb_iot.phy[idx].number_of_rf_exclusions, out.pnf_phy_rel13_nb_iot.phy[idx].number_of_rf_exclusions);
+
+		for(idx2 = 0; idx2 < out.pnf_phy_rel13_nb_iot.phy[idx].number_of_rf_exclusions; ++idx2)
+		{
+			CU_ASSERT_EQUAL(in.pnf_phy_rel13_nb_iot.phy[idx].excluded_rf_config[idx2].rf_config_index, out.pnf_phy_rel13_nb_iot.phy[idx].excluded_rf_config[idx2].rf_config_index);
+		}
+
+
+		CU_ASSERT_EQUAL(in.pnf_phy_rel13_nb_iot.phy[idx].number_of_dl_layers_supported, out.pnf_phy_rel13_nb_iot.phy[idx].number_of_dl_layers_supported);
+		CU_ASSERT_EQUAL(in.pnf_phy_rel13_nb_iot.phy[idx].number_of_ul_layers_supported, out.pnf_phy_rel13_nb_iot.phy[idx].number_of_ul_layers_supported);
+		CU_ASSERT_EQUAL(in.pnf_phy_rel13_nb_iot.phy[idx].maximum_3gpp_release_supported, out.pnf_phy_rel13_nb_iot.phy[idx].maximum_3gpp_release_supported);
+		CU_ASSERT_EQUAL(in.pnf_phy_rel13_nb_iot.phy[idx].nmm_modes_supported, out.pnf_phy_rel13_nb_iot.phy[idx].nmm_modes_supported);
+	}
+
 
 }
 
@@ -3025,7 +3502,7 @@ void nfapi_test_measurement_response()
 
 void nfapi_test_dl_config_request()
 {
-	#define IN_OUT_ASSERT(_V) { CU_ASSERT_EQUAL(in._V, out._V); }
+
 
 	uint16_t idx = 0;
 	nfapi_dl_config_request_t in;
@@ -3064,6 +3541,22 @@ void nfapi_test_dl_config_request()
 		in.dl_config_request_body.dl_config_pdu_list[0].dci_dl_pdu.dci_dl_pdu_rel12.ul_dl_configuration_indication[idx] = rand8(1, 5);
 	}
 	in.dl_config_request_body.dl_config_pdu_list[0].dci_dl_pdu.dci_dl_pdu_rel13.tl.tag = NFAPI_DL_CONFIG_REQUEST_DCI_DL_PDU_REL13_TAG;
+	in.dl_config_request_body.dl_config_pdu_list[0].dci_dl_pdu.dci_dl_pdu_rel13.tpm_struct_flag = 1; //rand8(0, 1);
+	in.dl_config_request_body.dl_config_pdu_list[0].dci_dl_pdu.dci_dl_pdu_rel13.tpm.num_prb_per_subband = 3;
+	in.dl_config_request_body.dl_config_pdu_list[0].dci_dl_pdu.dci_dl_pdu_rel13.tpm.number_of_subbands = 2;
+	in.dl_config_request_body.dl_config_pdu_list[0].dci_dl_pdu.dci_dl_pdu_rel13.tpm.num_antennas = 2;
+	in.dl_config_request_body.dl_config_pdu_list[0].dci_dl_pdu.dci_dl_pdu_rel13.tpm.subband_info[0].subband_index = 1;
+	in.dl_config_request_body.dl_config_pdu_list[0].dci_dl_pdu.dci_dl_pdu_rel13.tpm.subband_info[0].scheduled_ues = 2;
+	in.dl_config_request_body.dl_config_pdu_list[0].dci_dl_pdu.dci_dl_pdu_rel13.tpm.subband_info[0].precoding_value[0][0] = 0x321;
+	in.dl_config_request_body.dl_config_pdu_list[0].dci_dl_pdu.dci_dl_pdu_rel13.tpm.subband_info[0].precoding_value[0][1] = 0x321;
+	in.dl_config_request_body.dl_config_pdu_list[0].dci_dl_pdu.dci_dl_pdu_rel13.tpm.subband_info[0].precoding_value[1][0] = 0x321;
+	in.dl_config_request_body.dl_config_pdu_list[0].dci_dl_pdu.dci_dl_pdu_rel13.tpm.subband_info[0].precoding_value[1][1] = 0x321;
+	
+	in.dl_config_request_body.dl_config_pdu_list[0].dci_dl_pdu.dci_dl_pdu_rel13.tpm.subband_info[1].subband_index = 2;
+	in.dl_config_request_body.dl_config_pdu_list[0].dci_dl_pdu.dci_dl_pdu_rel13.tpm.subband_info[1].scheduled_ues = 1;	
+	in.dl_config_request_body.dl_config_pdu_list[0].dci_dl_pdu.dci_dl_pdu_rel13.tpm.subband_info[1].precoding_value[0][0] = 0x32A;
+	in.dl_config_request_body.dl_config_pdu_list[0].dci_dl_pdu.dci_dl_pdu_rel13.tpm.subband_info[1].precoding_value[1][0] = 0x32A;
+
 	in.dl_config_request_body.number_pdu++;
 
 	in.dl_config_request_body.dl_config_pdu_list[1].pdu_type = 1;
@@ -3122,10 +3615,25 @@ void nfapi_test_dl_config_request()
 	in.dl_config_request_body.number_pdu++;
 	*/
 
+	in.dl_config_request_body.dl_config_pdu_list[7].pdu_type = 9;
+	in.dl_config_request_body.dl_config_pdu_list[7].pdu_size = 123;
+	in.dl_config_request_body.dl_config_pdu_list[7].nbch_pdu.nbch_pdu_rel13.tl.tag = NFAPI_DL_CONFIG_REQUEST_NBCH_PDU_REL13_TAG;
+	in.dl_config_request_body.number_pdu++;
+	
+	in.dl_config_request_body.dl_config_pdu_list[8].pdu_type = 10;
+	in.dl_config_request_body.dl_config_pdu_list[8].pdu_size = 123;
+	in.dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.tl.tag = NFAPI_DL_CONFIG_REQUEST_NPDCCH_PDU_REL13_TAG;
+	in.dl_config_request_body.number_pdu++;
+	
+	in.dl_config_request_body.dl_config_pdu_list[9].pdu_type = 11;
+	in.dl_config_request_body.dl_config_pdu_list[9].pdu_size = 123;
+	in.dl_config_request_body.dl_config_pdu_list[9].ndlsch_pdu.ndlsch_pdu_rel13.tl.tag = NFAPI_DL_CONFIG_REQUEST_NDLSCH_PDU_REL13_TAG;
+	in.dl_config_request_body.number_pdu++;
+	
+
 	int packedMessageLength = nfapi_p7_message_pack(&in, gTestNfapiMessageTx, MAX_PACKED_MESSAGE_SIZE, 0);
 	CU_ASSERT_NOT_EQUAL(packedMessageLength, 0);
 	CU_ASSERT_NOT_EQUAL(packedMessageLength, -1);
-	printf("%d\n", packedMessageLength);
 
 	nfapi_p7_message_unpack(gTestNfapiMessageTx, packedMessageLength, &out, sizeof(out), 0);
 	
@@ -3201,6 +3709,33 @@ void nfapi_test_dl_config_request()
 	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[0].dci_dl_pdu.dci_dl_pdu_rel13.initial_lbt_sf);
 	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[0].dci_dl_pdu.dci_dl_pdu_rel13.codebook_size_determination);
 	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[0].dci_dl_pdu.dci_dl_pdu_rel13.drms_table_flag);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[0].dci_dl_pdu.dci_dl_pdu_rel13.tpm_struct_flag);
+	if(out.dl_config_request_body.dl_config_pdu_list[0].dci_dl_pdu.dci_dl_pdu_rel13.tpm_struct_flag)
+	{
+		
+		IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[0].dci_dl_pdu.dci_dl_pdu_rel13.tpm.num_prb_per_subband);
+		IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[0].dci_dl_pdu.dci_dl_pdu_rel13.tpm.number_of_subbands);
+		IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[0].dci_dl_pdu.dci_dl_pdu_rel13.tpm.num_antennas);
+		
+		uint8_t sb_idx;
+		for(sb_idx = 0; sb_idx < out.dl_config_request_body.dl_config_pdu_list[0].dci_dl_pdu.dci_dl_pdu_rel13.tpm.number_of_subbands; ++sb_idx)
+		{
+			IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[0].dci_dl_pdu.dci_dl_pdu_rel13.tpm.subband_info[sb_idx].subband_index);
+			IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[0].dci_dl_pdu.dci_dl_pdu_rel13.tpm.subband_info[sb_idx].scheduled_ues);
+			
+			uint8_t a_idx;
+			uint8_t su_idx;
+			
+			for(a_idx = 0; a_idx < out.dl_config_request_body.dl_config_pdu_list[0].dci_dl_pdu.dci_dl_pdu_rel13.tpm.num_antennas ; ++a_idx)
+			{
+				for(su_idx = 0; su_idx < out.dl_config_request_body.dl_config_pdu_list[0].dci_dl_pdu.dci_dl_pdu_rel13.tpm.subband_info[sb_idx].scheduled_ues; ++su_idx)
+				{
+					IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[0].dci_dl_pdu.dci_dl_pdu_rel13.tpm.subband_info[sb_idx].precoding_value[a_idx][su_idx]);
+				}
+			}
+		}
+	}
+
 
 	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[1].pdu_type);
 	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[1].pdu_size);
@@ -3250,13 +3785,66 @@ void nfapi_test_dl_config_request()
 	*/
 	//in.dl_config_request_body.dl_config_pdu_list[8].mpdcch_pdu;
 	//
+	
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[7].pdu_type);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[7].pdu_size);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[7].nbch_pdu.nbch_pdu_rel13.tl.tag);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[7].nbch_pdu.nbch_pdu_rel13.length);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[7].nbch_pdu.nbch_pdu_rel13.pdu_index);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[7].nbch_pdu.nbch_pdu_rel13.transmission_power);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[7].nbch_pdu.nbch_pdu_rel13.hyper_sfn_2_lsbs);
+	
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].pdu_type);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].pdu_size);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.tl.tag);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.length);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.pdu_index);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.ncce_index);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.aggregation_level);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.start_symbol);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.rnti_type);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.rnti);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.scrambling_reinitialization_batch_index);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.nrs_antenna_ports_assumed_by_the_ue);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.dci_format);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.scheduling_delay);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.resource_assignment);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.repetition_number);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.mcs);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.new_data_indicator);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.harq_ack_resource);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.npdcch_order_indication);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.starting_number_of_nprach_repetitions);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.subcarrier_indication_of_nprach);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.paging_direct_indication_differentation_flag);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.direct_indication);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.dci_subframe_repetition_number);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.total_dci_length_including_padding);
+	
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[9].pdu_type);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[9].pdu_size);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[9].ndlsch_pdu.ndlsch_pdu_rel13.tl.tag);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[9].ndlsch_pdu.ndlsch_pdu_rel13.length);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[9].ndlsch_pdu.ndlsch_pdu_rel13.pdu_index);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[9].ndlsch_pdu.ndlsch_pdu_rel13.start_symbol);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[9].ndlsch_pdu.ndlsch_pdu_rel13.rnti_type);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[9].ndlsch_pdu.ndlsch_pdu_rel13.rnti);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[9].ndlsch_pdu.ndlsch_pdu_rel13.resource_assignment);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[9].ndlsch_pdu.ndlsch_pdu_rel13.repetition_number);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[9].ndlsch_pdu.ndlsch_pdu_rel13.modulation);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[9].ndlsch_pdu.ndlsch_pdu_rel13.number_of_subframes_for_resource_assignment);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[9].ndlsch_pdu.ndlsch_pdu_rel13.scrambling_sequence_initialization_cinit);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[9].ndlsch_pdu.ndlsch_pdu_rel13.sf_idx);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[9].ndlsch_pdu.ndlsch_pdu_rel13.nrs_antenna_ports_assumed_by_the_ue);
+	
+	
 	free(in.dl_config_request_body.dl_config_pdu_list);
 	free(out.dl_config_request_body.dl_config_pdu_list);
 }
 void nfapi_test_ul_config_request()
 {
 	nfapi_ul_config_request_t in;
-	memset(&in, 0, sizeof(in));
+	//memset(&in, 0, sizeof(in));
 	nfapi_ul_config_request_t out;
 
 	in.header.phy_id = NFAPI_PHY_ID_NA;
@@ -3271,18 +3859,150 @@ void nfapi_test_ul_config_request()
 	in.ul_config_request_body.number_of_pdus = 0;
 	in.ul_config_request_body.rach_prach_frequency_resources = 34;
 	in.ul_config_request_body.srs_present = 1;
-	//nfapi_dl_config_request_pdu_t dl_config_pdu_list[NFAPI_DL_CONFIG_MAX_PDU];
+	
+	nfapi_ul_config_request_pdu_t ul_config_pdu_list[24];
+	memset(&ul_config_pdu_list[0], 0, sizeof(ul_config_pdu_list));
+	in.ul_config_request_body.ul_config_pdu_list = &ul_config_pdu_list[0];
+	
+	in.ul_config_request_body.ul_config_pdu_list[0].pdu_type = NFAPI_UL_CONFIG_ULSCH_PDU_TYPE;
+	//in.ul_config_request_body.ul_config_pdu_list[0].ulsch_pdu;
+	in.ul_config_request_body.number_of_pdus++;
+	
+	in.ul_config_request_body.ul_config_pdu_list[1].pdu_type = NFAPI_UL_CONFIG_ULSCH_CQI_RI_PDU_TYPE;
+	//in.ul_config_request_body.ul_config_pdu_list[1].ulsch_cqi_ri_pdu;
+	in.ul_config_request_body.number_of_pdus++;
+	
+	in.ul_config_request_body.ul_config_pdu_list[2].pdu_type = NFAPI_UL_CONFIG_ULSCH_HARQ_PDU_TYPE;
+	//in.ul_config_request_body.ul_config_pdu_list[2].ulsch_harq_pdu;
+	in.ul_config_request_body.number_of_pdus++;
+	
+	in.ul_config_request_body.ul_config_pdu_list[3].pdu_type = NFAPI_UL_CONFIG_ULSCH_CQI_HARQ_RI_PDU_TYPE;
+	//in.ul_config_request_body.ul_config_pdu_list[3].ulsch_cqi_harq_ri_pdu;
+	in.ul_config_request_body.number_of_pdus++;
+	
+	in.ul_config_request_body.ul_config_pdu_list[4].pdu_type = NFAPI_UL_CONFIG_UCI_CQI_PDU_TYPE;
+	//in.ul_config_request_body.ul_config_pdu_list[4].uci_cqi_pdu;
+	in.ul_config_request_body.number_of_pdus++;
+
+	in.ul_config_request_body.ul_config_pdu_list[5].pdu_type = NFAPI_UL_CONFIG_UCI_SR_PDU_TYPE;
+	//in.ul_config_request_body.ul_config_pdu_list[5].uci_sr_pdu;
+	in.ul_config_request_body.number_of_pdus++;
+	
+	in.ul_config_request_body.ul_config_pdu_list[6].pdu_type = NFAPI_UL_CONFIG_UCI_HARQ_PDU_TYPE;
+	//in.ul_config_request_body.ul_config_pdu_list[6].uci_harq_pdu;
+	in.ul_config_request_body.number_of_pdus++;
+	
+	in.ul_config_request_body.ul_config_pdu_list[7].pdu_type = NFAPI_UL_CONFIG_UCI_SR_HARQ_PDU_TYPE;
+	//in.ul_config_request_body.ul_config_pdu_list[7].uci_sr_harq_pdu;
+	in.ul_config_request_body.number_of_pdus++;
+	
+	in.ul_config_request_body.ul_config_pdu_list[8].pdu_type = NFAPI_UL_CONFIG_UCI_CQI_HARQ_PDU_TYPE;
+	//in.ul_config_request_body.ul_config_pdu_list[8].uci_cqi_harq_pdu;
+	in.ul_config_request_body.number_of_pdus++;
+	
+	in.ul_config_request_body.ul_config_pdu_list[9].pdu_type = NFAPI_UL_CONFIG_UCI_CQI_SR_PDU_TYPE;
+	//in.ul_config_request_body.ul_config_pdu_list[9].uci_cqi_sr_pdu;
+	in.ul_config_request_body.number_of_pdus++;
+	
+	in.ul_config_request_body.ul_config_pdu_list[10].pdu_type = NFAPI_UL_CONFIG_UCI_CQI_SR_HARQ_PDU_TYPE;
+	//in.ul_config_request_body.ul_config_pdu_list[10].uci_cqi_sr_harq_pdu;
+	in.ul_config_request_body.number_of_pdus++;
+	
+	in.ul_config_request_body.ul_config_pdu_list[11].pdu_type = NFAPI_UL_CONFIG_SRS_PDU_TYPE;
+	//in.ul_config_request_body.ul_config_pdu_list[11].srs_pdu;
+	in.ul_config_request_body.number_of_pdus++;
+	
+	in.ul_config_request_body.ul_config_pdu_list[12].pdu_type = NFAPI_UL_CONFIG_HARQ_BUFFER_PDU_TYPE;
+	//in.ul_config_request_body.ul_config_pdu_list[12].harq_buffer_pdu;
+	in.ul_config_request_body.number_of_pdus++;
+	
+	in.ul_config_request_body.ul_config_pdu_list[13].pdu_type = NFAPI_UL_CONFIG_ULSCH_UCI_CSI_PDU_TYPE;
+	//in.ul_config_request_body.ul_config_pdu_list[13].ulsch_uci_csi_pdu;
+	in.ul_config_request_body.number_of_pdus++;
+	
+	in.ul_config_request_body.ul_config_pdu_list[14].pdu_type = NFAPI_UL_CONFIG_ULSCH_UCI_HARQ_PDU_TYPE;
+	//in.ul_config_request_body.ul_config_pdu_list[14].ulsch_uci_harq_pdu;
+	in.ul_config_request_body.number_of_pdus++;
+	
+	in.ul_config_request_body.ul_config_pdu_list[15].pdu_type = NFAPI_UL_CONFIG_ULSCH_CSI_UCI_HARQ_PDU_TYPE;
+	//in.ul_config_request_body.ul_config_pdu_list[15].ulsch_csi_uci_harq_pdu;
+	in.ul_config_request_body.number_of_pdus++;
+	
+	in.ul_config_request_body.ul_config_pdu_list[16].pdu_type = NFAPI_UL_CONFIG_NULSCH_PDU_TYPE;
+	in.ul_config_request_body.ul_config_pdu_list[16].nulsch_pdu.nulsch_pdu_rel13.tl.tag = NFAPI_UL_CONFIG_REQUEST_NULSCH_PDU_REL13_TAG;
+	in.ul_config_request_body.ul_config_pdu_list[16].nulsch_pdu.nulsch_pdu_rel13.ue_information.ue_information_rel8.tl.tag = NFAPI_UL_CONFIG_REQUEST_UE_INFORMATION_REL8_TAG;
+	in.ul_config_request_body.ul_config_pdu_list[16].nulsch_pdu.nulsch_pdu_rel13.ue_information.ue_information_rel11.tl.tag = NFAPI_UL_CONFIG_REQUEST_UE_INFORMATION_REL11_TAG;
+	in.ul_config_request_body.ul_config_pdu_list[16].nulsch_pdu.nulsch_pdu_rel13.ue_information.ue_information_rel13.tl.tag = NFAPI_UL_CONFIG_REQUEST_UE_INFORMATION_REL13_TAG;
+	in.ul_config_request_body.ul_config_pdu_list[16].nulsch_pdu.nulsch_pdu_rel13.nb_harq_information.nb_harq_information_rel13_fdd.tl.tag = NFAPI_UL_CONFIG_REQUEST_NB_HARQ_INFORMATION_REL13_FDD_TAG;
+	in.ul_config_request_body.number_of_pdus++;
+	
+	in.ul_config_request_body.ul_config_pdu_list[17].pdu_type = NFAPI_UL_CONFIG_NRACH_PDU_TYPE;
+	in.ul_config_request_body.ul_config_pdu_list[17].nrach_pdu.nrach_pdu_rel13.tl.tag = NFAPI_UL_CONFIG_REQUEST_NRACH_PDU_REL13_TAG;
+	in.ul_config_request_body.number_of_pdus++;
+	
 
 
 	int packedMessageLength = nfapi_p7_message_pack(&in, gTestNfapiMessageTx, MAX_PACKED_MESSAGE_SIZE, 0);
 
 	nfapi_p7_message_unpack(gTestNfapiMessageTx, packedMessageLength, &out, sizeof(out), 0);
 
-	CU_ASSERT_EQUAL(in.header.message_id, out.header.message_id);
-	CU_ASSERT_EQUAL(in.sfn_sf, out.sfn_sf);
-	CU_ASSERT_EQUAL(in.ul_config_request_body.rach_prach_frequency_resources, out.ul_config_request_body.rach_prach_frequency_resources);
-	CU_ASSERT_EQUAL(in.ul_config_request_body.srs_present, out.ul_config_request_body.srs_present);
-	CU_ASSERT_EQUAL(in.ul_config_request_body.number_of_pdus, out.ul_config_request_body.number_of_pdus);
+	IN_OUT_ASSERT(header.message_id);
+	IN_OUT_ASSERT(sfn_sf);
+	IN_OUT_ASSERT(ul_config_request_body.rach_prach_frequency_resources);
+	IN_OUT_ASSERT(ul_config_request_body.srs_present);
+	IN_OUT_ASSERT(ul_config_request_body.number_of_pdus);
+	
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[0].pdu_type);
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[1].pdu_type);
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[2].pdu_type);
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[3].pdu_type);
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[4].pdu_type);
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[5].pdu_type);
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[6].pdu_type);
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[7].pdu_type);
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[8].pdu_type);
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[9].pdu_type);
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[10].pdu_type);
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[11].pdu_type);
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[12].pdu_type);
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[13].pdu_type);
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[14].pdu_type);
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[15].pdu_type);
+	
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[16].pdu_type);
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[16].nulsch_pdu.nulsch_pdu_rel13.tl.tag);
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[16].nulsch_pdu.nulsch_pdu_rel13.nulsch_format);
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[16].nulsch_pdu.nulsch_pdu_rel13.handle);
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[16].nulsch_pdu.nulsch_pdu_rel13.size);
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[16].nulsch_pdu.nulsch_pdu_rel13.rnti);
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[16].nulsch_pdu.nulsch_pdu_rel13.subcarrier_indication);
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[16].nulsch_pdu.nulsch_pdu_rel13.resource_assignment);
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[16].nulsch_pdu.nulsch_pdu_rel13.mcs);
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[16].nulsch_pdu.nulsch_pdu_rel13.redudancy_version);
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[16].nulsch_pdu.nulsch_pdu_rel13.repetition_number);
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[16].nulsch_pdu.nulsch_pdu_rel13.new_data_indication);
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[16].nulsch_pdu.nulsch_pdu_rel13.n_srs);
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[16].nulsch_pdu.nulsch_pdu_rel13.scrambling_sequence_initialization_cinit);
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[16].nulsch_pdu.nulsch_pdu_rel13.sf_idx);
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[16].nulsch_pdu.nulsch_pdu_rel13.ue_information.ue_information_rel8.tl.tag);
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[16].nulsch_pdu.nulsch_pdu_rel13.ue_information.ue_information_rel8.handle);
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[16].nulsch_pdu.nulsch_pdu_rel13.ue_information.ue_information_rel8.rnti);
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[16].nulsch_pdu.nulsch_pdu_rel13.ue_information.ue_information_rel11.tl.tag);
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[16].nulsch_pdu.nulsch_pdu_rel13.ue_information.ue_information_rel11.virtual_cell_id_enabled_flag);
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[16].nulsch_pdu.nulsch_pdu_rel13.ue_information.ue_information_rel11.npusch_identity);
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[16].nulsch_pdu.nulsch_pdu_rel13.ue_information.ue_information_rel13.tl.tag);
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[16].nulsch_pdu.nulsch_pdu_rel13.ue_information.ue_information_rel13.ue_type);
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[16].nulsch_pdu.nulsch_pdu_rel13.ue_information.ue_information_rel13.empty_symbols);
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[16].nulsch_pdu.nulsch_pdu_rel13.ue_information.ue_information_rel13.total_number_of_repetitions);
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[16].nulsch_pdu.nulsch_pdu_rel13.ue_information.ue_information_rel13.repetition_number);
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[16].nulsch_pdu.nulsch_pdu_rel13.nb_harq_information.nb_harq_information_rel13_fdd.tl.tag);
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[16].nulsch_pdu.nulsch_pdu_rel13.nb_harq_information.nb_harq_information_rel13_fdd.harq_ack_resource);
+	
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[17].nrach_pdu.nrach_pdu_rel13.tl.tag);
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[17].nrach_pdu.nrach_pdu_rel13.nprach_config_0);
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[17].nrach_pdu.nrach_pdu_rel13.nprach_config_1);
+	IN_OUT_ASSERT(ul_config_request_body.ul_config_pdu_list[17].nrach_pdu.nrach_pdu_rel13.nprach_config_2);
+	
 
 	free(out.ul_config_request_body.ul_config_pdu_list);
 	
@@ -3366,6 +4086,9 @@ void nfapi_test_hi_dci0_request()
 	in.hi_dci0_request_body.number_of_dci++;
 
 	in.hi_dci0_request_body.hi_dci0_pdu_list[2].pdu_type = NFAPI_HI_DCI0_EPDCCH_DCI_PDU_TYPE;
+	in.hi_dci0_request_body.hi_dci0_pdu_list[2].edpcch_dci_pdu.edpcch_dci_pdu_rel8.tl.tag = NFAPI_HI_DCI0_REQUEST_EDPCCH_DCI_PDU_REL8_TAG;
+	in.hi_dci0_request_body.hi_dci0_pdu_list[2].edpcch_dci_pdu.edpcch_dci_pdu_rel10.tl.tag = NFAPI_HI_DCI0_REQUEST_EDPCCH_DCI_PDU_REL10_TAG;
+	in.hi_dci0_request_body.hi_dci0_pdu_list[2].edpcch_dci_pdu.edpcch_parameters_rel11.tl.tag = NFAPI_HI_DCI0_REQUEST_EDPCCH_PARAMETERS_REL11_TAG;
 	/*
 	in.hi_dci0_request_body.hi_dci0_pdu_list[2].edpcch_dci_pdu.edpcch_dci_pdu_rel8;
 	uint8_t dci_format;
@@ -3409,6 +4132,7 @@ void nfapi_test_hi_dci0_request()
 	in.hi_dci0_request_body.number_of_dci++;
 	
 	in.hi_dci0_request_body.hi_dci0_pdu_list[3].pdu_type = NFAPI_HI_DCI0_MPDCCH_DCI_PDU_TYPE;
+	in.hi_dci0_request_body.hi_dci0_pdu_list[3].mpdcch_dci_pdu.mpdcch_dci_pdu_rel13.tl.tag = NFAPI_HI_DCI0_REQUEST_MDPCCH_DCI_PDU_REL13_TAG;
 	/*
 	in.hi_dci0_request_body.hi_dci0_pdu_list[3].mpdcch_dci_pdu.mpdcch_dci_pdu_rel13.mpdcch_narrowband;
 	uint8_t number_of_prb_pairs;
@@ -3446,6 +4170,10 @@ void nfapi_test_hi_dci0_request()
 	*/
 	in.hi_dci0_request_body.number_of_dci++;
 
+	in.hi_dci0_request_body.hi_dci0_pdu_list[4].pdu_type = NFAPI_HI_DCI0_NPDCCH_DCI_PDU_TYPE;
+	in.hi_dci0_request_body.hi_dci0_pdu_list[4].npdcch_dci_pdu.npdcch_dci_pdu_rel13.tl.tag = NFAPI_HI_DCI0_REQUEST_NDPCCH_DCI_PDU_REL13_TAG;
+	in.hi_dci0_request_body.number_of_dci++;
+
 	int packedMessageLength = nfapi_p7_message_pack(&in, gTestNfapiMessageTx, MAX_PACKED_MESSAGE_SIZE, 0);
 
 	nfapi_p7_message_unpack(gTestNfapiMessageTx, packedMessageLength, &out, sizeof(out), 0);
@@ -3469,6 +4197,23 @@ void nfapi_test_hi_dci0_request()
 	CU_ASSERT_EQUAL(in.hi_dci0_request_body.hi_dci0_pdu_list[2].pdu_type, out.hi_dci0_request_body.hi_dci0_pdu_list[2].pdu_type);
 
 	CU_ASSERT_EQUAL(in.hi_dci0_request_body.hi_dci0_pdu_list[3].pdu_type, out.hi_dci0_request_body.hi_dci0_pdu_list[3].pdu_type);
+	
+	IN_OUT_ASSERT(hi_dci0_request_body.hi_dci0_pdu_list[4].pdu_type);
+	IN_OUT_ASSERT(hi_dci0_request_body.hi_dci0_pdu_list[4].npdcch_dci_pdu.npdcch_dci_pdu_rel13.tl.tag);
+	IN_OUT_ASSERT(hi_dci0_request_body.hi_dci0_pdu_list[4].npdcch_dci_pdu.npdcch_dci_pdu_rel13.ncce_index);
+	IN_OUT_ASSERT(hi_dci0_request_body.hi_dci0_pdu_list[4].npdcch_dci_pdu.npdcch_dci_pdu_rel13.aggregation_level);
+	IN_OUT_ASSERT(hi_dci0_request_body.hi_dci0_pdu_list[4].npdcch_dci_pdu.npdcch_dci_pdu_rel13.start_symbol);
+	IN_OUT_ASSERT(hi_dci0_request_body.hi_dci0_pdu_list[4].npdcch_dci_pdu.npdcch_dci_pdu_rel13.rnti);
+	IN_OUT_ASSERT(hi_dci0_request_body.hi_dci0_pdu_list[4].npdcch_dci_pdu.npdcch_dci_pdu_rel13.scrambling_reinitialization_batch_index);
+	IN_OUT_ASSERT(hi_dci0_request_body.hi_dci0_pdu_list[4].npdcch_dci_pdu.npdcch_dci_pdu_rel13.nrs_antenna_ports_assumed_by_the_ue);
+	IN_OUT_ASSERT(hi_dci0_request_body.hi_dci0_pdu_list[4].npdcch_dci_pdu.npdcch_dci_pdu_rel13.subcarrier_indication);
+	IN_OUT_ASSERT(hi_dci0_request_body.hi_dci0_pdu_list[4].npdcch_dci_pdu.npdcch_dci_pdu_rel13.resource_assignment);
+	IN_OUT_ASSERT(hi_dci0_request_body.hi_dci0_pdu_list[4].npdcch_dci_pdu.npdcch_dci_pdu_rel13.scheduling_delay);
+	IN_OUT_ASSERT(hi_dci0_request_body.hi_dci0_pdu_list[4].npdcch_dci_pdu.npdcch_dci_pdu_rel13.mcs);
+	IN_OUT_ASSERT(hi_dci0_request_body.hi_dci0_pdu_list[4].npdcch_dci_pdu.npdcch_dci_pdu_rel13.redudancy_version);
+	IN_OUT_ASSERT(hi_dci0_request_body.hi_dci0_pdu_list[4].npdcch_dci_pdu.npdcch_dci_pdu_rel13.repetition_number);
+	IN_OUT_ASSERT(hi_dci0_request_body.hi_dci0_pdu_list[4].npdcch_dci_pdu.npdcch_dci_pdu_rel13.new_data_indicator);
+	IN_OUT_ASSERT(hi_dci0_request_body.hi_dci0_pdu_list[4].npdcch_dci_pdu.npdcch_dci_pdu_rel13.dci_subframe_repetition_number);
 
 	free(in.hi_dci0_request_body.hi_dci0_pdu_list);
 	free(out.hi_dci0_request_body.hi_dci0_pdu_list);
@@ -4246,6 +4991,80 @@ void nfapi_test_lbt_dl_indication_invalid_pdu_type()
 	free(out.lbt_dl_indication_body.lbt_indication_pdu_list);
 }
 
+void nfapi_test_nb_harq_indication()
+{
+	nfapi_nb_harq_indication_t in;
+	memset(&in, 0, sizeof(in));
+	nfapi_nb_harq_indication_t out;
+
+	in.header.phy_id = NFAPI_PHY_ID_NA;
+	in.header.message_id = NFAPI_NB_HARQ_INDICATION;
+	in.header.message_length = 0;
+
+	in.sfn_sf = 1234;
+	in.nb_harq_indication_body.tl.tag = NFAPI_NB_HARQ_INDICATION_BODY_TAG;
+	in.nb_harq_indication_body.number_of_harqs = 1;
+	
+	nfapi_nb_harq_indication_pdu_t nb_harq_pdu[1];
+	in.nb_harq_indication_body.nb_harq_pdu_list = &nb_harq_pdu[0];
+	in.nb_harq_indication_body.nb_harq_pdu_list[0].rx_ue_information.tl.tag = NFAPI_RX_UE_INFORMATION_TAG;
+	in.nb_harq_indication_body.nb_harq_pdu_list[0].nb_harq_indication_fdd_rel13.tl.tag = NFAPI_NB_HARQ_INDICATION_FDD_REL13_TAG;
+	in.nb_harq_indication_body.nb_harq_pdu_list[0].ul_cqi_information.tl.tag = NFAPI_UL_CQI_INFORMATION_TAG;
+	
+
+	int packedMessageLength = nfapi_p7_message_pack(&in, gTestNfapiMessageTx, MAX_PACKED_MESSAGE_SIZE, 0);
+	nfapi_p7_message_unpack(gTestNfapiMessageTx, packedMessageLength, &out, sizeof(out), 0);
+	
+	CU_ASSERT_EQUAL(in.header.message_id, out.header.message_id);
+	IN_OUT_ASSERT(sfn_sf);
+	IN_OUT_ASSERT(nb_harq_indication_body.tl.tag);
+	IN_OUT_ASSERT(nb_harq_indication_body.number_of_harqs);
+	
+	IN_OUT_ASSERT(nb_harq_indication_body.nb_harq_pdu_list[0].rx_ue_information.tl.tag);
+	IN_OUT_ASSERT(nb_harq_indication_body.nb_harq_pdu_list[0].nb_harq_indication_fdd_rel13.tl.tag);
+	IN_OUT_ASSERT(nb_harq_indication_body.nb_harq_pdu_list[0].ul_cqi_information.tl.tag);
+	
+}
+
+void nfapi_test_nrach_indication()
+{
+	nfapi_nrach_indication_t in;
+	memset(&in, 0, sizeof(in));
+	nfapi_nrach_indication_t out;
+
+	in.header.phy_id = NFAPI_PHY_ID_NA;
+	in.header.message_id = NFAPI_NRACH_INDICATION;
+	in.header.message_length = 0;
+
+	in.sfn_sf = 1234;
+	
+	in.nrach_indication_body.tl.tag = NFAPI_NRACH_INDICATION_BODY_TAG;
+	in.nrach_indication_body.number_of_initial_scs_detected = 1;
+	
+	nfapi_nrach_indication_pdu_t nrach_pdu[1];
+	in.nrach_indication_body.nrach_pdu_list = &nrach_pdu[0];
+	
+	in.nrach_indication_body.nrach_pdu_list[0].nrach_indication_rel13.tl.tag = NFAPI_NRACH_INDICATION_REL13_TAG;
+	
+	
+
+
+	int packedMessageLength = nfapi_p7_message_pack(&in, gTestNfapiMessageTx, MAX_PACKED_MESSAGE_SIZE, 0);
+	
+	nfapi_p7_message_unpack(gTestNfapiMessageTx, packedMessageLength, &out, sizeof(out), 0);
+	
+	CU_ASSERT_EQUAL(in.header.message_id, out.header.message_id);
+	IN_OUT_ASSERT(sfn_sf);
+	IN_OUT_ASSERT(nrach_indication_body.tl.tag);
+	IN_OUT_ASSERT(nrach_indication_body.number_of_initial_scs_detected);
+	IN_OUT_ASSERT(nrach_indication_body.nrach_pdu_list[0].nrach_indication_rel13.tl.tag);
+	IN_OUT_ASSERT(nrach_indication_body.nrach_pdu_list[0].nrach_indication_rel13.rnti);
+	IN_OUT_ASSERT(nrach_indication_body.nrach_pdu_list[0].nrach_indication_rel13.initial_sc);
+	IN_OUT_ASSERT(nrach_indication_body.nrach_pdu_list[0].nrach_indication_rel13.timing_advance);
+	IN_OUT_ASSERT(nrach_indication_body.nrach_pdu_list[0].nrach_indication_rel13.nrach_cs_level);	
+	
+}
+
 void nfapi_test_dl_node_sync()
 {
 	nfapi_dl_node_sync_t in;
@@ -4370,6 +5189,8 @@ void nfapi_struct_sizes()
 	printf("nfapi_rx_indication_t %zu\n", sizeof(nfapi_rx_indication_t));
 	printf("nfapi_rach_indication_t %zu\n", sizeof(nfapi_rach_indication_t));
 	printf("nfapi_cqi_indication_t %zu\n", sizeof(nfapi_cqi_indication_t));
+	printf("nfapi_nb_harq_indication_t %zu\n", sizeof(nfapi_nb_harq_indication_t));
+	printf("nfapi_nrach_indication_t %zu\n", sizeof(nfapi_nrach_indication_t));
 	printf("nfapi_lbt_dl_config_request_t %zu\n", sizeof(nfapi_lbt_dl_config_request_t));
 	printf("nfapi_lbt_dl_indication_t %zu\n", sizeof(nfapi_lbt_dl_indication_t));
 
@@ -4451,6 +5272,7 @@ int main ( int argc, char** argv)
 				(NULL == CU_add_test(pSuiteP4, "nfapi_test_rssi_request_lte_rat_type_mismatch", nfapi_test_rssi_request_lte_rat_type_mismatch)) ||
 				(NULL == CU_add_test(pSuiteP4, "nfapi_test_rssi_request_utran", nfapi_test_rssi_request_utran)) ||
 				(NULL == CU_add_test(pSuiteP4, "nfapi_test_rssi_request_geran", nfapi_test_rssi_request_geran)) ||
+				(NULL == CU_add_test(pSuiteP4, "nfapi_test_rssi_request_nb_iot", nfapi_test_rssi_request_nb_iot)) ||
 				(NULL == CU_add_test(pSuiteP4, "nfapi_test_rssi_response", nfapi_test_rssi_response)) ||
 				(NULL == CU_add_test(pSuiteP4, "nfapi_test_rssi_indication", nfapi_test_rssi_indication)) ||
 				(NULL == CU_add_test(pSuiteP4, "nfapi_test_rssi_indication_overrun", nfapi_test_rssi_indication_overrun)) ||
@@ -4460,6 +5282,7 @@ int main ( int argc, char** argv)
 				(NULL == CU_add_test(pSuiteP4, "nfapi_test_cell_search_request_utran_overrun", nfapi_test_cell_search_request_utran_overrun)) ||
 				(NULL == CU_add_test(pSuiteP4, "nfapi_test_cell_search_request_geran", nfapi_test_cell_search_request_geran)) ||
 				(NULL == CU_add_test(pSuiteP4, "nfapi_test_cell_search_request_geran_overrun", nfapi_test_cell_search_request_geran_overrun)) ||
+				(NULL == CU_add_test(pSuiteP4, "nfapi_test_cell_search_request_nb_iot", nfapi_test_cell_search_request_nb_iot)) ||
 				(NULL == CU_add_test(pSuiteP4, "nfapi_test_cell_search_response", nfapi_test_cell_search_response)) ||
 				(NULL == CU_add_test(pSuiteP4, "nfapi_test_cell_search_indication_lte", nfapi_test_cell_search_indication_lte)) ||
 				(NULL == CU_add_test(pSuiteP4, "nfapi_test_cell_search_indication_lte_overrun", nfapi_test_cell_search_indication_lte_overrun)) ||
@@ -4468,8 +5291,10 @@ int main ( int argc, char** argv)
 				(NULL == CU_add_test(pSuiteP4, "nfapi_test_cell_search_indication_geran", nfapi_test_cell_search_indication_geran)) ||
 				(NULL == CU_add_test(pSuiteP4, "nfapi_test_cell_search_indication_geran_overrun", nfapi_test_cell_search_indication_geran_overrun)) ||
 				(NULL == CU_add_test(pSuiteP4, "nfapi_test_cell_search_indication_state_overrun", nfapi_test_cell_search_indication_state_overrun)) ||
+				(NULL == CU_add_test(pSuiteP4, "nfapi_test_cell_search_indication_nb_iot", nfapi_test_cell_search_indication_nb_iot)) ||				
 				(NULL == CU_add_test(pSuiteP4, "nfapi_test_broadcast_detect_request_lte", nfapi_test_broadcast_detect_request_lte)) ||
 				(NULL == CU_add_test(pSuiteP4, "nfapi_test_broadcast_detect_request_utran", nfapi_test_broadcast_detect_request_utran)) ||
+				(NULL == CU_add_test(pSuiteP4, "nfapi_test_broadcast_detect_request_nb_iot", nfapi_test_broadcast_detect_request_nb_iot)) ||
 				(NULL == CU_add_test(pSuiteP4, "nfapi_test_broadcast_detect_request_state_overrun", nfapi_test_broadcast_detect_request_state_overrun)) ||
 				(NULL == CU_add_test(pSuiteP4, "nfapi_test_broadcast_detect_response", nfapi_test_broadcast_detect_response)) ||
 				(NULL == CU_add_test(pSuiteP4, "nfapi_test_broadcast_detect_indication_lte", nfapi_test_broadcast_detect_indication_lte)) ||
@@ -4477,15 +5302,19 @@ int main ( int argc, char** argv)
 				(NULL == CU_add_test(pSuiteP4, "nfapi_test_broadcast_detect_indication_utran", nfapi_test_broadcast_detect_indication_utran)) ||
 				(NULL == CU_add_test(pSuiteP4, "nfapi_test_broadcast_detect_indication_utran_overrun", nfapi_test_broadcast_detect_indication_utran_overrun)) ||
 				(NULL == CU_add_test(pSuiteP4, "nfapi_test_broadcast_detect_indication_state_overrun", nfapi_test_broadcast_detect_indication_state_overrun)) ||
+				(NULL == CU_add_test(pSuiteP4, "nfapi_test_broadcast_detect_indication_nb_iot", nfapi_test_broadcast_detect_indication_nb_iot)) ||
 				(NULL == CU_add_test(pSuiteP4, "nfapi_test_system_information_schedule_request_lte", nfapi_test_system_information_schedule_request_lte)) ||
 				(NULL == CU_add_test(pSuiteP4, "nfapi_test_system_information_schedule_request_state_overrun", nfapi_test_system_information_schedule_request_state_overrun)) ||
+				(NULL == CU_add_test(pSuiteP4, "nfapi_test_system_information_schedule_request_nb_iot", nfapi_test_system_information_schedule_request_nb_iot)) ||
 				(NULL == CU_add_test(pSuiteP4, "nfapi_test_system_information_schedule_response", nfapi_test_system_information_schedule_response)) ||
 				(NULL == CU_add_test(pSuiteP4, "nfapi_test_system_information_schedule_indication_lte", nfapi_test_system_information_schedule_indication_lte)) ||
+				(NULL == CU_add_test(pSuiteP4, "nfapi_test_system_information_schedule_indication_nb_iot", nfapi_test_system_information_schedule_indication_nb_iot)) ||
 				(NULL == CU_add_test(pSuiteP4, "nfapi_test_system_information_request_lte", nfapi_test_system_information_request_lte)) ||
 				(NULL == CU_add_test(pSuiteP4, "nfapi_test_system_information_request_lte_overrun", nfapi_test_system_information_request_lte_overrun)) ||
 				(NULL == CU_add_test(pSuiteP4, "nfapi_test_system_information_request_utran", nfapi_test_system_information_request_utran)) ||
 				(NULL == CU_add_test(pSuiteP4, "nfapi_test_system_information_request_geran", nfapi_test_system_information_request_geran)) ||
 				(NULL == CU_add_test(pSuiteP4, "nfapi_test_system_information_request_state_overrun", nfapi_test_system_information_request_state_overrun)) ||
+				(NULL == CU_add_test(pSuiteP4, "nfapi_test_system_information_request_nb_iot", nfapi_test_system_information_request_nb_iot)) ||				
 				(NULL == CU_add_test(pSuiteP4, "nfapi_test_system_information_response", nfapi_test_system_information_response)) ||
 				(NULL == CU_add_test(pSuiteP4, "nfapi_test_system_information_indication_lte", nfapi_test_system_information_indication_lte)) ||
 				(NULL == CU_add_test(pSuiteP4, "nfapi_test_system_information_indication_lte_overrun", nfapi_test_system_information_indication_lte_overrun)) ||
@@ -4493,6 +5322,7 @@ int main ( int argc, char** argv)
 				(NULL == CU_add_test(pSuiteP4, "nfapi_test_system_information_indication_utran_overrun", nfapi_test_system_information_indication_utran_overrun)) ||
 				(NULL == CU_add_test(pSuiteP4, "nfapi_test_system_information_indication_geran", nfapi_test_system_information_indication_geran)) ||
 				(NULL == CU_add_test(pSuiteP4, "nfapi_test_system_information_indication_geran_overrun", nfapi_test_system_information_indication_geran_overrun)) ||
+				(NULL == CU_add_test(pSuiteP4, "nfapi_test_system_information_indication_nb_iot", nfapi_test_system_information_indication_nb_iot)) ||
 				(NULL == CU_add_test(pSuiteP4, "nfapi_test_nmm_stop_request", nfapi_test_nmm_stop_request)) ||
 				(NULL == CU_add_test(pSuiteP4, "nfapi_test_nmm_stop_response", nfapi_test_nmm_stop_response))
 				) 
@@ -4560,6 +5390,8 @@ int main ( int argc, char** argv)
 			(NULL == CU_add_test(pSuiteP7, "nfapi_test_lbt_dl_config_request", nfapi_test_lbt_dl_config_request)) ||
 			(NULL == CU_add_test(pSuiteP7, "nfapi_test_lbt_dl_indication", nfapi_test_lbt_dl_indication)) ||
 			(NULL == CU_add_test(pSuiteP7, "nfapi_test_lbt_dl_indication_invalid_pdu_type", nfapi_test_lbt_dl_indication_invalid_pdu_type)) ||
+			(NULL == CU_add_test(pSuiteP7, "nfapi_test_nb_harq_indication", nfapi_test_nb_harq_indication)) ||
+			(NULL == CU_add_test(pSuiteP7, "nfapi_test_nrach_indication", nfapi_test_nrach_indication)) ||
 			(NULL == CU_add_test(pSuiteP7, "nfapi_test_dl_node_sync", nfapi_test_dl_node_sync)) ||
 			(NULL == CU_add_test(pSuiteP7, "nfapi_test_ul_node_sync", nfapi_test_ul_node_sync)) ||
 			(NULL == CU_add_test(pSuiteP7, "nfapi_test_timing_info", nfapi_test_timing_info)) ||

@@ -106,6 +106,34 @@ static uint8_t pack_geran_rssi_request_value(void* tlv, uint8_t **ppWritePackedM
 	return 1;
 }
 
+static uint8_t pack_nb_iot_rssi_request_value(void* tlv, uint8_t **ppWritePackedMsg, uint8_t *end)
+{
+	nfapi_nb_iot_rssi_request_t* value = (nfapi_nb_iot_rssi_request_t*)tlv;
+	uint16_t idx = 0;
+
+	if(!(push8(value->frequency_band_indicator, ppWritePackedMsg, end) &&
+		 push16(value->measurement_period, ppWritePackedMsg, end) &&
+		 push32(value->timeout, ppWritePackedMsg, end) &&
+		 push8(value->number_of_earfcns, ppWritePackedMsg, end)))
+		return 0;
+
+	for(;idx < value->number_of_earfcns; ++idx)
+	{
+		if(!(push16(value->earfcn[idx].earfcn, ppWritePackedMsg, end) &&
+			 push8(value->earfcn[idx].number_of_ro_dl, ppWritePackedMsg, end)))
+			return 0;
+			
+		uint8_t ro_dl_idx = 0;
+		for(ro_dl_idx = 0; ro_dl_idx < value->earfcn[idx].number_of_ro_dl; ++ro_dl_idx)
+		{
+			if(!push8(value->earfcn[idx].ro_dl[ro_dl_idx], ppWritePackedMsg, end))
+				return 0;
+		}
+	}
+
+	return 1;
+}
+
 
 
 static uint8_t pack_rssi_request(void *msg, uint8_t **ppWritePackedMsg, uint8_t *end, nfapi_p4_p5_codec_config_t* config)
@@ -127,6 +155,10 @@ static uint8_t pack_rssi_request(void *msg, uint8_t **ppWritePackedMsg, uint8_t 
 			break;
 		case NFAPI_RAT_TYPE_GERAN:
 			if(pack_tlv(NFAPI_GERAN_RSSI_REQUEST_TAG, &pNfapiMsg->geran_rssi_request, ppWritePackedMsg, end, &pack_geran_rssi_request_value) == 0)
+				return 0;
+			break;
+		case NFAPI_RAT_TYPE_NB_IOT:
+			if(pack_tlv(NFAPI_NB_IOT_RSSI_REQUEST_TAG, &pNfapiMsg->nb_iot_rssi_request, ppWritePackedMsg, end, &pack_nb_iot_rssi_request_value) == 0)
 				return 0;
 			break;
 	}
@@ -192,6 +224,19 @@ static uint8_t pack_geran_cell_search_request_value(void *msg, uint8_t **ppWrite
 			pusharray16(value->arfcn, NFAPI_MAX_ARFCN_LIST, value->number_of_arfcn, ppWritePackedMsg, end));
 }
 
+static uint8_t pack_nb_iot_cell_search_request_value(void *msg, uint8_t **ppWritePackedMsg, uint8_t *end)
+{
+	nfapi_nb_iot_cell_search_request_t* value = (nfapi_nb_iot_cell_search_request_t*)msg;
+
+	return (push16(value->earfcn, ppWritePackedMsg, end) &&
+			push8(value->ro_dl, ppWritePackedMsg, end) &&
+			push8(value->exhaustive_search, ppWritePackedMsg, end) &&
+			push32(value->timeout, ppWritePackedMsg, end) &&
+			push8(value->number_of_pci, ppWritePackedMsg, end) &&
+			pusharray16(value->pci, NFAPI_MAX_PCI_LIST, value->number_of_pci, ppWritePackedMsg, end));
+}
+
+
 static uint8_t pack_cell_search_request(void *msg, uint8_t **ppWritePackedMsg, uint8_t *end, nfapi_p4_p5_codec_config_t* config)
 {
 	nfapi_cell_search_request_t *pNfapiMsg = (nfapi_cell_search_request_t*)msg;
@@ -216,6 +261,12 @@ static uint8_t pack_cell_search_request(void *msg, uint8_t **ppWritePackedMsg, u
 		case NFAPI_RAT_TYPE_GERAN:
 			{
 				if(pack_tlv(NFAPI_GERAN_CELL_SEARCH_REQUEST_TAG, &pNfapiMsg->geran_cell_search_request, ppWritePackedMsg, end, &pack_geran_cell_search_request_value) == 0)
+					return 0;
+			}
+			break;
+		case NFAPI_RAT_TYPE_NB_IOT:
+			{
+				if(pack_tlv(NFAPI_NB_IOT_CELL_SEARCH_REQUEST_TAG, &pNfapiMsg->nb_iot_cell_search_request, ppWritePackedMsg, end, &pack_nb_iot_cell_search_request_value) == 0)
 					return 0;
 			}
 			break;
@@ -293,6 +344,25 @@ static uint8_t pack_geran_cell_search_indication_value(void *msg, uint8_t **ppWr
 	return 1;
 }
 
+static uint8_t pack_nb_iot_cell_search_indication_value(void *msg, uint8_t **ppWritePackedMsg, uint8_t *end)
+{
+	nfapi_nb_iot_cell_search_indication_t* value = (nfapi_nb_iot_cell_search_indication_t*)msg;
+	uint16_t idx = 0;
+
+	if(push16(value->number_of_nb_iot_cells_found, ppWritePackedMsg, end) == 0)
+		return 0;
+ 
+	for(idx = 0; idx < value->number_of_nb_iot_cells_found; ++idx)
+	{
+		if(!(push16(value->nb_iot_found_cells[idx].pci, ppWritePackedMsg, end) &&
+			 push8(value->nb_iot_found_cells[idx].rsrp, ppWritePackedMsg, end) &&
+			 push8(value->nb_iot_found_cells[idx].rsrq, ppWritePackedMsg, end) &&
+			 pushs16(value->nb_iot_found_cells[idx].frequency_offset, ppWritePackedMsg, end)))
+			return 0;
+	}
+
+	return 1;
+}
 static uint8_t pack_cell_search_indication(void *msg, uint8_t **ppWritePackedMsg, uint8_t *end, nfapi_p4_p5_codec_config_t* config)
 {
 	nfapi_cell_search_indication_t *pNfapiMsg = (nfapi_cell_search_indication_t*)msg;
@@ -302,6 +372,7 @@ static uint8_t pack_cell_search_indication(void *msg, uint8_t **ppWritePackedMsg
 			pack_tlv(NFAPI_UTRAN_CELL_SEARCH_INDICATION_TAG, &pNfapiMsg->utran_cell_search_indication, ppWritePackedMsg, end, &pack_utran_cell_search_indication_value) &&
 			pack_tlv(NFAPI_GERAN_CELL_SEARCH_INDICATION_TAG, &pNfapiMsg->geran_cell_search_indication, ppWritePackedMsg, end, &pack_geran_cell_search_indication_value) &&
 			pack_tlv(NFAPI_PNF_CELL_SEARCH_STATE_TAG, &pNfapiMsg->pnf_cell_search_state, ppWritePackedMsg, end, &pack_opaque_data_value) &&
+			pack_tlv(NFAPI_NB_IOT_CELL_SEARCH_INDICATION_TAG, &pNfapiMsg->nb_iot_cell_search_indication, ppWritePackedMsg, end, &pack_nb_iot_cell_search_indication_value) &&
 			pack_vendor_extension_tlv(pNfapiMsg->vendor_extension, ppWritePackedMsg, end, config));
 
 }
@@ -324,6 +395,16 @@ static uint8_t pack_utran_broadcast_detect_request_value(void *msg, uint8_t **pp
 			push32(value->timeout, ppWritePackedMsg, end));
 }
 
+static uint8_t pack_nb_iot_broadcast_detect_request_value(void *msg, uint8_t **ppWritePackedMsg, uint8_t *end)
+{
+	nfapi_nb_iot_broadcast_detect_request_t* value = (nfapi_nb_iot_broadcast_detect_request_t*)msg;
+
+	return (push16(value->earfcn, ppWritePackedMsg, end) &&
+			push8(value->ro_dl, ppWritePackedMsg, end) &&
+			push16(value->pci, ppWritePackedMsg, end) &&
+			push32(value->timeout, ppWritePackedMsg, end));
+}
+
 static uint8_t pack_broadcast_detect_request(void *msg, uint8_t **ppWritePackedMsg, uint8_t * end, nfapi_p4_p5_codec_config_t* config)
 {
 	nfapi_broadcast_detect_request_t *pNfapiMsg = (nfapi_broadcast_detect_request_t*)msg;
@@ -341,6 +422,11 @@ static uint8_t pack_broadcast_detect_request(void *msg, uint8_t **ppWritePackedM
 			if(pack_tlv(NFAPI_UTRAN_BROADCAST_DETECT_REQUEST_TAG, &pNfapiMsg->utran_broadcast_detect_request, ppWritePackedMsg, end, &pack_utran_broadcast_detect_request_value) == 0)
 				return 0;
 			break;
+		case NFAPI_RAT_TYPE_NB_IOT:
+			if(pack_tlv(NFAPI_NB_IOT_BROADCAST_DETECT_REQUEST_TAG, &pNfapiMsg->nb_iot_broadcast_detect_request, ppWritePackedMsg, end, &pack_nb_iot_broadcast_detect_request_value) == 0)
+				return 0;
+			break;
+			
 	}
 
 	return (pack_tlv(NFAPI_PNF_CELL_SEARCH_STATE_TAG, &pNfapiMsg->pnf_cell_search_state, ppWritePackedMsg, end, &pack_opaque_data_value) &&
@@ -374,6 +460,15 @@ static uint8_t pack_utran_broadcast_detect_indication_value(void *msg, uint8_t *
 			push32(value->sfn_offset, ppWritePackedMsg, end));
 }
 
+static uint8_t pack_nb_iot_broadcast_detect_indication_value(void *msg, uint8_t **ppWritePackedMsg, uint8_t *end)
+{
+	nfapi_nb_iot_broadcast_detect_indication_t* value = (nfapi_nb_iot_broadcast_detect_indication_t*)msg;
+
+	return (push8(value->number_of_tx_antenna, ppWritePackedMsg, end) &&
+			push16(value->mib_length, ppWritePackedMsg, end) &&
+			pusharray8(value->mib, NFAPI_MAX_MIB_LENGTH, value->mib_length, ppWritePackedMsg, end) &&
+			push32(value->sfn_offset, ppWritePackedMsg, end));
+}
 
 static uint8_t pack_broadcast_detect_indication(void *msg, uint8_t **ppWritePackedMsg, uint8_t *end, nfapi_p4_p5_codec_config_t* config)
 {
@@ -383,6 +478,7 @@ static uint8_t pack_broadcast_detect_indication(void *msg, uint8_t **ppWritePack
 			pack_tlv(NFAPI_LTE_BROADCAST_DETECT_INDICATION_TAG, &pNfapiMsg->lte_broadcast_detect_indication, ppWritePackedMsg, end, &pack_lte_broadcast_detect_indication_value) &&
 			pack_tlv(NFAPI_UTRAN_BROADCAST_DETECT_INDICATION_TAG, &pNfapiMsg->utran_broadcast_detect_indication, ppWritePackedMsg, end, &pack_utran_broadcast_detect_indication_value) &&
 			pack_tlv(NFAPI_PNF_CELL_BROADCAST_STATE_TAG, &pNfapiMsg->pnf_cell_broadcast_state, ppWritePackedMsg, end, &pack_opaque_data_value) &&
+			pack_tlv(NFAPI_NB_IOT_BROADCAST_DETECT_INDICATION_TAG, &pNfapiMsg->nb_iot_broadcast_detect_indication, ppWritePackedMsg, end, &pack_nb_iot_broadcast_detect_indication_value) &&
 			pack_vendor_extension_tlv(pNfapiMsg->vendor_extension, ppWritePackedMsg, end, config));
 }
 
@@ -399,6 +495,18 @@ static uint8_t pack_lte_system_information_schedule_request_value(void *msg, uin
 			push32(value->timeout, ppWritePackedMsg, end));
 }
 
+static uint8_t pack_nb_iot_system_information_schedule_request_value(void *msg, uint8_t **ppWritePackedMsg, uint8_t *end)
+{
+	nfapi_nb_iot_system_information_schedule_request_t* value = (nfapi_nb_iot_system_information_schedule_request_t*)msg;
+
+	return (push16(value->earfcn, ppWritePackedMsg, end) &&
+			push8(value->ro_dl, ppWritePackedMsg, end) &&
+			push16(value->pci, ppWritePackedMsg, end) &&
+			push8(value->scheduling_info_sib1_nb, ppWritePackedMsg, end) &&
+			push32(value->timeout, ppWritePackedMsg, end));
+}
+
+
 static uint8_t pack_system_information_schedule_request(void *msg, uint8_t **ppWritePackedMsg, uint8_t *end, nfapi_p4_p5_codec_config_t* config)
 {
 	nfapi_system_information_schedule_request_t *pNfapiMsg = (nfapi_system_information_schedule_request_t*)msg;
@@ -410,6 +518,10 @@ static uint8_t pack_system_information_schedule_request(void *msg, uint8_t **ppW
 	{
 		case NFAPI_RAT_TYPE_LTE:
 			if(pack_tlv(NFAPI_LTE_SYSTEM_INFORMATION_SCHEDULE_REQUEST_TAG, &pNfapiMsg->lte_system_information_schedule_request, ppWritePackedMsg, end, &pack_lte_system_information_schedule_request_value) == 0)
+				return 0;
+			break;
+		case NFAPI_RAT_TYPE_NB_IOT:
+			if(pack_tlv(NFAPI_NB_IOT_SYSTEM_INFORMATION_SCHEDULE_REQUEST_TAG, &pNfapiMsg->nb_iot_system_information_schedule_request, ppWritePackedMsg, end, &pack_nb_iot_system_information_schedule_request_value) == 0)
 				return 0;
 			break;
 	}
@@ -436,12 +548,22 @@ static uint8_t pack_lte_system_information_indication_value(void* msg, uint8_t *
 			pusharray8(value->sib, NFAPI_MAX_SIB_LENGTH, value->sib_length, ppWritePackedMsg, end));
 }
 
+static uint8_t pack_nb_iot_system_information_indication_value(void* msg, uint8_t **ppWritePackedMsg, uint8_t *end)
+{
+	nfapi_nb_iot_system_information_indication_t* value = (nfapi_nb_iot_system_information_indication_t*)msg;
+
+	return (push8(value->sib_type, ppWritePackedMsg, end) &&
+			push16(value->sib_length, ppWritePackedMsg, end) &&
+			pusharray8(value->sib, NFAPI_MAX_SIB_LENGTH, value->sib_length, ppWritePackedMsg, end));
+}
+
 static uint8_t pack_system_information_schedule_indication(void *msg, uint8_t **ppWritePackedMsg, uint8_t *end, nfapi_p4_p5_codec_config_t* config)
 {
 	nfapi_system_information_schedule_indication_t *pNfapiMsg = (nfapi_system_information_schedule_indication_t*)msg;
 
 	return (push32(pNfapiMsg->error_code, ppWritePackedMsg, end) &&
 			pack_tlv(NFAPI_LTE_SYSTEM_INFORMATION_INDICATION_TAG, &pNfapiMsg->lte_system_information_indication, ppWritePackedMsg, end, &pack_lte_system_information_indication_value) &&
+			pack_tlv(NFAPI_NB_IOT_SYSTEM_INFORMATION_INDICATION_TAG, &pNfapiMsg->nb_iot_system_information_indication, ppWritePackedMsg, end, &pack_nb_iot_system_information_indication_value) &&
 			pack_vendor_extension_tlv(pNfapiMsg->vendor_extension, ppWritePackedMsg, end, config));
 }
 
@@ -484,6 +606,37 @@ static uint8_t pack_geran_system_information_request_value(void *msg, uint8_t **
 			push8(value->bsic, ppWritePackedMsg, end) &&
 			push32(value->timeout, ppWritePackedMsg, end));
 }
+static uint8_t pack_nb_iot_system_information_request_value(void *msg, uint8_t **ppWritePackedMsg, uint8_t *end)
+{
+	nfapi_nb_iot_system_information_request_t* value = (nfapi_nb_iot_system_information_request_t*)msg;
+	uint16_t idx = 0;
+
+	if(!(push16(value->earfcn, ppWritePackedMsg, end) &&
+		 push8(value->ro_dl, ppWritePackedMsg, end) &&
+		 push16(value->pci, ppWritePackedMsg, end) &&
+		 push8(value->number_of_si_periodicity, ppWritePackedMsg, end)))
+		return 0;
+
+	for(idx = 0; idx < value->number_of_si_periodicity; ++idx)
+	{
+		if(!(push8(value->si_periodicity[idx].si_periodicity, ppWritePackedMsg, end) &&
+			 push8(value->si_periodicity[idx].si_repetition_pattern, ppWritePackedMsg, end) &&
+			 push8(value->si_periodicity[idx].si_tb_size, ppWritePackedMsg, end) &&
+			 push8(value->si_periodicity[idx].number_of_si_index, ppWritePackedMsg, end)))
+			return 0;
+			
+		uint8_t si_idx;	
+		for(si_idx = 0; si_idx < value->si_periodicity[idx].number_of_si_index; ++si_idx)
+		{
+			if(!(push8(value->si_periodicity[idx].si_index[si_idx], ppWritePackedMsg, end)))
+				return 0;
+		}
+	}
+
+	return (push8(value->si_window_length, ppWritePackedMsg, end) &&
+			push32(value->timeout, ppWritePackedMsg, end));
+}
+
 
 static uint8_t pack_system_information_request(void *msg, uint8_t **ppWritePackedMsg, uint8_t *end, nfapi_p4_p5_codec_config_t* config)
 {
@@ -504,6 +657,10 @@ static uint8_t pack_system_information_request(void *msg, uint8_t **ppWritePacke
 			break;
 		case NFAPI_RAT_TYPE_GERAN:
 			if(pack_tlv(NFAPI_GERAN_SYSTEM_INFORMATION_REQUEST_TAG, &pNfapiMsg->geran_system_information_request, ppWritePackedMsg, end, &pack_geran_system_information_request_value) == 0)
+				return 0;
+			break;
+		case NFAPI_RAT_TYPE_NB_IOT:
+			if(pack_tlv(NFAPI_NB_IOT_SYSTEM_INFORMATION_REQUEST_TAG, &pNfapiMsg->nb_iot_system_information_request, ppWritePackedMsg, end, &pack_nb_iot_system_information_request_value) == 0)
 				return 0;
 			break;
 	}
@@ -544,6 +701,7 @@ static uint8_t pack_system_information_indication(void *msg, uint8_t **ppWritePa
 			pack_tlv(NFAPI_LTE_SYSTEM_INFORMATION_INDICATION_TAG, &pNfapiMsg->lte_system_information_indication, ppWritePackedMsg, end, &pack_lte_system_information_indication_value) &&
 			pack_tlv(NFAPI_UTRAN_SYSTEM_INFORMATION_INDICATION_TAG, &pNfapiMsg->utran_system_information_indication, ppWritePackedMsg, end, &pack_utran_system_information_indication_value) &&
 			pack_tlv(NFAPI_GERAN_SYSTEM_INFORMATION_INDICATION_TAG, &pNfapiMsg->geran_system_information_indication, ppWritePackedMsg, end, &pack_geran_system_information_indication_value) &&
+			pack_tlv(NFAPI_NB_IOT_SYSTEM_INFORMATION_INDICATION_TAG, &pNfapiMsg->nb_iot_system_information_indication, ppWritePackedMsg, end, &pack_nb_iot_system_information_indication_value) &&
 			pack_vendor_extension_tlv(pNfapiMsg->vendor_extension, ppWritePackedMsg, end, config));
 }
 	
@@ -642,6 +800,51 @@ static uint8_t unpack_geran_rssi_request_value(void *tlv, uint8_t **ppReadPacked
 	return 1;
 }
 
+static uint8_t unpack_nb_iot_rssi_request_value(void *tlv, uint8_t **ppReadPackedMsg, uint8_t *end)
+{
+	nfapi_nb_iot_rssi_request_t* value = (nfapi_nb_iot_rssi_request_t*)tlv;
+	uint16_t idx = 0;
+
+	if(!(pull8(ppReadPackedMsg, &value->frequency_band_indicator, end) &&
+	 	 pull16(ppReadPackedMsg, &value->measurement_period, end) &&
+		 pull32(ppReadPackedMsg, &value->timeout, end) &&
+		 pull8(ppReadPackedMsg, &value->number_of_earfcns, end)))
+		return 0;
+
+	if(value->number_of_earfcns <= NFAPI_MAX_CARRIER_LIST)
+	{
+		for(idx = 0; idx < value->number_of_earfcns; ++idx)
+		{
+			if(!(pull16(ppReadPackedMsg, &value->earfcn[idx].earfcn, end) &&
+			 	 pull8(ppReadPackedMsg, &value->earfcn[idx].number_of_ro_dl, end)))
+				return 0;
+				
+			if(value->earfcn[idx].number_of_ro_dl <= NFAPI_MAX_RO_DL)
+			{
+				uint8_t ro_dl_idx = 0;
+				for(ro_dl_idx = 0; ro_dl_idx < value->earfcn[idx].number_of_ro_dl; ++ro_dl_idx)
+				{
+					if(!pull8(ppReadPackedMsg, &value->earfcn[idx].ro_dl[ro_dl_idx], end))
+						return 0;
+				}
+			}
+			else
+			{
+				NFAPI_TRACE(NFAPI_TRACE_ERROR, "More ROdl's than we can decode %d \n", value->earfcn[idx].number_of_ro_dl);
+				return 0;
+			}
+			
+		}
+	}
+	else
+	{
+		NFAPI_TRACE(NFAPI_TRACE_ERROR, "More EARFCN's than we can decode %d \n", value->number_of_earfcns);
+		return 0;
+	}
+
+	return 1;
+}
+
 static uint8_t unpack_rssi_request(uint8_t **ppReadPackedMsg, uint8_t *end, void *msg, nfapi_p4_p5_codec_config_t* config)
 {
 	nfapi_rssi_request_t *pNfapiMsg = (nfapi_rssi_request_t*)msg;
@@ -651,6 +854,7 @@ static uint8_t unpack_rssi_request(uint8_t **ppReadPackedMsg, uint8_t *end, void
 		{ NFAPI_LTE_RSSI_REQUEST_TAG, &pNfapiMsg->lte_rssi_request, &unpack_lte_rssi_request_value},
 		{ NFAPI_UTRAN_RSSI_REQUEST_TAG, &pNfapiMsg->utran_rssi_request, &unpack_utran_rssi_request_value},
 		{ NFAPI_GERAN_RSSI_REQUEST_TAG, &pNfapiMsg->geran_rssi_request, &unpack_geran_rssi_request_value},
+		{ NFAPI_NB_IOT_RSSI_REQUEST_TAG, &pNfapiMsg->nb_iot_rssi_request, &unpack_nb_iot_rssi_request_value},
 	};
 
 	int result = 0;
@@ -663,7 +867,8 @@ static uint8_t unpack_rssi_request(uint8_t **ppReadPackedMsg, uint8_t *end, void
 	if(result == 1 &&
 	   !((pNfapiMsg->rat_type == NFAPI_RAT_TYPE_LTE && pNfapiMsg->lte_rssi_request.tl.tag == NFAPI_LTE_RSSI_REQUEST_TAG) ||
 	    (pNfapiMsg->rat_type == NFAPI_RAT_TYPE_UTRAN && pNfapiMsg->utran_rssi_request.tl.tag == NFAPI_UTRAN_RSSI_REQUEST_TAG) ||
-	    (pNfapiMsg->rat_type == NFAPI_RAT_TYPE_GERAN && pNfapiMsg->geran_rssi_request.tl.tag == NFAPI_GERAN_RSSI_REQUEST_TAG)))
+	    (pNfapiMsg->rat_type == NFAPI_RAT_TYPE_GERAN && pNfapiMsg->geran_rssi_request.tl.tag == NFAPI_GERAN_RSSI_REQUEST_TAG) ||
+	    (pNfapiMsg->rat_type == NFAPI_RAT_TYPE_NB_IOT && pNfapiMsg->nb_iot_rssi_request.tl.tag == NFAPI_NB_IOT_RSSI_REQUEST_TAG)))
 	{
 		NFAPI_TRACE(NFAPI_TRACE_ERROR, "Mismatch RAT Type: %d and TAG value: 0x%04x \n", pNfapiMsg->rat_type, pNfapiMsg->lte_rssi_request.tl.tag);
 		result = 0;
@@ -786,6 +991,30 @@ static uint8_t unpack_geran_cell_search_request_value(void *tlv, uint8_t **ppRea
 	return 1;
 }
 
+static uint8_t unpack_nb_iot_cell_search_request_value(void *tlv, uint8_t **ppReadPackedMsg, uint8_t *end)
+{
+	nfapi_nb_iot_cell_search_request_t* value = (nfapi_nb_iot_cell_search_request_t*)tlv;
+
+	if(!(pull16(ppReadPackedMsg, &value->earfcn, end) &&
+		 pull8(ppReadPackedMsg, &value->ro_dl, end) &&
+		 pull8(ppReadPackedMsg, &value->exhaustive_search, end) &&
+		 pull32(ppReadPackedMsg, &value->timeout, end) &&
+		 pull8(ppReadPackedMsg, &value->number_of_pci, end)))
+		return 0;
+
+	if(value->number_of_pci <= NFAPI_MAX_PCI_LIST)
+	{
+		if(pullarray16(ppReadPackedMsg, value->pci, NFAPI_MAX_PCI_LIST, value->number_of_pci, end) == 0)
+			return 0;
+	}
+	else
+	{
+		NFAPI_TRACE(NFAPI_TRACE_ERROR, "More PCI's than we can decode %d \n", value->number_of_pci);
+		return 0;
+	}
+	return 1;
+}
+
 static uint8_t unpack_cell_search_request(uint8_t **ppReadPackedMsg, uint8_t *end, void *msg, nfapi_p4_p5_codec_config_t* config)
 {
 	nfapi_cell_search_request_t *pNfapiMsg = (nfapi_cell_search_request_t*)msg;
@@ -795,6 +1024,7 @@ static uint8_t unpack_cell_search_request(uint8_t **ppReadPackedMsg, uint8_t *en
 		{ NFAPI_LTE_CELL_SEARCH_REQUEST_TAG, &pNfapiMsg->lte_cell_search_request, &unpack_lte_cell_search_request_value},
 		{ NFAPI_UTRAN_CELL_SEARCH_REQUEST_TAG, &pNfapiMsg->utran_cell_search_request, &unpack_utran_cell_search_request_value},
 		{ NFAPI_GERAN_CELL_SEARCH_REQUEST_TAG, &pNfapiMsg->geran_cell_search_request, &unpack_geran_cell_search_request_value},
+		{ NFAPI_NB_IOT_CELL_SEARCH_REQUEST_TAG, &pNfapiMsg->nb_iot_cell_search_request, &unpack_nb_iot_cell_search_request_value},
 	};
 
 	int result = (pull8(ppReadPackedMsg, &pNfapiMsg->rat_type, end) &&
@@ -804,7 +1034,8 @@ static uint8_t unpack_cell_search_request(uint8_t **ppReadPackedMsg, uint8_t *en
 	if(result == 1 &&
 	   !((pNfapiMsg->rat_type == NFAPI_RAT_TYPE_LTE && pNfapiMsg->lte_cell_search_request.tl.tag == NFAPI_LTE_CELL_SEARCH_REQUEST_TAG) ||
 	    (pNfapiMsg->rat_type == NFAPI_RAT_TYPE_UTRAN && pNfapiMsg->utran_cell_search_request.tl.tag == NFAPI_UTRAN_CELL_SEARCH_REQUEST_TAG) ||
-	    (pNfapiMsg->rat_type == NFAPI_RAT_TYPE_GERAN && pNfapiMsg->geran_cell_search_request.tl.tag == NFAPI_GERAN_CELL_SEARCH_REQUEST_TAG)))
+	    (pNfapiMsg->rat_type == NFAPI_RAT_TYPE_GERAN && pNfapiMsg->geran_cell_search_request.tl.tag == NFAPI_GERAN_CELL_SEARCH_REQUEST_TAG) ||
+	    (pNfapiMsg->rat_type == NFAPI_RAT_TYPE_NB_IOT && pNfapiMsg->nb_iot_cell_search_request.tl.tag == NFAPI_NB_IOT_CELL_SEARCH_REQUEST_TAG)))
 	{
 		NFAPI_TRACE(NFAPI_TRACE_ERROR, "Mismatch RAT Type: %d and TAG value: 0x%04x \n", pNfapiMsg->rat_type, pNfapiMsg->lte_cell_search_request.tl.tag);
 		result = 0;
@@ -908,6 +1139,33 @@ static uint8_t unpack_geran_cell_search_indication_value(void *tlv, uint8_t **pp
 	return 1;
 }
 
+static uint8_t unpack_nb_iot_cell_search_indication_value(void *tlv, uint8_t **ppReadPackedMsg, uint8_t *end)
+{
+	nfapi_nb_iot_cell_search_indication_t* value = (nfapi_nb_iot_cell_search_indication_t*)tlv;
+
+	uint16_t idx = 0;
+	if(pull16(ppReadPackedMsg, &value->number_of_nb_iot_cells_found, end) == 0)
+		return 0;
+
+	if(value->number_of_nb_iot_cells_found <= NFAPI_MAX_NB_IOT_CELLS_FOUND)
+	{
+		for(idx = 0; idx < value->number_of_nb_iot_cells_found; ++idx)
+		{
+			if(!(pull16(ppReadPackedMsg, &value->nb_iot_found_cells[idx].pci, end) &&
+				 pull8(ppReadPackedMsg, &value->nb_iot_found_cells[idx].rsrp, end) &&
+				 pull8(ppReadPackedMsg, &value->nb_iot_found_cells[idx].rsrq, end) &&
+				 pulls16(ppReadPackedMsg, &value->nb_iot_found_cells[idx].frequency_offset, end)))
+				return 0;
+		}
+	}
+	else
+	{
+		NFAPI_TRACE(NFAPI_TRACE_ERROR, "More found NB_IOT cells than we can decode %d \n", value->number_of_nb_iot_cells_found);
+		return 0;
+	}
+	return 1;
+}
+
 static uint8_t unpack_cell_search_indication(uint8_t **ppReadPackedMsg, uint8_t *end, void *msg, nfapi_p4_p5_codec_config_t* config)
 {
 	nfapi_cell_search_indication_t *pNfapiMsg = (nfapi_cell_search_indication_t*)msg;
@@ -917,7 +1175,8 @@ static uint8_t unpack_cell_search_indication(uint8_t **ppReadPackedMsg, uint8_t 
 		{ NFAPI_LTE_CELL_SEARCH_INDICATION_TAG, &pNfapiMsg->lte_cell_search_indication, &unpack_lte_cell_search_indication_value},
 		{ NFAPI_UTRAN_CELL_SEARCH_INDICATION_TAG, &pNfapiMsg->utran_cell_search_indication, &unpack_utran_cell_search_indication_value},
 		{ NFAPI_GERAN_CELL_SEARCH_INDICATION_TAG, &pNfapiMsg->geran_cell_search_indication, &unpack_geran_cell_search_indication_value},
-		{ NFAPI_PNF_CELL_SEARCH_STATE_TAG, &pNfapiMsg->pnf_cell_search_state, &unpack_opaque_data_value}
+		{ NFAPI_PNF_CELL_SEARCH_STATE_TAG, &pNfapiMsg->pnf_cell_search_state, &unpack_opaque_data_value},
+		{ NFAPI_NB_IOT_CELL_SEARCH_INDICATION_TAG, &pNfapiMsg->nb_iot_cell_search_indication, &unpack_nb_iot_cell_search_indication_value},
 	};
 
 	return (pull32(ppReadPackedMsg, &pNfapiMsg->error_code, end) &&
@@ -943,6 +1202,16 @@ static uint8_t unpack_utran_broadcast_detect_request_value(void *tlv, uint8_t **
 			pull32(ppReadPackedMsg, &value->timeout, end));
 }
 
+static uint8_t unpack_nb_iot_broadcast_detect_request_value(void *tlv, uint8_t **ppReadPackedMsg, uint8_t *end)
+{
+	nfapi_nb_iot_broadcast_detect_request_t* value = (nfapi_nb_iot_broadcast_detect_request_t*)tlv;
+
+	return (pull16(ppReadPackedMsg, &value->earfcn, end) &&
+			pull8(ppReadPackedMsg, &value->ro_dl, end) &&
+			pull16(ppReadPackedMsg, &value->pci, end) &&
+			pull32(ppReadPackedMsg, &value->timeout, end));
+}
+
 static uint8_t unpack_broadcast_detect_request(uint8_t **ppReadPackedMsg, uint8_t *end, void *msg, nfapi_p4_p5_codec_config_t* config)
 {
 	nfapi_broadcast_detect_request_t *pNfapiMsg = (nfapi_broadcast_detect_request_t*)msg;
@@ -951,7 +1220,8 @@ static uint8_t unpack_broadcast_detect_request(uint8_t **ppReadPackedMsg, uint8_
 	{
 		{ NFAPI_LTE_BROADCAST_DETECT_REQUEST_TAG, &pNfapiMsg->lte_broadcast_detect_request, &unpack_lte_broadcast_detect_request_value},
 		{ NFAPI_UTRAN_BROADCAST_DETECT_REQUEST_TAG, &pNfapiMsg->utran_broadcast_detect_request, &unpack_utran_broadcast_detect_request_value},
-		{ NFAPI_PNF_CELL_SEARCH_STATE_TAG, &pNfapiMsg->pnf_cell_search_state, &unpack_opaque_data_value}
+		{ NFAPI_PNF_CELL_SEARCH_STATE_TAG, &pNfapiMsg->pnf_cell_search_state, &unpack_opaque_data_value},
+		{ NFAPI_NB_IOT_BROADCAST_DETECT_REQUEST_TAG, &pNfapiMsg->nb_iot_broadcast_detect_request, &unpack_nb_iot_broadcast_detect_request_value}
 	};
 
 	return (pull8(ppReadPackedMsg, &pNfapiMsg->rat_type, end) &&	
@@ -1005,6 +1275,24 @@ static uint8_t unpack_utran_broadcast_detect_indication_value(void *tlv, uint8_t
 			pull32(ppReadPackedMsg, &value->sfn_offset, end));
 }
 
+static uint8_t unpack_nb_iot_broadcast_detect_indication_value(void *tlv, uint8_t **ppReadPackedMsg, uint8_t *end)
+{
+	nfapi_nb_iot_broadcast_detect_indication_t* value = (nfapi_nb_iot_broadcast_detect_indication_t*)tlv;
+
+	if(!(pull8(ppReadPackedMsg, &value->number_of_tx_antenna, end) && 
+		 pull16(ppReadPackedMsg, &value->mib_length, end)))
+		return 0;
+
+	if(value->mib_length > NFAPI_MAX_MIB_LENGTH)
+	{
+		NFAPI_TRACE(NFAPI_TRACE_ERROR, "MIB too long %d \n", value->mib_length);
+		return 0;
+	}
+
+	return (pullarray8(ppReadPackedMsg, value->mib, NFAPI_MAX_MIB_LENGTH, value->mib_length, end) &&
+			pull32(ppReadPackedMsg, &value->sfn_offset, end));
+}
+
 static uint8_t unpack_broadcast_detect_indication(uint8_t **ppReadPackedMsg, uint8_t *end, void *msg, nfapi_p4_p5_codec_config_t* config)
 {
 	nfapi_broadcast_detect_indication_t *pNfapiMsg = (nfapi_broadcast_detect_indication_t*)msg;
@@ -1013,6 +1301,7 @@ static uint8_t unpack_broadcast_detect_indication(uint8_t **ppReadPackedMsg, uin
 	{
 		{ NFAPI_LTE_BROADCAST_DETECT_INDICATION_TAG, &pNfapiMsg->lte_broadcast_detect_indication, &unpack_lte_broadcast_detect_indication_value},
 		{ NFAPI_UTRAN_BROADCAST_DETECT_INDICATION_TAG, &pNfapiMsg->utran_broadcast_detect_indication, &unpack_utran_broadcast_detect_indication_value},
+		{ NFAPI_NB_IOT_BROADCAST_DETECT_INDICATION_TAG, &pNfapiMsg->nb_iot_broadcast_detect_indication, &unpack_nb_iot_broadcast_detect_indication_value},
 		{ NFAPI_PNF_CELL_BROADCAST_STATE_TAG, &pNfapiMsg->pnf_cell_broadcast_state, &unpack_opaque_data_value}
 	};
 
@@ -1033,6 +1322,17 @@ static uint8_t unpack_lte_system_information_schedule_request_value(void *tlv, u
 			pull32(ppReadPackedMsg, &value->timeout, end));
 }
 
+static uint8_t unpack_nb_iot_system_information_schedule_request_value(void *tlv, uint8_t **ppReadPackedMsg, uint8_t *end)
+{
+	nfapi_nb_iot_system_information_schedule_request_t* value = (nfapi_nb_iot_system_information_schedule_request_t*)tlv;
+
+	return (pull16(ppReadPackedMsg, &value->earfcn, end) &&
+			pull8(ppReadPackedMsg, &value->ro_dl, end) &&	
+			pull16(ppReadPackedMsg, &value->pci, end) &&
+			pull8(ppReadPackedMsg, &value->scheduling_info_sib1_nb, end) &&
+			pull32(ppReadPackedMsg, &value->timeout, end));
+}
+
 static uint8_t unpack_system_information_schedule_request(uint8_t **ppReadPackedMsg, uint8_t *end, void *msg, nfapi_p4_p5_codec_config_t* config)
 {
 	nfapi_system_information_schedule_request_t *pNfapiMsg = (nfapi_system_information_schedule_request_t*)msg;
@@ -1040,6 +1340,7 @@ static uint8_t unpack_system_information_schedule_request(uint8_t **ppReadPacked
 	unpack_tlv_t unpack_fns[] =
 	{
 		{ NFAPI_LTE_SYSTEM_INFORMATION_SCHEDULE_REQUEST_TAG, &pNfapiMsg->lte_system_information_schedule_request, &unpack_lte_system_information_schedule_request_value},
+		{ NFAPI_NB_IOT_SYSTEM_INFORMATION_SCHEDULE_REQUEST_TAG, &pNfapiMsg->nb_iot_system_information_schedule_request, &unpack_nb_iot_system_information_schedule_request_value},
 		{ NFAPI_PNF_CELL_BROADCAST_STATE_TAG, &pNfapiMsg->pnf_cell_broadcast_state, &unpack_opaque_data_value}
 	};
 
@@ -1079,6 +1380,26 @@ static uint8_t unpack_lte_system_information_indication_value(void *tlv, uint8_t
 	return 1;
 }
 
+static uint8_t unpack_nb_iot_system_information_indication_value(void *tlv, uint8_t **ppReadPackedMsg, uint8_t *end)
+{
+	nfapi_nb_iot_system_information_indication_t* value = (nfapi_nb_iot_system_information_indication_t*)tlv;
+
+	if(!(pull8(ppReadPackedMsg, &value->sib_type, end) &&
+		 pull16(ppReadPackedMsg, &value->sib_length, end)))
+		return 0;
+
+	if(value->sib_length > NFAPI_MAX_SIB_LENGTH)
+	{
+		NFAPI_TRACE(NFAPI_TRACE_ERROR, "SIB too long %d \n", value->sib_length);
+		return 0;
+	}
+	
+	if(pullarray8(ppReadPackedMsg, value->sib, NFAPI_MAX_SIB_LENGTH,  value->sib_length, end) == 0)
+		return 0;
+
+	return 1;
+}
+
 static uint8_t unpack_system_information_schedule_indication(uint8_t **ppReadPackedMsg, uint8_t *end, void *msg, nfapi_p4_p5_codec_config_t* config)
 {
 	nfapi_system_information_schedule_indication_t *pNfapiMsg = (nfapi_system_information_schedule_indication_t*)msg;
@@ -1086,6 +1407,7 @@ static uint8_t unpack_system_information_schedule_indication(uint8_t **ppReadPac
 	unpack_tlv_t unpack_fns[] =
 	{
 		{ NFAPI_LTE_SYSTEM_INFORMATION_INDICATION_TAG, &pNfapiMsg->lte_system_information_indication, &unpack_lte_system_information_indication_value},
+		{ NFAPI_NB_IOT_SYSTEM_INFORMATION_INDICATION_TAG, &pNfapiMsg->nb_iot_system_information_indication, &unpack_nb_iot_system_information_indication_value},
 	};
 
 	return (pull32(ppReadPackedMsg, &pNfapiMsg->error_code, end) &&
@@ -1143,6 +1465,47 @@ static uint8_t unpack_geran_system_information_request_value(void *tlv, uint8_t 
 			pull32(ppReadPackedMsg, &value->timeout, end));
 }
 
+static uint8_t unpack_nb_iot_system_information_request_value(void *tlv, uint8_t **ppReadPackedMsg, uint8_t *end)
+{
+	nfapi_nb_iot_system_information_request_t* value = (nfapi_nb_iot_system_information_request_t*)tlv;
+	uint16_t idx = 0;
+
+	if(!(pull16(ppReadPackedMsg, &value->earfcn, end) &&
+		 pull8(ppReadPackedMsg, &value->ro_dl, end) &&
+		 pull16(ppReadPackedMsg, &value->pci, end) &&
+		 pull8(ppReadPackedMsg, &value->number_of_si_periodicity, end)))
+		return 0;
+
+	if(value->number_of_si_periodicity > NFAPI_MAX_SI_PERIODICITY)
+	{
+		NFAPI_TRACE(NFAPI_TRACE_ERROR, "More found SI periodicity than we can decode %d \n", value->number_of_si_periodicity);
+		return 0;
+	}
+
+	for(idx = 0; idx < value->number_of_si_periodicity; ++idx)
+	{
+		if(!(pull8(ppReadPackedMsg, &value->si_periodicity[idx].si_periodicity, end) &&
+			 pull8(ppReadPackedMsg, &value->si_periodicity[idx].si_repetition_pattern, end) &&
+			 pull8(ppReadPackedMsg, &value->si_periodicity[idx].si_tb_size, end) &&
+			 pull8(ppReadPackedMsg, &value->si_periodicity[idx].number_of_si_index, end)))
+			return 0;
+			
+		uint8_t si_idx;
+		for(si_idx = 0; si_idx < value->si_periodicity[idx].number_of_si_index; ++si_idx)
+		{
+			if(!(pull8(ppReadPackedMsg, &value->si_periodicity[idx].si_index[si_idx], end)))
+				return 0;
+			
+		}
+	}
+
+	if(!(pull8(ppReadPackedMsg, &value->si_window_length, end) &&
+	 	 pull32(ppReadPackedMsg, &value->timeout, end)))
+		return 0;
+
+	return 1;
+}
+
 static uint8_t unpack_system_information_request(uint8_t **ppReadPackedMsg, uint8_t *end, void *msg, nfapi_p4_p5_codec_config_t* config)
 {
 	nfapi_system_information_request_t *pNfapiMsg = (nfapi_system_information_request_t*)msg;
@@ -1152,6 +1515,7 @@ static uint8_t unpack_system_information_request(uint8_t **ppReadPackedMsg, uint
 		{ NFAPI_LTE_SYSTEM_INFORMATION_REQUEST_TAG, &pNfapiMsg->lte_system_information_request, &unpack_lte_system_information_request_value},
 		{ NFAPI_UTRAN_SYSTEM_INFORMATION_REQUEST_TAG, &pNfapiMsg->utran_system_information_request, &unpack_utran_system_information_request_value},
 		{ NFAPI_GERAN_SYSTEM_INFORMATION_REQUEST_TAG, &pNfapiMsg->geran_system_information_request, &unpack_geran_system_information_request_value},
+		{ NFAPI_NB_IOT_SYSTEM_INFORMATION_REQUEST_TAG, &pNfapiMsg->nb_iot_system_information_request, &unpack_nb_iot_system_information_request_value},
 		{ NFAPI_PNF_CELL_BROADCAST_STATE_TAG, &pNfapiMsg->pnf_cell_broadcast_state, &unpack_opaque_data_value}
 	};
 
@@ -1231,6 +1595,7 @@ static uint8_t unpack_system_information_indication(uint8_t **ppReadPackedMsg, u
 		{ NFAPI_LTE_SYSTEM_INFORMATION_INDICATION_TAG, &pNfapiMsg->lte_system_information_indication, &unpack_lte_system_information_indication_value},
 		{ NFAPI_UTRAN_SYSTEM_INFORMATION_INDICATION_TAG, &pNfapiMsg->utran_system_information_indication, &unpack_utran_system_information_indication_value},
 		{ NFAPI_GERAN_SYSTEM_INFORMATION_INDICATION_TAG, &pNfapiMsg->geran_system_information_indication, &unpack_geran_system_information_indication_value},
+		{ NFAPI_NB_IOT_SYSTEM_INFORMATION_INDICATION_TAG, &pNfapiMsg->nb_iot_system_information_indication, &unpack_nb_iot_system_information_indication_value},
 	};
 
 	return (pull32(ppReadPackedMsg, &pNfapiMsg->error_code, end) &&

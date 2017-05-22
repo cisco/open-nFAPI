@@ -774,6 +774,21 @@ int nfapi_pnf_p7_cqi_ind(nfapi_pnf_p7_config_t* config, nfapi_cqi_indication_t* 
  */
 int nfapi_pnf_p7_lbt_dl_ind(nfapi_pnf_p7_config_t* config, nfapi_lbt_dl_indication_t* ind);
 
+/*! Send the NB_HARQ.indication
+ * \param config A pointer to a PNF P7 config
+ * \param ind A pointer to the lbt dl indication message structure
+ * \return 0 means success, -1 means failure
+ */
+int nfapi_pnf_p7_nb_harq_ind(nfapi_pnf_p7_config_t* config, nfapi_nb_harq_indication_t* ind);
+
+/*! Send the NRACH.indication
+ * \param config A pointer to a PNF P7 config
+ * \param ind A pointer to the lbt dl indication message structure
+ * \return 0 means success, -1 means failure
+ */
+int nfapi_pnf_p7_nrach_ind(nfapi_pnf_p7_config_t* config, nfapi_nrach_indication_t* ind);
+
+
 /*! Send a vendor exntesion message
  * \param config A pointer to a PNF P7 config
  * \param msg A pointer to the lbt dl indication message structure
