@@ -20,6 +20,8 @@ Open-nFAPI implements the P4, P5 and P7 interfaces as defined by the nFAPI speci
 
 The remaining interfaces are currently outside of the scope of this project.
 
+Supports release 082.09.05 of the nFAPI specification
+
 **The Small Cell Forum cordially requests that any derivative work that looks to 
 extend the nFAPI libraries use the specified vendor extension techniques, 
 so ensuring the widest interoperability of the baseline nFAPI specification 
