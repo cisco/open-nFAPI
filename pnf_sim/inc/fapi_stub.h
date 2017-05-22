@@ -42,6 +42,10 @@ typedef struct {
 	int (*fapi_rx_sr_ind)(fapi_t* fapi, fapi_rx_sr_ind_t* ind);
 	int (*fapi_rach_ind)(fapi_t* fapi, fapi_rach_ind_t* ind);
 	int (*fapi_srs_ind)(fapi_t* fapi, fapi_srs_ind_t* ind);
+	
+	int (*fapi_lbt_dl_ind)(fapi_t* fapi, fapi_lbt_dl_ind_t* ind);
+	int (*fapi_nb_harq_ind)(fapi_t* fapi, fapi_nb_harq_ind_t* ind);
+	int (*fapi_nrach_ind)(fapi_t* fapi, fapi_nrach_ind_t* ind);
 
 } fapi_cb_t;
 

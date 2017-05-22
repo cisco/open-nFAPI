@@ -3596,7 +3596,6 @@ void nfapi_test_dl_config_request()
 	in.dl_config_request_body.dl_config_pdu_list[6].csi_rs_pdu.csi_rs_pdu_rel13.tl.tag = NFAPI_DL_CONFIG_REQUEST_CSI_RS_PDU_REL13_TAG;
 	in.dl_config_request_body.number_pdu++;
 
-	/*
 	in.dl_config_request_body.dl_config_pdu_list[7].pdu_type = 7;
 	in.dl_config_request_body.dl_config_pdu_list[7].pdu_size = 123;
 	in.dl_config_request_body.dl_config_pdu_list[7].epdcch_pdu.epdcch_pdu_rel8.tl.tag = NFAPI_DL_CONFIG_REQUEST_EPDCCH_PDU_REL8_TAG;
@@ -3611,23 +3610,22 @@ void nfapi_test_dl_config_request()
 
 	in.dl_config_request_body.dl_config_pdu_list[8].pdu_type = 8;
 	in.dl_config_request_body.dl_config_pdu_list[8].pdu_size = 123;
-	in.dl_config_request_body.dl_config_pdu_list[8].mpdcch_pdu;
+	in.dl_config_request_body.dl_config_pdu_list[8].mpdcch_pdu.mpdcch_pdu_rel13.tl.tag = NFAPI_DL_CONFIG_REQUEST_MPDCCH_PDU_REL13_TAG;
 	in.dl_config_request_body.number_pdu++;
-	*/
 
-	in.dl_config_request_body.dl_config_pdu_list[7].pdu_type = 9;
-	in.dl_config_request_body.dl_config_pdu_list[7].pdu_size = 123;
-	in.dl_config_request_body.dl_config_pdu_list[7].nbch_pdu.nbch_pdu_rel13.tl.tag = NFAPI_DL_CONFIG_REQUEST_NBCH_PDU_REL13_TAG;
-	in.dl_config_request_body.number_pdu++;
-	
-	in.dl_config_request_body.dl_config_pdu_list[8].pdu_type = 10;
-	in.dl_config_request_body.dl_config_pdu_list[8].pdu_size = 123;
-	in.dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.tl.tag = NFAPI_DL_CONFIG_REQUEST_NPDCCH_PDU_REL13_TAG;
-	in.dl_config_request_body.number_pdu++;
-	
-	in.dl_config_request_body.dl_config_pdu_list[9].pdu_type = 11;
+	in.dl_config_request_body.dl_config_pdu_list[9].pdu_type = 9;
 	in.dl_config_request_body.dl_config_pdu_list[9].pdu_size = 123;
-	in.dl_config_request_body.dl_config_pdu_list[9].ndlsch_pdu.ndlsch_pdu_rel13.tl.tag = NFAPI_DL_CONFIG_REQUEST_NDLSCH_PDU_REL13_TAG;
+	in.dl_config_request_body.dl_config_pdu_list[9].nbch_pdu.nbch_pdu_rel13.tl.tag = NFAPI_DL_CONFIG_REQUEST_NBCH_PDU_REL13_TAG;
+	in.dl_config_request_body.number_pdu++;
+	
+	in.dl_config_request_body.dl_config_pdu_list[10].pdu_type = 10;
+	in.dl_config_request_body.dl_config_pdu_list[10].pdu_size = 123;
+	in.dl_config_request_body.dl_config_pdu_list[10].npdcch_pdu.npdcch_pdu_rel13.tl.tag = NFAPI_DL_CONFIG_REQUEST_NPDCCH_PDU_REL13_TAG;
+	in.dl_config_request_body.number_pdu++;
+	
+	in.dl_config_request_body.dl_config_pdu_list[11].pdu_type = 11;
+	in.dl_config_request_body.dl_config_pdu_list[11].pdu_size = 123;
+	in.dl_config_request_body.dl_config_pdu_list[11].ndlsch_pdu.ndlsch_pdu_rel13.tl.tag = NFAPI_DL_CONFIG_REQUEST_NDLSCH_PDU_REL13_TAG;
 	in.dl_config_request_body.number_pdu++;
 	
 
@@ -3768,7 +3766,7 @@ void nfapi_test_dl_config_request()
 	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[6].csi_rs_pdu.csi_rs_pdu_rel10.tl.tag);
 	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[6].csi_rs_pdu.csi_rs_pdu_rel13.tl.tag);
 
-	/*
+	
 	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[7].pdu_type);
 	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[7].pdu_size);
 	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[7].epdcch_pdu.epdcch_pdu_rel8.tl.tag);
@@ -3782,60 +3780,61 @@ void nfapi_test_dl_config_request()
 
 	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].pdu_type);
 	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].pdu_size);
-	*/
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].mpdcch_pdu.mpdcch_pdu_rel13.tl.tag);
+	
 	//in.dl_config_request_body.dl_config_pdu_list[8].mpdcch_pdu;
 	//
 	
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[7].pdu_type);
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[7].pdu_size);
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[7].nbch_pdu.nbch_pdu_rel13.tl.tag);
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[7].nbch_pdu.nbch_pdu_rel13.length);
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[7].nbch_pdu.nbch_pdu_rel13.pdu_index);
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[7].nbch_pdu.nbch_pdu_rel13.transmission_power);
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[7].nbch_pdu.nbch_pdu_rel13.hyper_sfn_2_lsbs);
-	
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].pdu_type);
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].pdu_size);
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.tl.tag);
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.length);
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.pdu_index);
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.ncce_index);
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.aggregation_level);
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.start_symbol);
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.rnti_type);
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.rnti);
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.scrambling_reinitialization_batch_index);
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.nrs_antenna_ports_assumed_by_the_ue);
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.dci_format);
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.scheduling_delay);
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.resource_assignment);
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.repetition_number);
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.mcs);
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.new_data_indicator);
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.harq_ack_resource);
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.npdcch_order_indication);
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.starting_number_of_nprach_repetitions);
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.subcarrier_indication_of_nprach);
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.paging_direct_indication_differentation_flag);
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.direct_indication);
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.dci_subframe_repetition_number);
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[8].npdcch_pdu.npdcch_pdu_rel13.total_dci_length_including_padding);
-	
 	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[9].pdu_type);
 	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[9].pdu_size);
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[9].ndlsch_pdu.ndlsch_pdu_rel13.tl.tag);
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[9].ndlsch_pdu.ndlsch_pdu_rel13.length);
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[9].ndlsch_pdu.ndlsch_pdu_rel13.pdu_index);
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[9].ndlsch_pdu.ndlsch_pdu_rel13.start_symbol);
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[9].ndlsch_pdu.ndlsch_pdu_rel13.rnti_type);
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[9].ndlsch_pdu.ndlsch_pdu_rel13.rnti);
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[9].ndlsch_pdu.ndlsch_pdu_rel13.resource_assignment);
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[9].ndlsch_pdu.ndlsch_pdu_rel13.repetition_number);
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[9].ndlsch_pdu.ndlsch_pdu_rel13.modulation);
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[9].ndlsch_pdu.ndlsch_pdu_rel13.number_of_subframes_for_resource_assignment);
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[9].ndlsch_pdu.ndlsch_pdu_rel13.scrambling_sequence_initialization_cinit);
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[9].ndlsch_pdu.ndlsch_pdu_rel13.sf_idx);
-	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[9].ndlsch_pdu.ndlsch_pdu_rel13.nrs_antenna_ports_assumed_by_the_ue);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[9].nbch_pdu.nbch_pdu_rel13.tl.tag);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[9].nbch_pdu.nbch_pdu_rel13.length);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[9].nbch_pdu.nbch_pdu_rel13.pdu_index);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[9].nbch_pdu.nbch_pdu_rel13.transmission_power);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[9].nbch_pdu.nbch_pdu_rel13.hyper_sfn_2_lsbs);
+	
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[10].pdu_type);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[10].pdu_size);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[10].npdcch_pdu.npdcch_pdu_rel13.tl.tag);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[10].npdcch_pdu.npdcch_pdu_rel13.length);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[10].npdcch_pdu.npdcch_pdu_rel13.pdu_index);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[10].npdcch_pdu.npdcch_pdu_rel13.ncce_index);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[10].npdcch_pdu.npdcch_pdu_rel13.aggregation_level);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[10].npdcch_pdu.npdcch_pdu_rel13.start_symbol);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[10].npdcch_pdu.npdcch_pdu_rel13.rnti_type);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[10].npdcch_pdu.npdcch_pdu_rel13.rnti);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[10].npdcch_pdu.npdcch_pdu_rel13.scrambling_reinitialization_batch_index);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[10].npdcch_pdu.npdcch_pdu_rel13.nrs_antenna_ports_assumed_by_the_ue);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[10].npdcch_pdu.npdcch_pdu_rel13.dci_format);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[10].npdcch_pdu.npdcch_pdu_rel13.scheduling_delay);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[10].npdcch_pdu.npdcch_pdu_rel13.resource_assignment);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[10].npdcch_pdu.npdcch_pdu_rel13.repetition_number);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[10].npdcch_pdu.npdcch_pdu_rel13.mcs);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[10].npdcch_pdu.npdcch_pdu_rel13.new_data_indicator);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[10].npdcch_pdu.npdcch_pdu_rel13.harq_ack_resource);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[10].npdcch_pdu.npdcch_pdu_rel13.npdcch_order_indication);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[10].npdcch_pdu.npdcch_pdu_rel13.starting_number_of_nprach_repetitions);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[10].npdcch_pdu.npdcch_pdu_rel13.subcarrier_indication_of_nprach);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[10].npdcch_pdu.npdcch_pdu_rel13.paging_direct_indication_differentation_flag);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[10].npdcch_pdu.npdcch_pdu_rel13.direct_indication);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[10].npdcch_pdu.npdcch_pdu_rel13.dci_subframe_repetition_number);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[10].npdcch_pdu.npdcch_pdu_rel13.total_dci_length_including_padding);
+	
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[11].pdu_type);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[11].pdu_size);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[11].ndlsch_pdu.ndlsch_pdu_rel13.tl.tag);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[11].ndlsch_pdu.ndlsch_pdu_rel13.length);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[11].ndlsch_pdu.ndlsch_pdu_rel13.pdu_index);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[11].ndlsch_pdu.ndlsch_pdu_rel13.start_symbol);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[11].ndlsch_pdu.ndlsch_pdu_rel13.rnti_type);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[11].ndlsch_pdu.ndlsch_pdu_rel13.rnti);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[11].ndlsch_pdu.ndlsch_pdu_rel13.resource_assignment);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[11].ndlsch_pdu.ndlsch_pdu_rel13.repetition_number);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[11].ndlsch_pdu.ndlsch_pdu_rel13.modulation);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[11].ndlsch_pdu.ndlsch_pdu_rel13.number_of_subframes_for_resource_assignment);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[11].ndlsch_pdu.ndlsch_pdu_rel13.scrambling_sequence_initialization_cinit);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[11].ndlsch_pdu.ndlsch_pdu_rel13.sf_idx);
+	IN_OUT_ASSERT(dl_config_request_body.dl_config_pdu_list[11].ndlsch_pdu.ndlsch_pdu_rel13.nrs_antenna_ports_assumed_by_the_ue);
 	
 	
 	free(in.dl_config_request_body.dl_config_pdu_list);
@@ -4086,9 +4085,9 @@ void nfapi_test_hi_dci0_request()
 	in.hi_dci0_request_body.number_of_dci++;
 
 	in.hi_dci0_request_body.hi_dci0_pdu_list[2].pdu_type = NFAPI_HI_DCI0_EPDCCH_DCI_PDU_TYPE;
-	in.hi_dci0_request_body.hi_dci0_pdu_list[2].edpcch_dci_pdu.edpcch_dci_pdu_rel8.tl.tag = NFAPI_HI_DCI0_REQUEST_EDPCCH_DCI_PDU_REL8_TAG;
-	in.hi_dci0_request_body.hi_dci0_pdu_list[2].edpcch_dci_pdu.edpcch_dci_pdu_rel10.tl.tag = NFAPI_HI_DCI0_REQUEST_EDPCCH_DCI_PDU_REL10_TAG;
-	in.hi_dci0_request_body.hi_dci0_pdu_list[2].edpcch_dci_pdu.edpcch_parameters_rel11.tl.tag = NFAPI_HI_DCI0_REQUEST_EDPCCH_PARAMETERS_REL11_TAG;
+	in.hi_dci0_request_body.hi_dci0_pdu_list[2].epdcch_dci_pdu.epdcch_dci_pdu_rel8.tl.tag = NFAPI_HI_DCI0_REQUEST_EPDCCH_DCI_PDU_REL8_TAG;
+	in.hi_dci0_request_body.hi_dci0_pdu_list[2].epdcch_dci_pdu.epdcch_dci_pdu_rel10.tl.tag = NFAPI_HI_DCI0_REQUEST_EPDCCH_DCI_PDU_REL10_TAG;
+	in.hi_dci0_request_body.hi_dci0_pdu_list[2].epdcch_dci_pdu.epdcch_parameters_rel11.tl.tag = NFAPI_HI_DCI0_REQUEST_EPDCCH_PARAMETERS_REL11_TAG;
 	/*
 	in.hi_dci0_request_body.hi_dci0_pdu_list[2].edpcch_dci_pdu.edpcch_dci_pdu_rel8;
 	uint8_t dci_format;
@@ -4132,7 +4131,7 @@ void nfapi_test_hi_dci0_request()
 	in.hi_dci0_request_body.number_of_dci++;
 	
 	in.hi_dci0_request_body.hi_dci0_pdu_list[3].pdu_type = NFAPI_HI_DCI0_MPDCCH_DCI_PDU_TYPE;
-	in.hi_dci0_request_body.hi_dci0_pdu_list[3].mpdcch_dci_pdu.mpdcch_dci_pdu_rel13.tl.tag = NFAPI_HI_DCI0_REQUEST_MDPCCH_DCI_PDU_REL13_TAG;
+	in.hi_dci0_request_body.hi_dci0_pdu_list[3].mpdcch_dci_pdu.mpdcch_dci_pdu_rel13.tl.tag = NFAPI_HI_DCI0_REQUEST_MPDCCH_DCI_PDU_REL13_TAG;
 	/*
 	in.hi_dci0_request_body.hi_dci0_pdu_list[3].mpdcch_dci_pdu.mpdcch_dci_pdu_rel13.mpdcch_narrowband;
 	uint8_t number_of_prb_pairs;
@@ -4171,7 +4170,7 @@ void nfapi_test_hi_dci0_request()
 	in.hi_dci0_request_body.number_of_dci++;
 
 	in.hi_dci0_request_body.hi_dci0_pdu_list[4].pdu_type = NFAPI_HI_DCI0_NPDCCH_DCI_PDU_TYPE;
-	in.hi_dci0_request_body.hi_dci0_pdu_list[4].npdcch_dci_pdu.npdcch_dci_pdu_rel13.tl.tag = NFAPI_HI_DCI0_REQUEST_NDPCCH_DCI_PDU_REL13_TAG;
+	in.hi_dci0_request_body.hi_dci0_pdu_list[4].npdcch_dci_pdu.npdcch_dci_pdu_rel13.tl.tag = NFAPI_HI_DCI0_REQUEST_NPDCCH_DCI_PDU_REL13_TAG;
 	in.hi_dci0_request_body.number_of_dci++;
 
 	int packedMessageLength = nfapi_p7_message_pack(&in, gTestNfapiMessageTx, MAX_PACKED_MESSAGE_SIZE, 0);
@@ -5061,7 +5060,7 @@ void nfapi_test_nrach_indication()
 	IN_OUT_ASSERT(nrach_indication_body.nrach_pdu_list[0].nrach_indication_rel13.rnti);
 	IN_OUT_ASSERT(nrach_indication_body.nrach_pdu_list[0].nrach_indication_rel13.initial_sc);
 	IN_OUT_ASSERT(nrach_indication_body.nrach_pdu_list[0].nrach_indication_rel13.timing_advance);
-	IN_OUT_ASSERT(nrach_indication_body.nrach_pdu_list[0].nrach_indication_rel13.nrach_cs_level);	
+	IN_OUT_ASSERT(nrach_indication_body.nrach_pdu_list[0].nrach_indication_rel13.nrach_ce_level);	
 	
 }
 
