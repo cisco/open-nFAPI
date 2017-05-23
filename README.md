@@ -113,15 +113,18 @@ pnfsim <address> <port> <xml config file>
 ## Directory structure
 
 ```
-docs				doxgen documentation
-common				common code used by the nfapi libraries
-nfapi				the nfapi library including message definitions & encode/decode functions
-pnf					the pnf library for p4, p5, & p7 interfaces
-vnf					the vnf library for p4, p5, & p7 interfaces
-sim_common			common simulation for used by the vnf and pnf sim
-vnf_sim				a vnf simulator including a stub mac implementation
-pnf_sim				a pnf simualtor including a fapi interface defintion and stub implementation
-xml					xml configuration files for the vnf and pnf simulator
-wireshark           code for a wireshark dissector for the nFAPI protocol
+docs                    doxgen documentation
+common                  common code used by the nfapi libraries
+nfapi                   the nfapi library including message definitions & encode/decode functions
+pnf                     the pnf library for p4, p5, & p7 interfaces
+vnf                     the vnf library for p4, p5, & p7 interfaces
+sim_common              common simulation for used by the vnf and pnf sim
+vnf_sim                 a vnf simulator including a stub mac implementation
+pnf_sim                 a pnf simualtor including a fapi interface defintion and stub implementation
+xml                     xml configuration files for the vnf and pnf simulator
+wireshark               code for a wireshark dissector for the nFAPI protocol
 ```
 
+## Coverity
+
+Coverity runs on the coverity-scan branch. Changes must be merged to the coverity-scan branch to be checked.

@@ -4382,7 +4382,7 @@ static uint8_t unpack_tx_request(uint8_t **ppReadPackedMsg, uint8_t *end, void *
 					pdu->pdu_index = index;
 					
 
-					// TODO : Need to rethink this bit
+					// TODO : May need to rethink this bit
 					pdu->num_segments = 1;
 					pdu->segments[0].segment_length = pdu->pdu_length;
 					pdu->segments[0].segment_data = nfapi_p7_allocate(pdu->pdu_length, config);
