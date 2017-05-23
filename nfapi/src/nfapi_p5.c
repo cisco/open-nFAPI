@@ -201,6 +201,7 @@ static uint8_t pack_pnf_phy_rel13_info(void* elem, uint8_t **ppWritePackedMsg, u
 			push16(phy->drms_enhancement_supported, ppWritePackedMsg, end) &&
 			push16(phy->srs_enhancement_supported, ppWritePackedMsg, end) );
 }
+
 static uint8_t pack_pnf_phy_rel13_value(void* tlv, uint8_t **ppWritePackedMsg, uint8_t *end)
 {
 	nfapi_pnf_phy_rel13_t* value = (nfapi_pnf_phy_rel13_t*)tlv;
@@ -208,6 +209,30 @@ static uint8_t pack_pnf_phy_rel13_value(void* tlv, uint8_t **ppWritePackedMsg, u
 	return (push16(value->number_of_phys, ppWritePackedMsg, end) &&
 	        packarray(value->phy, sizeof(nfapi_pnf_phy_rel13_info_t), NFAPI_MAX_PNF_PHY, value->number_of_phys, ppWritePackedMsg, end, &pack_pnf_phy_rel13_info));
 }
+
+static uint8_t pack_pnf_phy_rel13_nb_iot_info(void* elem, uint8_t **ppWritePackedMsg, uint8_t *end)
+{
+	nfapi_pnf_phy_rel13_nb_iot_info_t* phy = (nfapi_pnf_phy_rel13_nb_iot_info_t*)elem;
+		
+	return( push16(phy->phy_config_index, ppWritePackedMsg, end) &&
+			push16(phy->number_of_rfs, ppWritePackedMsg, end) &&
+			packarray(phy->rf_config, sizeof(nfapi_rf_config_info_t), NFAPI_MAX_PNF_PHY_RF_CONFIG, phy->number_of_rfs, ppWritePackedMsg, end, &pack_rf_config_info) &&
+			push16(phy->number_of_rf_exclusions, ppWritePackedMsg, end) &&
+			packarray(phy->excluded_rf_config, sizeof(nfapi_rf_config_info_t), NFAPI_MAX_PNF_PHY_RF_CONFIG, phy->number_of_rf_exclusions, ppWritePackedMsg, end, &pack_rf_config_info) &&
+			push8(phy->number_of_dl_layers_supported, ppWritePackedMsg, end) &&
+			push8(phy->number_of_ul_layers_supported, ppWritePackedMsg, end) &&
+			push16(phy->maximum_3gpp_release_supported, ppWritePackedMsg, end) &&
+			push8(phy->nmm_modes_supported, ppWritePackedMsg, end));
+}
+
+static uint8_t pack_pnf_phy_rel13_nb_iot_value(void* tlv, uint8_t **ppWritePackedMsg, uint8_t *end)
+{
+	nfapi_pnf_phy_rel13_nb_iot_t* value = (nfapi_pnf_phy_rel13_nb_iot_t*)tlv;
+
+	return (push16(value->number_of_phys, ppWritePackedMsg, end) &&
+	        packarray(value->phy, sizeof(nfapi_pnf_phy_rel13_nb_iot_info_t), NFAPI_MAX_PNF_PHY, value->number_of_phys, ppWritePackedMsg, end, &pack_pnf_phy_rel13_nb_iot_info));
+}
+
 
 static uint8_t pack_pnf_param_response(void *msg, uint8_t **ppWritePackedMsg, uint8_t *end, nfapi_p4_p5_codec_config_t* config)
 {
@@ -221,6 +246,7 @@ static uint8_t pack_pnf_param_response(void *msg, uint8_t **ppWritePackedMsg, ui
 			pack_tlv(NFAPI_PNF_PHY_REL11_TAG, &pNfapiMsg->pnf_phy_rel11, ppWritePackedMsg, end, &pack_pnf_phy_rel11_value) &&
 			pack_tlv(NFAPI_PNF_PHY_REL12_TAG, &pNfapiMsg->pnf_phy_rel12, ppWritePackedMsg, end, &pack_pnf_phy_rel12_value) &&
 			pack_tlv(NFAPI_PNF_PHY_REL13_TAG, &pNfapiMsg->pnf_phy_rel13, ppWritePackedMsg, end, &pack_pnf_phy_rel13_value) &&
+			pack_tlv(NFAPI_PNF_PHY_REL13_NB_IOT_TAG, &pNfapiMsg->pnf_phy_rel13_nb_iot, ppWritePackedMsg, end, &pack_pnf_phy_rel13_nb_iot_value) &&
 			pack_vendor_extension_tlv(pNfapiMsg->vendor_extension, ppWritePackedMsg, end, config));
 }
 
@@ -1028,6 +1054,30 @@ static uint8_t unpack_pnf_phy_rel13_value(void* tlv, uint8_t **ppReadPackedMsg, 
 			 unpackarray(ppReadPackedMsg, value->phy, sizeof(nfapi_pnf_phy_rel13_info_t), NFAPI_MAX_PNF_PHY, value->number_of_phys, end, &unpack_pnf_phy_rel13_info));
 }
 
+static uint8_t unpack_pnf_phy_rel13_nb_info_info(void *elem, uint8_t **ppReadPackedMsg, uint8_t *end)
+{
+	nfapi_pnf_phy_rel13_nb_iot_info_t* phy = (nfapi_pnf_phy_rel13_nb_iot_info_t*)elem;
+
+	return( pull16(ppReadPackedMsg, &phy->phy_config_index, end) &&
+			pull16(ppReadPackedMsg, &phy->number_of_rfs, end) &&
+			unpackarray(ppReadPackedMsg, phy->rf_config, sizeof(nfapi_rf_config_info_t), NFAPI_MAX_PNF_PHY_RF_CONFIG, phy->number_of_rfs, end, &unpack_rf_config_info) &&
+			pull16(ppReadPackedMsg, &phy->number_of_rf_exclusions, end) &&
+			unpackarray(ppReadPackedMsg, phy->excluded_rf_config, sizeof(nfapi_rf_config_info_t), NFAPI_MAX_PNF_PHY_RF_CONFIG, phy->number_of_rf_exclusions, end, &unpack_rf_config_info) &&
+			pull8(ppReadPackedMsg, &phy->number_of_dl_layers_supported, end) &&
+			pull8(ppReadPackedMsg, &phy->number_of_ul_layers_supported, end) &&
+			pull16(ppReadPackedMsg, &phy->maximum_3gpp_release_supported, end) &&
+			pull8(ppReadPackedMsg, &phy->nmm_modes_supported, end));
+}
+
+static uint8_t unpack_pnf_phy_rel13_nb_iot_value(void* tlv, uint8_t **ppReadPackedMsg, uint8_t *end)
+{
+	nfapi_pnf_phy_rel13_nb_iot_t* value = (nfapi_pnf_phy_rel13_nb_iot_t*)tlv;
+	
+	return ( pull16(ppReadPackedMsg, &value->number_of_phys, end) &&
+			 unpackarray(ppReadPackedMsg, value->phy, sizeof(nfapi_pnf_phy_rel13_nb_iot_info_t), NFAPI_MAX_PNF_PHY, value->number_of_phys, end, &unpack_pnf_phy_rel13_nb_info_info));
+}
+
+
 
 static uint8_t unpack_pnf_param_response(uint8_t **ppReadPackedMsg, uint8_t *end, void *msg, nfapi_p4_p5_codec_config_t* config)
 {
@@ -1042,6 +1092,7 @@ static uint8_t unpack_pnf_param_response(uint8_t **ppReadPackedMsg, uint8_t *end
 		{ NFAPI_PNF_PHY_REL11_TAG, &pNfapiMsg->pnf_phy_rel11, &unpack_pnf_phy_rel11_value},
 		{ NFAPI_PNF_PHY_REL12_TAG, &pNfapiMsg->pnf_phy_rel12, &unpack_pnf_phy_rel12_value},
 		{ NFAPI_PNF_PHY_REL13_TAG, &pNfapiMsg->pnf_phy_rel13, &unpack_pnf_phy_rel13_value},
+		{ NFAPI_PNF_PHY_REL13_NB_IOT_TAG, &pNfapiMsg->pnf_phy_rel13_nb_iot, &unpack_pnf_phy_rel13_nb_iot_value},
 	};
 
 	return ( pull32(ppReadPackedMsg, &pNfapiMsg->error_code, end) &&

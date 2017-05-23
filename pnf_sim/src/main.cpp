@@ -52,7 +52,9 @@
 
 #define NUM_P5_PHY 2
 
-uint32_t rand_range(uint32_t min, uint32_t max)
+uint16_t phy_antenna_capability_values[] = { 1, 2, 4, 8, 16 };
+
+static uint32_t rand_range(uint32_t min, uint32_t max)
 {
 	return ((rand() % (max + 1 - min)) + min);
 }
@@ -534,6 +536,32 @@ int pnf_param_request(nfapi_pnf_config_t* config, nfapi_pnf_param_request_t* req
 			resp.pnf_phy_rel13.phy[i].drms_enhancement_supported = 0;
 			resp.pnf_phy_rel13.phy[i].srs_enhancement_supported = 1;
 		}
+		
+		resp.pnf_phy_rel13_nb_iot.tl.tag = NFAPI_PNF_PHY_REL13_NB_IOT_TAG;
+		resp.pnf_phy_rel13_nb_iot.number_of_phys = pnf->phys.size();		
+		
+		for(int i = 0; i < pnf->phys.size(); ++i)
+		{
+			resp.pnf_phy_rel13_nb_iot.phy[i].phy_config_index = pnf->phys[i].index; 
+			
+			resp.pnf_phy_rel13_nb_iot.phy[i].number_of_rfs = pnf->phys[i].rfs.size();
+			for(int j = 0; j < pnf->phys[i].rfs.size(); ++j)
+			{
+				resp.pnf_phy_rel13_nb_iot.phy[i].rf_config[j].rf_config_index = pnf->phys[i].rfs[j];
+			}
+	
+			resp.pnf_phy_rel13_nb_iot.phy[i].number_of_rf_exclusions = pnf->phys[i].excluded_rfs.size();
+			for(int j = 0; j < pnf->phys[i].excluded_rfs.size(); ++j)
+			{
+				resp.pnf_phy_rel13_nb_iot.phy[i].excluded_rf_config[j].rf_config_index = pnf->phys[i].excluded_rfs[j];
+			}
+			
+			resp.pnf_phy_rel13_nb_iot.phy[i].number_of_dl_layers_supported = pnf->phys[i].num_dl_layers_supported;
+			resp.pnf_phy_rel13_nb_iot.phy[i].number_of_ul_layers_supported = pnf->phys[i].num_ul_layers_supported;
+			resp.pnf_phy_rel13_nb_iot.phy[i].maximum_3gpp_release_supported = pnf->phys[i].release_supported;
+			resp.pnf_phy_rel13_nb_iot.phy[i].nmm_modes_supported = pnf->phys[i].nmm_modes_supported;
+
+		}
 	}
 
 
@@ -615,26 +643,43 @@ int fapi_param_response(fapi_t* fapi, fapi_param_resp_t* resp)
 	if(1)
 	{
 		// just code to populate all the tlv for testing with wireshark
+		// todo : these should be move up so that they are populated by fapi
 		
 		nfapi_resp.phy_capabilities.dl_modulation_support.tl.tag = NFAPI_PHY_CAPABILITIES_DL_MODULATION_SUPPORT_TAG;
+		nfapi_resp.phy_capabilities.dl_modulation_support.value = rand_range(0, 0x0F);
 		nfapi_resp.num_tlv++;
 		nfapi_resp.phy_capabilities.ul_modulation_support.tl.tag = NFAPI_PHY_CAPABILITIES_UL_MODULATION_SUPPORT_TAG;
+		nfapi_resp.phy_capabilities.ul_modulation_support.value = rand_range(0, 0x07);
 		nfapi_resp.num_tlv++;
 		nfapi_resp.phy_capabilities.phy_antenna_capability.tl.tag = NFAPI_PHY_CAPABILITIES_PHY_ANTENNA_CAPABILITY_TAG;
+		nfapi_resp.phy_capabilities.phy_antenna_capability.value = phy_antenna_capability_values[rand_range(0, 4)];
 		nfapi_resp.num_tlv++;
 		nfapi_resp.phy_capabilities.release_capability.tl.tag = NFAPI_PHY_CAPABILITIES_RELEASE_CAPABILITY_TAG;
+		nfapi_resp.phy_capabilities.release_capability.value = rand_range(0, 0x3F);
 		nfapi_resp.num_tlv++;
 		nfapi_resp.phy_capabilities.mbsfn_capability.tl.tag = NFAPI_PHY_CAPABILITIES_MBSFN_CAPABILITY_TAG;
+		nfapi_resp.phy_capabilities.mbsfn_capability.value = rand_range(0, 1);
 		nfapi_resp.num_tlv++;
 		
 		
 		nfapi_resp.laa_capability.laa_support.tl.tag = NFAPI_LAA_CAPABILITY_LAA_SUPPORT_TAG;
+		nfapi_resp.laa_capability.laa_support.value = rand_range(0, 1);
 		nfapi_resp.num_tlv++;
 		nfapi_resp.laa_capability.pd_sensing_lbt_support.tl.tag = NFAPI_LAA_CAPABILITY_PD_SENSING_LBT_SUPPORT_TAG;
+		nfapi_resp.laa_capability.pd_sensing_lbt_support.value = rand_range(0, 1);		
 		nfapi_resp.num_tlv++;
 		nfapi_resp.laa_capability.multi_carrier_lbt_support.tl.tag = NFAPI_LAA_CAPABILITY_MULTI_CARRIER_LBT_SUPPORT_TAG;
+		nfapi_resp.laa_capability.multi_carrier_lbt_support.value = rand_range(0, 0x0F);		
 		nfapi_resp.num_tlv++;
 		nfapi_resp.laa_capability.partial_sf_support.tl.tag = NFAPI_LAA_CAPABILITY_PARTIAL_SF_SUPPORT_TAG;
+		nfapi_resp.laa_capability.partial_sf_support.value = rand_range(0, 1);		
+		nfapi_resp.num_tlv++;
+		
+		nfapi_resp.nb_iot_capability.nb_iot_support.tl.tag = NFAPI_LAA_CAPABILITY_NB_IOT_SUPPORT_TAG;
+		nfapi_resp.nb_iot_capability.nb_iot_support.value = rand_range(0, 2);		
+		nfapi_resp.num_tlv++;
+		nfapi_resp.nb_iot_capability.nb_iot_operating_mode_capability.tl.tag = NFAPI_LAA_CAPABILITY_NB_IOT_OPERATING_MODE_CAPABILITY_TAG;
+		nfapi_resp.nb_iot_capability.nb_iot_operating_mode_capability.value = rand_range(0, 1);		
 		nfapi_resp.num_tlv++;
 		
 		nfapi_resp.subframe_config.duplex_mode.tl.tag = NFAPI_SUBFRAME_CONFIG_DUPLEX_MODE_TAG;
@@ -1341,6 +1386,83 @@ int fapi_srs_ind(fapi_t* fapi, fapi_srs_ind_t* ind)
 	return 0;
 }
 
+int fapi_lbt_dl_ind(fapi_t* fapi, fapi_lbt_dl_ind_t* ind)
+{
+	pnf_phy_user_data_t* data = (pnf_phy_user_data_t*)(fapi->user_data);
+}
+
+int fapi_nb_harq_ind(fapi_t* fapi, fapi_nb_harq_ind_t* ind)
+{
+	pnf_phy_user_data_t* data = (pnf_phy_user_data_t*)(fapi->user_data);
+	
+	nfapi_nb_harq_indication_t nb_harq_ind;
+	memset(&nb_harq_ind, 0, sizeof(nb_harq_ind));
+	nb_harq_ind.header.message_id = NFAPI_NB_HARQ_INDICATION;
+	nb_harq_ind.header.phy_id = data->p7_config->phy_id;
+	nb_harq_ind.sfn_sf = ind->sfn_sf;
+
+	if(((pnf_info*)(data->config->user_data))->wireshark_test_mode)
+	{
+		
+		nb_harq_ind.nb_harq_indication_body.tl.tag = NFAPI_NB_HARQ_INDICATION_BODY_TAG;
+		nb_harq_ind.nb_harq_indication_body.number_of_harqs = 1;
+		
+		nfapi_nb_harq_indication_pdu_t pdus[nb_harq_ind.nb_harq_indication_body.number_of_harqs];
+		memset(&pdus, 0, sizeof(pdus));	
+		
+		pdus[0].rx_ue_information.tl.tag = NFAPI_RX_UE_INFORMATION_TAG;
+		pdus[0].rx_ue_information.handle = rand_range(0, -1);
+		pdus[0].rx_ue_information.rnti = rand_range(0, 65535);
+		
+		pdus[0].nb_harq_indication_fdd_rel13.tl.tag = NFAPI_NB_HARQ_INDICATION_FDD_REL13_TAG;
+		pdus[0].nb_harq_indication_fdd_rel13.harq_tb1 = rand_range(1, 7);
+		
+		pdus[0].ul_cqi_information.tl.tag = NFAPI_UL_CQI_INFORMATION_TAG;
+		pdus[0].ul_cqi_information.ul_cqi = rand_range(0, 255);
+		pdus[0].ul_cqi_information.channel = rand_range(0, 1);
+		
+		nb_harq_ind.nb_harq_indication_body.nb_harq_pdu_list = pdus;
+		nfapi_pnf_p7_nb_harq_ind(data->p7_config, &nb_harq_ind);
+	}
+	else
+	{
+		nfapi_pnf_p7_nb_harq_ind(data->p7_config, &nb_harq_ind);
+	}
+}
+
+int fapi_nrach_ind(fapi_t* fapi, fapi_nrach_ind_t* ind)
+{
+	pnf_phy_user_data_t* data = (pnf_phy_user_data_t*)(fapi->user_data);
+	
+	nfapi_nrach_indication_t nrach_ind;
+	memset(&nrach_ind, 0, sizeof(nrach_ind));
+	nrach_ind.header.message_id = NFAPI_NRACH_INDICATION;
+	nrach_ind.header.phy_id = data->p7_config->phy_id;
+	nrach_ind.sfn_sf = ind->sfn_sf;
+
+	if(((pnf_info*)(data->config->user_data))->wireshark_test_mode)
+	{
+		nrach_ind.nrach_indication_body.tl.tag = NFAPI_NRACH_INDICATION_BODY_TAG;
+		nrach_ind.nrach_indication_body.number_of_initial_scs_detected = 1;
+		
+		nfapi_nrach_indication_pdu_t pdus[nrach_ind.nrach_indication_body.number_of_initial_scs_detected];
+		memset(&pdus, 0, sizeof(pdus));	
+		
+		pdus[0].nrach_indication_rel13.tl.tag = NFAPI_NRACH_INDICATION_REL13_TAG;
+		pdus[0].nrach_indication_rel13.rnti = rand_range(1, 65535);
+		pdus[0].nrach_indication_rel13.initial_sc = rand_range(0, 47);
+		pdus[0].nrach_indication_rel13.timing_advance = rand_range(0, 3840);
+		pdus[0].nrach_indication_rel13.nrach_ce_level = rand_range(0, 2);
+		
+		nrach_ind.nrach_indication_body.nrach_pdu_list = pdus;
+		
+		nfapi_pnf_p7_nrach_ind(data->p7_config, &nrach_ind);
+	}
+	else
+	{
+		nfapi_pnf_p7_nrach_ind(data->p7_config, &nrach_ind);
+	}	
+}
 
 int pnf_start_request(nfapi_pnf_config_t* config, nfapi_pnf_start_request_t* req)
 {
@@ -1370,6 +1492,12 @@ int pnf_start_request(nfapi_pnf_config_t* config, nfapi_pnf_start_request_t* req
 			cb.fapi_rx_sr_ind = fapi_rx_sr_ind;
 			cb.fapi_rach_ind = fapi_rach_ind;
 			cb.fapi_srs_ind = fapi_srs_ind;
+			
+			cb.fapi_lbt_dl_ind = fapi_lbt_dl_ind;
+			cb.fapi_nb_harq_ind = fapi_nb_harq_ind;
+			cb.fapi_nrach_ind = fapi_nrach_ind;
+			
+			
 
 			fapi_config_t c;
 			c.duplex_mode = phy.duplex_mode;

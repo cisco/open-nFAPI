@@ -272,6 +272,15 @@ void send_uplink_indications(fapi_internal_t* instance, uint16_t sfn_sf)
 	ve_p7_ind.error_code = NFAPI_MSG_OK;
 	nfapi_pnf_p7_vendor_extension(config, &(ve_p7_ind.header));
 	*/
+	
+	fapi_nb_harq_ind_t nb_harq_ind;
+	nb_harq_ind.sfn_sf = sfn_sf;
+	(instance->callbacks.fapi_nb_harq_ind)(&(instance->_public), &nb_harq_ind);
+
+	fapi_nrach_ind_t nrach_ind;
+	nrach_ind.sfn_sf = sfn_sf;
+	(instance->callbacks.fapi_nrach_ind)(&(instance->_public), &nrach_ind);
+
 }
 
 void* fapi_thread_start(void* ptr)

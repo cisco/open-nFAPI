@@ -48,6 +48,9 @@ void mac_rach_ind(mac_t* mac, nfapi_rach_indication_t* ind);
 void mac_srs_ind(mac_t* mac, nfapi_srs_indication_t* ind);
 void mac_sr_ind(mac_t* mac, nfapi_sr_indication_t* ind);
 void mac_cqi_ind(mac_t* mac, nfapi_cqi_indication_t* ind);
+void mac_lbt_dl_ind(mac_t* mac, nfapi_lbt_dl_indication_t* ind);
+void mac_nb_harq_ind(mac_t* mac, nfapi_nb_harq_indication_t* ind);
+void mac_nrach_ind(mac_t* mac, nfapi_nrach_indication_t* ind);
 
 
 #if defined(__cplusplus)

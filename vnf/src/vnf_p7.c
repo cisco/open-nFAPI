@@ -761,6 +761,62 @@ void vnf_handle_lbt_dl_indication(void *pRecvMsg, int recvMsgLen, vnf_p7_t* vnf_
 	}
 }
 
+void vnf_handle_nb_harq_indication(void *pRecvMsg, int recvMsgLen, vnf_p7_t* vnf_p7)
+{
+	// ensure it's valid
+	if (pRecvMsg == NULL || vnf_p7 == NULL)
+	{
+		NFAPI_TRACE(NFAPI_TRACE_ERROR, "%s: NULL parameters\n", __FUNCTION__);
+	}
+	else
+	{
+		nfapi_nb_harq_indication_t ind;
+	
+		if(nfapi_p7_message_unpack(pRecvMsg, recvMsgLen, &ind, sizeof(ind), &vnf_p7->_public.codec_config) < 0)
+		{
+			NFAPI_TRACE(NFAPI_TRACE_ERROR, "%s: Failed to unpack message\n", __FUNCTION__);
+		}
+		else
+		{
+			if(vnf_p7->_public.nb_harq_indication)
+			{
+				(vnf_p7->_public.nb_harq_indication)(&(vnf_p7->_public), &ind);
+			}
+		}
+	
+		vnf_p7_codec_free(vnf_p7, ind.nb_harq_indication_body.nb_harq_pdu_list);
+		vnf_p7_codec_free(vnf_p7, ind.vendor_extension);
+	}
+}
+
+void vnf_handle_nrach_indication(void *pRecvMsg, int recvMsgLen, vnf_p7_t* vnf_p7)
+{
+	// ensure it's valid
+	if (pRecvMsg == NULL || vnf_p7 == NULL)
+	{
+		NFAPI_TRACE(NFAPI_TRACE_ERROR, "%s: NULL parameters\n", __FUNCTION__);
+	}
+	else
+	{
+		nfapi_nrach_indication_t ind;
+	
+		if(nfapi_p7_message_unpack(pRecvMsg, recvMsgLen, &ind, sizeof(ind), &vnf_p7->_public.codec_config) < 0)
+		{
+			NFAPI_TRACE(NFAPI_TRACE_ERROR, "%s: Failed to unpack message\n", __FUNCTION__);
+		}
+		else
+		{
+			if(vnf_p7->_public.nrach_indication)
+			{
+				(vnf_p7->_public.nrach_indication)(&(vnf_p7->_public), &ind);
+			}
+		}
+	
+		vnf_p7_codec_free(vnf_p7, ind.nrach_indication_body.nrach_pdu_list);
+		vnf_p7_codec_free(vnf_p7, ind.vendor_extension);
+	}
+}
+
 void vnf_handle_p7_vendor_extension(void *pRecvMsg, int recvMsgLen, vnf_p7_t* vnf_p7, uint16_t message_id)
 {
 	if (pRecvMsg == NULL || vnf_p7 == NULL)
@@ -1232,6 +1288,14 @@ void vnf_dispatch_p7_message(void *pRecvMsg, int recvMsgLen, vnf_p7_t* vnf_p7)
 		case NFAPI_LBT_DL_INDICATION:
 			vnf_handle_lbt_dl_indication(pRecvMsg, recvMsgLen, vnf_p7);
 			break;
+			
+		case NFAPI_NB_HARQ_INDICATION:
+			vnf_handle_nb_harq_indication(pRecvMsg, recvMsgLen, vnf_p7);
+			break;
+			
+		case NFAPI_NRACH_INDICATION:
+			vnf_handle_nrach_indication(pRecvMsg, recvMsgLen, vnf_p7);
+			break;			
 
 		default:
 			{

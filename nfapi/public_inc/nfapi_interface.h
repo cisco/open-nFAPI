@@ -26,14 +26,16 @@
 #define NFAPI_PNF_PARAM_GENERAL_OUI_LENGTH 3
 #define NFAPI_MAX_NUM_RF_BANDS 16
 
-// TODO : The following maximums need to be defined
+// The following definition control the size of arrays used in the interface.
+// These may be changed if desired. They are used in the encoder to make sure 
+// that the user has not specified a 'count' larger than the max array, and also
+// used by the decoder when decode an array. If the 'count' received is larger
+// than the array it is to be stored in the decode fails. 
 #define NFAPI_MAX_NUM_ANTENNAS 8
 #define NFAPI_MAX_NUM_SUBBANDS 13
 #define NFAPI_MAX_BF_VECTORS 8
 #define NFAPI_MAX_CC 1
-
-
-
+#define NFAPI_MAX_NUM_PHYSICAL_ANTENNAS 8
 #define NFAPI_MAX_RSSI 8
 #define NFAPI_MAX_PSC_LIST 32
 #define NFAPI_MAX_PCI_LIST 32
@@ -42,12 +44,26 @@
 #define NFAPI_MAX_LTE_CELLS_FOUND 8
 #define NFAPI_MAX_UTRAN_CELLS_FOUND 8
 #define NFAPI_MAX_GSM_CELLS_FOUND 8
+#define NFAPI_MAX_NB_IOT_CELLS_FOUND 8
 #define NFAPI_MAX_SI_PERIODICITY 8
+#define NFAPI_MAX_SI_INDEX 8
 #define NFAPI_MAX_MIB_LENGTH 32
 #define NFAPI_MAX_SIB_LENGTH 256
 #define NFAPI_MAX_SI_LENGTH 256
-
 #define NFAPI_MAX_OPAQUE_DATA 64
+#define NFAPI_MAX_NUM_SCHEDULED_UES 8 // Used in the TPM structure
+#define NFAPI_MAX_PNF_PHY 5
+#define NFAPI_MAX_PNF_PHY_RF_CONFIG 5
+#define NFAPI_MAX_PNF_RF  5
+#define NFAPI_MAX_NMM_FREQUENCY_BANDS 32
+#define NFAPI_MAX_RECEIVED_INTERFERENCE_POWER_RESULTS 100
+#define NFAPI_MAX_UL_DL_CONFIGURATIONS 5
+#define NFAPI_MAX_CSI_RS_RESOURCE_CONFIG 4
+#define NFAPI_MAX_ANTENNA_PORT_COUNT 8
+#define NFAPI_MAX_EPDCCH_PRB 8
+#define NFAPI_MAX_TX_PHYSICAL_ANTENNA_PORTS 8
+#define NFAPI_MAX_NUMBER_ACK_NACK_TDD 8
+#define NFAPI_MAX_RO_DL 8
 
 #define NFAPI_HEADER_LENGTH 8
 #define NFAPI_P7_HEADER_LENGTH 16
@@ -109,9 +125,7 @@ typedef struct {
 
 #define NFAPI_MAX_SFNSFDEC 10240
 
-
 typedef nfapi_tl_t* nfapi_vendor_extension_tlv_t;
-
 
 
 // nFAPI Message IDs
@@ -130,6 +144,8 @@ typedef enum {
 	NFAPI_RX_CQI_INDICATION,
 	NFAPI_LBT_DL_CONFIG_REQUEST,
 	NFAPI_LBT_DL_INDICATION,
+	NFAPI_NB_HARQ_INDICATION,
+	NFAPI_NRACH_INDICATION,
 
 	NFAPI_PNF_PARAM_REQUEST = 0x0100,
 	NFAPI_PNF_PARAM_RESPONSE,
@@ -191,6 +207,14 @@ typedef enum {
 	NFAPI_MSG_INVALID_SFN,
 	NFAPI_MSG_HI_ERR,
 	NFAPI_MSG_TX_ERR,
+	
+	NFAPI_LBT_NO_PDU_IN_DL_REQ,
+	NFAPI_LBT_NO_VALID_CONFIG_REQ_RECEIVED,
+	NFAPI_FAPI_E_LBT_SF_SFN_PASSED_END_SF_SFN,
+	NFAPI_FAPI_E_LBT_OVERLAP,
+	NFAPI_MSG_BCH_PRESENT,
+	
+	NFAPI_NBIOT_UNEXPECTED_REQ,
 
 	// This is special return code that indicates that a response has
 	// been send via P9
@@ -223,6 +247,9 @@ typedef enum {
 	NFAPI_DL_CONFIG_CSI_RS_PDU_TYPE,
 	NFAPI_DL_CONFIG_EPDCCH_DL_PDU_TYPE,
 	NFAPI_DL_CONFIG_MPDCCH_PDU_TYPE,
+	NFAPI_DL_CONFIG_NBCH_PDU_TYPE,
+	NFAPI_DL_CONFIG_NPDCCH_PDU_TYPE,
+	NFAPI_DL_CONFIG_NDLSCH_PDU_TYPE
 } nfapi_dl_config_pdu_type_e;
 
 typedef enum {
@@ -261,6 +288,8 @@ typedef enum {
 	NFAPI_UL_CONFIG_ULSCH_UCI_CSI_PDU_TYPE,
 	NFAPI_UL_CONFIG_ULSCH_UCI_HARQ_PDU_TYPE,
 	NFAPI_UL_CONFIG_ULSCH_CSI_UCI_HARQ_PDU_TYPE,
+	NFAPI_UL_CONFIG_NULSCH_PDU_TYPE,
+	NFAPI_UL_CONFIG_NRACH_PDU_TYPE,
 } nfapi_ul_config_pdu_type_e;
 
 typedef enum {
@@ -268,6 +297,7 @@ typedef enum {
 	NFAPI_HI_DCI0_DCI_PDU_TYPE,
 	NFAPI_HI_DCI0_EPDCCH_DCI_PDU_TYPE,
 	NFAPI_HI_DCI0_MPDCCH_DCI_PDU_TYPE,
+	NFAPI_HI_DCI0_NPDCCH_DCI_PDU_TYPE,
 } nfapi_hi_dci0_pdu_type_e;
 
 typedef enum {
@@ -326,7 +356,8 @@ typedef enum {
 typedef enum {
 	NFAPI_RAT_TYPE_LTE = 0,
 	NFAPI_RAT_TYPE_UTRAN = 1,
-	NFAPI_RAT_TYPE_GERAN = 2
+	NFAPI_RAT_TYPE_GERAN = 2,
+	NFAPI_RAT_TYPE_NB_IOT = 3
 } nfapi_rat_type_e;
 
 typedef enum {
@@ -384,8 +415,7 @@ typedef struct {
 
 
 
-#define NFAPI_MAX_PNF_PHY 5 // todo : what is the valid range
-#define NFAPI_MAX_PNF_PHY_RF_CONFIG 5 // todo : what is the valid range
+
 
 typedef struct {
 	uint16_t rf_config_index;
@@ -485,9 +515,26 @@ typedef struct {
 } nfapi_pnf_phy_rel13_t;
 #define NFAPI_PNF_PHY_REL13_TAG 0x100D
 
+typedef struct {
+	uint16_t phy_config_index;
+	uint16_t number_of_rfs;
+	nfapi_rf_config_info_t rf_config[NFAPI_MAX_PNF_PHY_RF_CONFIG];
+	uint16_t number_of_rf_exclusions;
+	nfapi_rf_config_info_t excluded_rf_config[NFAPI_MAX_PNF_PHY_RF_CONFIG];
+	uint8_t number_of_dl_layers_supported;
+	uint8_t number_of_ul_layers_supported;
+	uint16_t maximum_3gpp_release_supported;
+	uint8_t nmm_modes_supported;
+} nfapi_pnf_phy_rel13_nb_iot_info_t;
+
+typedef struct {
+	nfapi_tl_t tl;
+	uint16_t number_of_phys;
+	nfapi_pnf_phy_rel13_nb_iot_info_t phy[NFAPI_MAX_PNF_PHY];
+} nfapi_pnf_phy_rel13_nb_iot_t;
+#define NFAPI_PNF_PHY_REL13_NB_IOT_TAG 0x100E
 
 
-#define NFAPI_MAX_PNF_RF  5 // todo : what is the valid range
 
 typedef struct {
 	uint16_t rf_config_index;
@@ -560,7 +607,6 @@ typedef struct {
 #define NFAPI_PHY_CAPABILITIES_PHY_ANTENNA_CAPABILITY_TAG 0x00CC
 #define NFAPI_PHY_CAPABILITIES_RELEASE_CAPABILITY_TAG 0x00CD
 #define NFAPI_PHY_CAPABILITIES_MBSFN_CAPABILITY_TAG 0x00CE
-//#define NFAPI_PHY_CAPABILITIES_LAA_CAPABILITY_TAG 0x00CF
 
 
 typedef struct {
@@ -773,6 +819,80 @@ typedef struct {
 #define NFAPI_EMTC_CONFIG_PUCCH_INTERVAL_ULHOPPINGCONFIGCOMMONMODEB_TAG 0x0099
 
 typedef struct {
+	nfapi_uint16_tlv_t operating_mode;
+	nfapi_uint16_tlv_t anchor;
+	nfapi_uint16_tlv_t prb_index;
+	nfapi_uint16_tlv_t control_region_size;
+	nfapi_uint16_tlv_t assumed_crs_aps;
+	nfapi_uint16_tlv_t nprach_config_0_enabled;
+	nfapi_uint16_tlv_t nprach_config_0_sf_periodicity;
+	nfapi_uint16_tlv_t nprach_config_0_start_time;
+	nfapi_uint16_tlv_t nprach_config_0_subcarrier_offset;
+	nfapi_uint16_tlv_t nprach_config_0_number_of_subcarriers;
+	nfapi_uint16_tlv_t nprach_config_0_cp_length;
+	nfapi_uint16_tlv_t nprach_config_0_number_of_repetitions_per_attempt;
+	nfapi_uint16_tlv_t nprach_config_1_enabled;
+	nfapi_uint16_tlv_t nprach_config_1_sf_periodicity;
+	nfapi_uint16_tlv_t nprach_config_1_start_time;
+	nfapi_uint16_tlv_t nprach_config_1_subcarrier_offset;
+	nfapi_uint16_tlv_t nprach_config_1_number_of_subcarriers;
+	nfapi_uint16_tlv_t nprach_config_1_cp_length;
+	nfapi_uint16_tlv_t nprach_config_1_number_of_repetitions_per_attempt;
+	nfapi_uint16_tlv_t nprach_config_2_enabled;
+	nfapi_uint16_tlv_t nprach_config_2_sf_periodicity;
+	nfapi_uint16_tlv_t nprach_config_2_start_time;
+	nfapi_uint16_tlv_t nprach_config_2_subcarrier_offset;
+	nfapi_uint16_tlv_t nprach_config_2_number_of_subcarriers;
+	nfapi_uint16_tlv_t nprach_config_2_cp_length;
+	nfapi_uint16_tlv_t nprach_config_2_number_of_repetitions_per_attempt;
+	nfapi_uint16_tlv_t three_tone_base_sequence;
+	nfapi_uint16_tlv_t six_tone_base_sequence;
+	nfapi_uint16_tlv_t twelve_tone_base_sequence;
+	nfapi_uint16_tlv_t three_tone_cyclic_shift;
+	nfapi_uint16_tlv_t six_tone_cyclic_shift;
+	nfapi_uint16_tlv_t dl_gap_config_enable;
+	nfapi_uint16_tlv_t dl_gap_threshold;
+	nfapi_uint16_tlv_t dl_gap_periodicity;
+	nfapi_uint16_tlv_t dl_gap_duration_coefficient;
+} nfapi_nb_iot_config_t;
+
+#define NFAPI_NB_IOT_CONFIG_OPERATING_MODE_TAG 0x00A5
+#define NFAPI_NB_IOT_CONFIG_ANCHOR_TAG 0x00A6
+#define NFAPI_NB_IOT_CONFIG_PRB_INDEX_TAG 0x00A7
+#define NFAPI_NB_IOT_CONFIG_CONTROL_REGION_SIZE_TAG 0x00A8
+#define NFAPI_NB_IOT_CONFIG_ASSUMED_CRS_APS_TAG 0x00A9
+#define NFAPI_NB_IOT_CONFIG_NPRACH_CONFIG_0_ENABLED_TAG 0x00AA
+#define NFAPI_NB_IOT_CONFIG_NPRACH_CONFIG_0_SF_PERIODICITY_TAG 0x00AB
+#define NFAPI_NB_IOT_CONFIG_NPRACH_CONFIG_0_START_TIME_TAG 0x00AC
+#define NFAPI_NB_IOT_CONFIG_NPRACH_CONFIG_0_SUBCARRIER_OFFSET_TAG 0x00AD
+#define NFAPI_NB_IOT_CONFIG_NPRACH_CONFIG_0_NUMBER_OF_SUBCARRIERS_TAG 0x00AE
+#define NFAPI_NB_IOT_CONFIG_NPRACH_CONFIG_0_CP_LENGTH_TAG 0x00AF
+#define NFAPI_NB_IOT_CONFIG_NPRACH_CONFIG_0_NUMBER_OF_REPETITIONS_PER_ATTEMPT_TAG 0x00B0
+#define NFAPI_NB_IOT_CONFIG_NPRACH_CONFIG_1_ENABLED_TAG 0x00B1
+#define NFAPI_NB_IOT_CONFIG_NPRACH_CONFIG_1_SF_PERIODICITY_TAG 0x00B2
+#define NFAPI_NB_IOT_CONFIG_NPRACH_CONFIG_1_START_TIME_TAG 0x00B3
+#define NFAPI_NB_IOT_CONFIG_NPRACH_CONFIG_1_SUBCARRIER_OFFSET_TAG 0x00B4
+#define NFAPI_NB_IOT_CONFIG_NPRACH_CONFIG_1_NUMBER_OF_SUBCARRIERS_TAG 0x00B5
+#define NFAPI_NB_IOT_CONFIG_NPRACH_CONFIG_1_CP_LENGTH_TAG 0x00B6
+#define NFAPI_NB_IOT_CONFIG_NPRACH_CONFIG_1_NUMBER_OF_REPETITIONS_PER_ATTEMPT_TAG 0x00B7
+#define NFAPI_NB_IOT_CONFIG_NPRACH_CONFIG_2_ENABLED_TAG 0x00B8
+#define NFAPI_NB_IOT_CONFIG_NPRACH_CONFIG_2_SF_PERIODICITY_TAG 0x00B9
+#define NFAPI_NB_IOT_CONFIG_NPRACH_CONFIG_2_START_TIME_TAG 0x00BA
+#define NFAPI_NB_IOT_CONFIG_NPRACH_CONFIG_2_SUBCARRIER_OFFSET_TAG 0x00BB
+#define NFAPI_NB_IOT_CONFIG_NPRACH_CONFIG_2_NUMBER_OF_SUBCARRIERS_TAG 0x00BC
+#define NFAPI_NB_IOT_CONFIG_NPRACH_CONFIG_2_CP_LENGTH_TAG 0x00BD
+#define NFAPI_NB_IOT_CONFIG_NPRACH_CONFIG_2_NUMBER_OF_REPETITIONS_PER_ATTEMPT_TAG 0x00BE
+#define NFAPI_NB_IOT_CONFIG_THREE_TONE_BASE_SEQUENCE_TAG 0x00BF
+#define NFAPI_NB_IOT_CONFIG_SIX_TONE_BASE_SEQUENCE_TAG 0x00C0
+#define NFAPI_NB_IOT_CONFIG_TWELVE_TONE_BASE_SEQUENCE_TAG 0x00C1
+#define NFAPI_NB_IOT_CONFIG_THREE_TONE_CYCLIC_SHIFT_TAG 0x00C2
+#define NFAPI_NB_IOT_CONFIG_SIX_TONE_CYCLIC_SHIFT_TAG 0x00C3
+#define NFAPI_NB_IOT_CONFIG_DL_GAP_CONFIG_ENABLE_TAG 0x00C4
+#define NFAPI_NB_IOT_CONFIG_DL_GAP_THRESHOLD_TAG 0x00C5
+#define NFAPI_NB_IOT_CONFIG_DL_GAP_PERIODICITY_TAG 0x00C6
+#define NFAPI_NB_IOT_CONFIG_DL_GAP_DURATION_COEFFICIENT_TAG 0x00C7
+
+typedef struct {
 	nfapi_uint16_tlv_t laa_support;
 	nfapi_uint16_tlv_t pd_sensing_lbt_support;
 	nfapi_uint16_tlv_t multi_carrier_lbt_support;
@@ -783,6 +903,14 @@ typedef struct {
 #define NFAPI_LAA_CAPABILITY_PD_SENSING_LBT_SUPPORT_TAG 0x00D2
 #define NFAPI_LAA_CAPABILITY_MULTI_CARRIER_LBT_SUPPORT_TAG 0x00D3
 #define NFAPI_LAA_CAPABILITY_PARTIAL_SF_SUPPORT_TAG 0x00D4
+
+typedef struct {
+	nfapi_uint16_tlv_t nb_iot_support;
+	nfapi_uint16_tlv_t nb_iot_operating_mode_capability;
+} nfapi_nb_iot_capability_t;
+
+#define NFAPI_LAA_CAPABILITY_NB_IOT_SUPPORT_TAG 0x00D5
+#define NFAPI_LAA_CAPABILITY_NB_IOT_OPERATING_MODE_CAPABILITY_TAG 0x00D6
 
 typedef struct {
 	nfapi_uint16_tlv_t subframe_assignment;
@@ -829,7 +957,7 @@ typedef struct {
 	uint8_t address[NFAPI_IPV6_ADDRESS_LENGTH];
 } nfapi_ipv6_address_t;
 
-#define NFAPI_MAX_NMM_FREQUENCY_BANDS 32
+
 
 typedef struct {
 	nfapi_tl_t tl;
@@ -909,6 +1037,7 @@ typedef struct {
 	nfapi_pnf_phy_rel11_t pnf_phy_rel11;
 	nfapi_pnf_phy_rel12_t pnf_phy_rel12;
 	nfapi_pnf_phy_rel13_t pnf_phy_rel13;
+	nfapi_pnf_phy_rel13_nb_iot_t pnf_phy_rel13_nb_iot;
 	nfapi_vendor_extension_tlv_t vendor_extension;
 } nfapi_pnf_param_response_t;
 
@@ -955,10 +1084,12 @@ typedef struct {
 	nfapi_p4_p5_message_header_t header;
 	uint8_t error_code;
 	uint8_t num_tlv;
-	// fdd or tdd in idle or confingured tlvs
+	// fdd or tdd in idle or configured tlvs
 	nfapi_l1_status l1_status;
 	nfapi_phy_capabilities_t phy_capabilities;
 	nfapi_laa_capability_t laa_capability;
+	nfapi_nb_iot_capability_t nb_iot_capability;
+	
 	nfapi_subframe_config_t subframe_config;
 	nfapi_rf_config_t rf_config;
 	nfapi_phich_config_t phich_config;
@@ -970,6 +1101,7 @@ typedef struct {
 	nfapi_uplink_reference_signal_config_t uplink_reference_signal_config;
 	nfapi_tdd_frame_structure_t tdd_frame_structure_config;
 	nfapi_l23_config_t l23_config;
+	nfapi_nb_iot_config_t nb_iot_config;
 
 	// addition nfapi tlvs as per table 2-16 in idle or configure
 	nfapi_nfapi_t nfapi_config;
@@ -992,7 +1124,8 @@ typedef struct {
 	nfapi_emtc_config_t emtc_config;
 	nfapi_tdd_frame_structure_t tdd_frame_structure_config;
 	nfapi_l23_config_t l23_config;
-
+	nfapi_nb_iot_config_t nb_iot_config;
+	
 	// addition nfapi tlvs as per table 2-16 in idle or configure
 	nfapi_nfapi_t nfapi_config;
 
@@ -1039,7 +1172,7 @@ typedef struct {
 #define NFAPI_MEASUREMENT_REQUEST_RECEIVED_INTERFERENCE_POWER_TAG 0x1005
 #define NFAPI_MEASUREMENT_REQUEST_THERMAL_NOISE_POWER_TAG 0x1006
 
-#define NFAPI_MAX_RECEIVED_INTERFERENCE_POWER_RESULTS 100
+
 
 typedef struct {
 	nfapi_tl_t tl;
@@ -1123,7 +1256,7 @@ typedef struct {
 
 #define NFAPI_DL_CONFIG_REQUEST_DCI_DL_PDU_REL11_TAG 0x2039
 
-#define NFAPI_MAX_UL_DL_CONFIGURATIONS 5
+
 
 typedef struct {
 	nfapi_tl_t tl;
@@ -1135,6 +1268,21 @@ typedef struct {
 
 #define NFAPI_DL_CONFIG_REQUEST_DCI_DL_PDU_REL12_TAG 0x203a
 
+
+
+typedef struct {
+	uint8_t subband_index;
+	uint8_t scheduled_ues;
+	uint16_t precoding_value[NFAPI_MAX_NUM_PHYSICAL_ANTENNAS][NFAPI_MAX_NUM_SCHEDULED_UES];
+} nfapi_dl_config_dci_dl_tpm_subband_info_t;
+
+typedef struct {
+	uint8_t num_prb_per_subband;
+	uint8_t number_of_subbands;
+	uint8_t num_antennas;
+	nfapi_dl_config_dci_dl_tpm_subband_info_t subband_info[NFAPI_MAX_NUM_SUBBANDS];
+} nfapi_dl_config_dci_dl_tpm_t;
+
 typedef struct {
 	nfapi_tl_t tl;
 	uint8_t laa_end_partial_sf_flag;
@@ -1142,12 +1290,11 @@ typedef struct {
 	uint8_t initial_lbt_sf;
 	uint8_t codebook_size_determination;
 	uint8_t drms_table_flag;
+	uint8_t tpm_struct_flag;
+	nfapi_dl_config_dci_dl_tpm_t tpm;
 } nfapi_dl_config_dci_dl_pdu_rel13_t;
 
 #define NFAPI_DL_CONFIG_REQUEST_DCI_DL_PDU_REL13_TAG 0x203b
-
-
-
 
 typedef struct {
 	nfapi_dl_config_dci_dl_pdu_rel8_t dci_dl_pdu_rel8;
@@ -1228,7 +1375,6 @@ typedef struct {
 } nfapi_dl_config_dlsch_pdu_rel9_t;
 #define NFAPI_DL_CONFIG_REQUEST_DLSCH_PDU_REL9_TAG 0x2007
 
-#define NFAPI_MAX_CSI_RS_RESOURCE_CONFIG 4
 typedef struct {
 	nfapi_tl_t tl;
 	uint8_t csi_rs_flag;
@@ -1339,7 +1485,6 @@ typedef struct {
 } nfapi_dl_config_csi_rs_pdu_rel10_t;
 #define NFAPI_DL_CONFIG_REQUEST_CSI_RS_PDU_REL10_TAG 0x200B
 
-#define NFAPI_MAX_ANTENNA_PORT_COUNT 8
 typedef struct {
 	nfapi_tl_t tl;
 	uint8_t csi_rs_class;
@@ -1365,37 +1510,36 @@ typedef struct {
 #define NFAPI_DL_CONFIG_REQUEST_EPDCCH_PDU_REL12_TAG 0x203a
 #define NFAPI_DL_CONFIG_REQUEST_EPDCCH_PDU_REL13_TAG 0x203b
 
-#define NFAPI_MAX_EPDCCH_PRB 8
 typedef struct {
 	nfapi_tl_t tl;
-	uint8_t edpcch_resource_assigenment_flag;
-	uint16_t edpcch_id;
+	uint8_t epdcch_resource_assignment_flag;
+	uint16_t epdcch_id;
 	uint8_t epdcch_start_symbol;
 	uint8_t epdcch_num_prb;
 	uint8_t epdcch_prb_index[NFAPI_MAX_EPDCCH_PRB];
 	nfapi_bf_vector_t bf_vector;
-} nfapi_dl_config_edpcch_parameters_rel11_t;
+} nfapi_dl_config_epdcch_parameters_rel11_t;
 #define NFAPI_DL_CONFIG_REQUEST_EPDCCH_PARAM_REL11_TAG 0x2041
 
 typedef struct {
 	nfapi_tl_t tl;
 	uint8_t dwpts_symbols;
 	uint8_t initial_lbt_sf;
-} nfapi_dl_config_edpcch_parameters_rel13_t;
+} nfapi_dl_config_epdcch_parameters_rel13_t;
 #define NFAPI_DL_CONFIG_REQUEST_EPDCCH_PARAM_REL13_TAG 0x2042
 
 typedef struct {
-	nfapi_dl_config_dci_dl_pdu_rel8_t epdcch_pdu_rel8;
-	nfapi_dl_config_dci_dl_pdu_rel9_t epdcch_pdu_rel9;
-	nfapi_dl_config_dci_dl_pdu_rel10_t epdcch_pdu_rel10;
-	nfapi_dl_config_dci_dl_pdu_rel11_t epdcch_pdu_rel11;
-	nfapi_dl_config_dci_dl_pdu_rel12_t epdcch_pdu_rel12;
-	nfapi_dl_config_dci_dl_pdu_rel13_t epdcch_pdu_rel13;
-	nfapi_dl_config_edpcch_parameters_rel11_t epdcch_params_rel11;
-	nfapi_dl_config_edpcch_parameters_rel13_t epdcch_params_rel13;
-} nfapi_dl_config_edpcch_pdu;
+	nfapi_dl_config_dci_dl_pdu_rel8_t			epdcch_pdu_rel8;
+	nfapi_dl_config_dci_dl_pdu_rel9_t			epdcch_pdu_rel9;
+	nfapi_dl_config_dci_dl_pdu_rel10_t			epdcch_pdu_rel10;
+	nfapi_dl_config_dci_dl_pdu_rel11_t			epdcch_pdu_rel11;
+	nfapi_dl_config_dci_dl_pdu_rel12_t			epdcch_pdu_rel12;
+	nfapi_dl_config_dci_dl_pdu_rel13_t			epdcch_pdu_rel13;
+	nfapi_dl_config_epdcch_parameters_rel11_t	epdcch_params_rel11;
+	nfapi_dl_config_epdcch_parameters_rel13_t	epdcch_params_rel13;
+} nfapi_dl_config_epdcch_pdu;
 
-#define NFAPI_MAX_TX_PHYSICAL_ANTENNA_PORTS 8
+
 typedef struct {
 	nfapi_tl_t tl;
 	uint8_t mpdcch_narrow_band;
@@ -1440,13 +1584,83 @@ typedef struct {
 	uint8_t total_dci_length_including_padding;
 	uint8_t number_of_tx_antenna_ports;
 	uint16_t precoding_value[NFAPI_MAX_TX_PHYSICAL_ANTENNA_PORTS];
-} nfapi_dl_config_mdpcch_pdu_rel13_t;
-#define NFAPI_DL_CONFIG_REQUEST_MDPCCH_PDU_REL13_TAG 0x205B
+} nfapi_dl_config_mpdcch_pdu_rel13_t;
+#define NFAPI_DL_CONFIG_REQUEST_MPDCCH_PDU_REL13_TAG 0x205B
 
 
 typedef struct {
-	nfapi_dl_config_mdpcch_pdu_rel13_t mdpcch_pdu_rel13;
-} nfapi_dl_config_mdpcch_pdu;
+	nfapi_dl_config_mpdcch_pdu_rel13_t mpdcch_pdu_rel13;
+} nfapi_dl_config_mpdcch_pdu;
+
+typedef struct {
+	nfapi_tl_t tl;
+	uint16_t length;
+	uint16_t pdu_index;
+	uint16_t transmission_power;
+	uint16_t hyper_sfn_2_lsbs;
+} nfapi_dl_config_nbch_pdu_rel13_t;
+
+#define NFAPI_DL_CONFIG_REQUEST_NBCH_PDU_REL13_TAG 0x205C
+
+typedef struct {
+	nfapi_dl_config_nbch_pdu_rel13_t nbch_pdu_rel13;
+} nfapi_dl_config_nbch_pdu;
+
+typedef struct {
+	nfapi_tl_t tl;
+	uint16_t length;
+	uint16_t pdu_index;
+	uint8_t ncce_index;
+	uint8_t aggregation_level;
+	uint8_t start_symbol;
+	uint8_t rnti_type;
+	uint16_t rnti;
+	uint8_t scrambling_reinitialization_batch_index;
+	uint8_t nrs_antenna_ports_assumed_by_the_ue;
+	uint8_t dci_format;
+	uint8_t scheduling_delay;
+	uint8_t resource_assignment;
+	uint8_t repetition_number;
+	uint8_t mcs;
+	uint8_t new_data_indicator;
+	uint8_t harq_ack_resource;
+	uint8_t npdcch_order_indication;
+	uint8_t starting_number_of_nprach_repetitions;
+	uint8_t subcarrier_indication_of_nprach;
+	uint8_t paging_direct_indication_differentation_flag;
+	uint8_t direct_indication;
+	uint8_t dci_subframe_repetition_number;
+	uint8_t total_dci_length_including_padding;
+} nfapi_dl_config_npdcch_pdu_rel13_t;
+
+#define NFAPI_DL_CONFIG_REQUEST_NPDCCH_PDU_REL13_TAG 0x205D
+
+typedef struct {
+	nfapi_dl_config_npdcch_pdu_rel13_t npdcch_pdu_rel13;
+} nfapi_dl_config_npdcch_pdu;
+
+typedef struct {
+	nfapi_tl_t tl;
+	uint16_t length;
+	uint16_t pdu_index;
+	uint8_t start_symbol;
+	uint8_t rnti_type;
+	uint16_t rnti;
+	uint16_t resource_assignment;
+	uint16_t repetition_number;
+	uint8_t modulation;
+	uint8_t number_of_subframes_for_resource_assignment;
+	uint8_t scrambling_sequence_initialization_cinit;
+	uint16_t sf_idx;
+	uint8_t nrs_antenna_ports_assumed_by_the_ue;
+} nfapi_dl_config_ndlsch_pdu_rel13_t;
+
+#define NFAPI_DL_CONFIG_REQUEST_NDLSCH_PDU_REL13_TAG 0x205E
+
+typedef struct {
+	nfapi_dl_config_ndlsch_pdu_rel13_t ndlsch_pdu_rel13;
+} nfapi_dl_config_ndlsch_pdu;
+
 
 typedef struct {
 	uint8_t pdu_type;
@@ -1459,8 +1673,11 @@ typedef struct {
 		nfapi_dl_config_pch_pdu		pch_pdu;
 		nfapi_dl_config_prs_pdu		prs_pdu;
 		nfapi_dl_config_csi_rs_pdu	csi_rs_pdu;
-		nfapi_dl_config_edpcch_pdu	epdcch_pdu;
-		nfapi_dl_config_mdpcch_pdu	mpdcch_pdu;
+		nfapi_dl_config_epdcch_pdu	epdcch_pdu;
+		nfapi_dl_config_mpdcch_pdu	mpdcch_pdu;
+		nfapi_dl_config_nbch_pdu	nbch_pdu;
+		nfapi_dl_config_npdcch_pdu	npdcch_pdu;
+		nfapi_dl_config_ndlsch_pdu	ndlsch_pdu;
 	};
 } nfapi_dl_config_request_pdu_t;
 
@@ -1878,6 +2095,53 @@ typedef struct {
 } nfapi_ul_config_ulsch_csi_uci_harq_pdu;
 
 typedef struct {
+	nfapi_tl_t tl;
+	uint8_t harq_ack_resource;
+} nfapi_ul_config_nb_harq_information_rel13_fdd_t;
+#define NFAPI_UL_CONFIG_REQUEST_NB_HARQ_INFORMATION_REL13_FDD_TAG 0x2061
+
+typedef struct {
+	nfapi_ul_config_nb_harq_information_rel13_fdd_t nb_harq_information_rel13_fdd;
+} nfapi_ul_config_nb_harq_information;
+
+typedef struct {
+	nfapi_tl_t tl;	
+	uint8_t nulsch_format;
+	uint32_t handle;
+	uint16_t size;
+	uint16_t rnti;
+	uint8_t subcarrier_indication;
+	uint8_t resource_assignment;
+	uint8_t mcs;
+	uint8_t redudancy_version;
+	uint8_t repetition_number;
+	uint8_t new_data_indication;
+	uint8_t n_srs;
+	uint16_t scrambling_sequence_initialization_cinit;
+	uint16_t sf_idx;
+	nfapi_ul_config_ue_information ue_information;
+	nfapi_ul_config_nb_harq_information nb_harq_information;
+} nfapi_ul_config_nulsch_pdu_rel13_t;
+#define NFAPI_UL_CONFIG_REQUEST_NULSCH_PDU_REL13_TAG 0x205F
+
+typedef struct {
+	nfapi_ul_config_nulsch_pdu_rel13_t nulsch_pdu_rel13;
+} nfapi_ul_config_nulsch_pdu;
+
+
+typedef struct {
+	nfapi_tl_t tl;
+	uint8_t nprach_config_0;
+	uint8_t nprach_config_1;
+	uint8_t nprach_config_2;
+} nfapi_ul_config_nrach_pdu_rel13_t;
+#define NFAPI_UL_CONFIG_REQUEST_NRACH_PDU_REL13_TAG 0x2067
+
+typedef struct {
+	nfapi_ul_config_nrach_pdu_rel13_t nrach_pdu_rel13;
+} nfapi_ul_config_nrach_pdu;
+
+typedef struct {
 	uint8_t pdu_type;
 	uint8_t pdu_size;
 	union {
@@ -1897,6 +2161,8 @@ typedef struct {
 		nfapi_ul_config_ulsch_uci_csi_pdu		ulsch_uci_csi_pdu;
 		nfapi_ul_config_ulsch_uci_harq_pdu		ulsch_uci_harq_pdu;
 		nfapi_ul_config_ulsch_csi_uci_harq_pdu	ulsch_csi_uci_harq_pdu;
+		nfapi_ul_config_nulsch_pdu				nulsch_pdu;
+		nfapi_ul_config_nrach_pdu				nrach_pdu;
 	};
 } nfapi_ul_config_request_pdu_t;
 
@@ -1988,20 +2254,20 @@ typedef struct {
 	nfapi_hi_dci0_dci_pdu_rel12_t	dci_pdu_rel12;
 } nfapi_hi_dci0_dci_pdu;
 
-typedef nfapi_hi_dci0_dci_pdu_rel8_t nfapi_hi_dci0_edpcch_dci_pdu_rel8_t;
-#define NFAPI_HI_DCI0_REQUEST_EDPCCH_DCI_PDU_REL8_TAG 0x2020
+typedef nfapi_hi_dci0_dci_pdu_rel8_t nfapi_hi_dci0_epdcch_dci_pdu_rel8_t;
+#define NFAPI_HI_DCI0_REQUEST_EPDCCH_DCI_PDU_REL8_TAG 0x2020
 
-typedef nfapi_hi_dci0_dci_pdu_rel10_t nfapi_hi_dci0_edpcch_dci_pdu_rel10_t;
-#define NFAPI_HI_DCI0_REQUEST_EDPCCH_DCI_PDU_REL10_TAG 0x2021
+typedef nfapi_hi_dci0_dci_pdu_rel10_t nfapi_hi_dci0_epdcch_dci_pdu_rel10_t;
+#define NFAPI_HI_DCI0_REQUEST_EPDCCH_DCI_PDU_REL10_TAG 0x2021
 
-typedef nfapi_dl_config_edpcch_parameters_rel11_t nfapi_hi_dci0_edpcch_parameters_rel11_t;
-#define NFAPI_HI_DCI0_REQUEST_EDPCCH_PARAMETERS_REL11_TAG 0x2041
+typedef nfapi_dl_config_epdcch_parameters_rel11_t nfapi_hi_dci0_epdcch_parameters_rel11_t;
+#define NFAPI_HI_DCI0_REQUEST_EPDCCH_PARAMETERS_REL11_TAG 0x2041
 
 typedef struct {
-	nfapi_hi_dci0_edpcch_dci_pdu_rel8_t		edpcch_dci_pdu_rel8;
-	nfapi_hi_dci0_edpcch_dci_pdu_rel10_t	edpcch_dci_pdu_rel10;
-	nfapi_hi_dci0_edpcch_parameters_rel11_t	edpcch_parameters_rel11;
-} nfapi_hi_dci0_edpcch_dci_pdu;
+	nfapi_hi_dci0_epdcch_dci_pdu_rel8_t		epdcch_dci_pdu_rel8;
+	nfapi_hi_dci0_epdcch_dci_pdu_rel10_t	epdcch_dci_pdu_rel10;
+	nfapi_hi_dci0_epdcch_parameters_rel11_t	epdcch_parameters_rel11;
+} nfapi_hi_dci0_epdcch_dci_pdu;
 
 
 typedef struct {
@@ -2039,21 +2305,46 @@ typedef struct {
 	uint8_t total_dci_length_include_padding;
 	uint8_t number_of_tx_antenna_ports;
 	uint16_t precoding_value[NFAPI_MAX_ANTENNA_PORT_COUNT];
-} nfapi_hi_dci0_mdpcch_dci_pdu_rel13_t;
-#define NFAPI_HI_DCI0_REQUEST_MDPCCH_DCI_PDU_REL13_TAG 0x204E
+} nfapi_hi_dci0_mpdcch_dci_pdu_rel13_t;
+#define NFAPI_HI_DCI0_REQUEST_MPDCCH_DCI_PDU_REL13_TAG 0x204E
 
 typedef struct {
-	nfapi_hi_dci0_mdpcch_dci_pdu_rel13_t	mpdcch_dci_pdu_rel13;
+	nfapi_hi_dci0_mpdcch_dci_pdu_rel13_t	mpdcch_dci_pdu_rel13;
 } nfapi_hi_dci0_mpdcch_dci_pdu;
+
+typedef struct {
+	nfapi_tl_t tl;
+	uint8_t ncce_index;
+	uint8_t aggregation_level;
+	uint8_t start_symbol;
+	uint16_t rnti;
+	uint8_t scrambling_reinitialization_batch_index;
+	uint8_t nrs_antenna_ports_assumed_by_the_ue;
+	uint8_t subcarrier_indication;
+	uint8_t resource_assignment;
+	uint8_t scheduling_delay;
+	uint8_t mcs;
+	uint8_t redudancy_version;
+	uint8_t repetition_number;
+	uint8_t new_data_indicator;
+	uint8_t dci_subframe_repetition_number;
+} nfapi_hi_dci0_npdcch_dci_pdu_rel13_t;
+
+#define NFAPI_HI_DCI0_REQUEST_NPDCCH_DCI_PDU_REL13_TAG 0x2062
+
+typedef struct {
+	nfapi_hi_dci0_npdcch_dci_pdu_rel13_t	npdcch_dci_pdu_rel13;
+} nfapi_hi_dci0_npdcch_dci_pdu;
 
 typedef struct {
 	uint8_t pdu_type;
 	uint8_t pdu_size;
 	union {
-		nfapi_hi_dci0_hi_pdu	hi_pdu;
-		nfapi_hi_dci0_dci_pdu	dci_pdu;
-		nfapi_hi_dci0_edpcch_dci_pdu edpcch_dci_pdu;
-		nfapi_hi_dci0_mpdcch_dci_pdu mpdcch_dci_pdu;
+		nfapi_hi_dci0_hi_pdu			hi_pdu;
+		nfapi_hi_dci0_dci_pdu			dci_pdu;
+		nfapi_hi_dci0_epdcch_dci_pdu	epdcch_dci_pdu;
+		nfapi_hi_dci0_mpdcch_dci_pdu	mpdcch_dci_pdu;
+		nfapi_hi_dci0_npdcch_dci_pdu	npdcch_dci_pdu;
 	};
 } nfapi_hi_dci0_request_pdu_t;
 
@@ -2160,7 +2451,6 @@ typedef struct {
 } nfapi_harq_indication_tdd_rel8_t;
 #define NFAPI_HARQ_INDICATION_TDD_REL8_TAG 0x2027
 
-#define NFAPI_MAX_NUMBER_ACK_NACK_TDD 8
 typedef struct {
 	nfapi_tl_t tl;
 	uint8_t mode;
@@ -2392,7 +2682,7 @@ typedef struct {
 } nfapi_srs_indication_fdd_rel11_t;
 #define NFAPI_SRS_INDICATION_FDD_REL11_TAG 0x2053
 
-#define NFAPI_MAX_NUM_PHYSICAL_ANTENNAS 8
+
 typedef struct {
 	nfapi_tl_t tl;
 	uint8_t num_prb_per_subband;
@@ -2453,6 +2743,45 @@ typedef struct {
 } nfapi_rx_indication_body_t;
 #define NFAPI_RX_INDICATION_BODY_TAG 0x2023
 
+typedef struct {
+	nfapi_tl_t tl;	
+	uint8_t harq_tb1;
+} nfapi_nb_harq_indication_fdd_rel13_t;
+#define NFAPI_NB_HARQ_INDICATION_FDD_REL13_TAG 0x2064
+
+typedef struct {
+	uint16_t								instance_length;
+	nfapi_rx_ue_information					rx_ue_information;
+	nfapi_nb_harq_indication_fdd_rel13_t	nb_harq_indication_fdd_rel13;
+	nfapi_ul_cqi_information_t				ul_cqi_information;
+} nfapi_nb_harq_indication_pdu_t;
+
+typedef struct {
+	nfapi_tl_t tl;
+	uint16_t number_of_harqs;
+	nfapi_nb_harq_indication_pdu_t* nb_harq_pdu_list;
+} nfapi_nb_harq_indication_body_t;
+#define NFAPI_NB_HARQ_INDICATION_BODY_TAG 0x2063
+
+typedef struct {
+	nfapi_tl_t tl;
+	uint16_t rnti;
+	uint8_t initial_sc;
+	uint16_t timing_advance;
+	uint8_t nrach_ce_level;
+} nfapi_nrach_indication_pdu_rel13_t;
+#define NFAPI_NRACH_INDICATION_REL13_TAG 0x2066
+
+typedef struct {
+	nfapi_nrach_indication_pdu_rel13_t		nrach_indication_rel13;
+} nfapi_nrach_indication_pdu_t;
+
+typedef struct {
+	nfapi_tl_t tl;
+	uint8_t number_of_initial_scs_detected;
+	nfapi_nrach_indication_pdu_t* nrach_pdu_list;
+} nfapi_nrach_indication_body_t;
+#define NFAPI_NRACH_INDICATION_BODY_TAG 0x2065
 
 typedef struct {
 	nfapi_tl_t tl;
@@ -2621,6 +2950,25 @@ typedef struct {
 
 #define NFAPI_GERAN_RSSI_REQUEST_TAG 0x3002
 
+
+
+typedef struct {
+	uint16_t earfcn;
+	uint8_t number_of_ro_dl;
+	uint8_t ro_dl[NFAPI_MAX_RO_DL];
+} nfapi_earfcn_t;
+
+typedef struct {
+	nfapi_tl_t tl;
+	uint8_t frequency_band_indicator;
+	uint16_t measurement_period;
+	uint32_t timeout;
+	uint8_t number_of_earfcns;
+	nfapi_earfcn_t earfcn[NFAPI_MAX_CARRIER_LIST];
+} nfapi_nb_iot_rssi_request_t;
+
+#define NFAPI_NB_IOT_RSSI_REQUEST_TAG 0x3020
+
 typedef struct {
 	nfapi_tl_t tl;
 	uint16_t number_of_rssi;
@@ -2660,6 +3008,18 @@ typedef struct {
 } nfapi_geran_cell_search_request_t;
 
 #define NFAPI_GERAN_CELL_SEARCH_REQUEST_TAG 0x3006
+
+typedef struct {
+	nfapi_tl_t tl;
+	uint16_t earfcn;
+	uint8_t ro_dl;
+	uint8_t exhaustive_search;
+	uint32_t timeout;
+	uint8_t number_of_pci;
+	uint16_t pci[NFAPI_MAX_PCI_LIST];
+} nfapi_nb_iot_cell_search_request_t;
+
+#define NFAPI_NB_IOT_CELL_SEARCH_REQUEST_TAG 0x3021
 
 typedef struct {
 	uint16_t pci;
@@ -2708,6 +3068,21 @@ typedef struct {
 
 #define NFAPI_GERAN_CELL_SEARCH_INDICATION_TAG 0x3009
 
+typedef struct {
+	uint16_t pci;
+	uint8_t rsrp;
+	uint8_t rsrq;
+	int16_t frequency_offset;
+} nfapi_nb_iot_found_cell_t;
+
+typedef struct {
+	nfapi_tl_t tl;
+	uint16_t number_of_nb_iot_cells_found;
+	nfapi_nb_iot_found_cell_t nb_iot_found_cells[NFAPI_MAX_NB_IOT_CELLS_FOUND];
+} nfapi_nb_iot_cell_search_indication_t;
+
+#define NFAPI_NB_IOT_CELL_SEARCH_INDICATION_TAG 0x3022
+
 typedef nfapi_opaqaue_data_t nfapi_pnf_cell_search_state_t;
 
 #define NFAPI_PNF_CELL_SEARCH_STATE_TAG 0x300A
@@ -2732,6 +3107,16 @@ typedef struct {
 
 typedef struct {
 	nfapi_tl_t tl;
+	uint16_t earfcn;
+	uint8_t ro_dl;
+	uint16_t pci;
+	uint32_t timeout;
+} nfapi_nb_iot_broadcast_detect_request_t;
+
+#define NFAPI_NB_IOT_BROADCAST_DETECT_REQUEST_TAG 0x3023
+
+typedef struct {
+	nfapi_tl_t tl;
 	uint8_t number_of_tx_antenna;
 	uint16_t mib_length;
 	uint8_t mib[NFAPI_MAX_MIB_LENGTH];
@@ -2749,6 +3134,17 @@ typedef struct {
 
 #define NFAPI_UTRAN_BROADCAST_DETECT_INDICATION_TAG 0x300F
 
+
+typedef struct {
+	nfapi_tl_t tl;
+	uint8_t number_of_tx_antenna;
+	uint16_t mib_length;
+	uint8_t mib[NFAPI_MAX_MIB_LENGTH];
+	uint32_t sfn_offset;
+} nfapi_nb_iot_broadcast_detect_indication_t;
+
+#define NFAPI_NB_IOT_BROADCAST_DETECT_INDICATION_TAG 0x3024
+
 #define NFAPI_PNF_CELL_BROADCAST_STATE_TAG 0x3010
 
 typedef struct {
@@ -2763,6 +3159,18 @@ typedef struct {
 } nfapi_lte_system_information_schedule_request_t;
 
 #define NFAPI_LTE_SYSTEM_INFORMATION_SCHEDULE_REQUEST_TAG 0x3011
+
+
+typedef struct {
+	nfapi_tl_t tl;
+	uint16_t earfcn;
+	uint8_t ro_dl;
+	uint16_t pci;
+	uint8_t scheduling_info_sib1_nb;
+	uint32_t timeout;
+} nfapi_nb_iot_system_information_schedule_request_t;
+
+#define NFAPI_NB_IOT_SYSTEM_INFORMATION_SCHEDULE_REQUEST_TAG 0x3025
 
 typedef nfapi_opaqaue_data_t nfapi_pnf_cell_broadcast_state_t;
 
@@ -2805,6 +3213,27 @@ typedef struct {
 #define NFAPI_GERAN_SYSTEM_INFORMATION_REQUEST_TAG 0x3016
 
 typedef struct {
+	uint8_t si_periodicity;
+	uint8_t si_repetition_pattern;
+	uint8_t si_tb_size;
+	uint8_t number_of_si_index;
+	uint8_t si_index[NFAPI_MAX_SI_INDEX];
+} nfapi_nb_iot_system_information_si_periodicity_t;
+
+typedef struct {
+	nfapi_tl_t tl;
+	uint16_t earfcn;
+	uint8_t ro_dl;
+	uint16_t pci;
+	uint8_t number_of_si_periodicity;
+	nfapi_nb_iot_system_information_si_periodicity_t si_periodicity[NFAPI_MAX_SI_PERIODICITY];
+	uint8_t si_window_length;
+	uint32_t timeout;
+} nfapi_nb_iot_system_information_request_t;
+
+#define NFAPI_NB_IOT_SYSTEM_INFORMATION_REQUEST_TAG 0x3027
+
+typedef struct {
 	nfapi_tl_t tl;
 	uint8_t sib_type;
 	uint16_t sib_length;
@@ -2828,6 +3257,16 @@ typedef struct {
 } nfapi_geran_system_information_indication_t;
 
 #define NFAPI_GERAN_SYSTEM_INFORMATION_INDICATION_TAG 0x301a
+
+typedef struct {
+	nfapi_tl_t tl;
+	uint8_t sib_type;
+	uint16_t sib_length;
+	uint8_t sib[NFAPI_MAX_SIB_LENGTH];
+} nfapi_nb_iot_system_information_indication_t;
+
+#define NFAPI_NB_IOT_SYSTEM_INFORMATION_INDICATION_TAG 0x3026
+
 
 //
 // Top level NFAP messages
@@ -2922,6 +3361,20 @@ typedef struct {
 typedef struct {
 	nfapi_p7_message_header_t header;
 	uint16_t sfn_sf;
+	nfapi_nb_harq_indication_body_t nb_harq_indication_body;
+	nfapi_vendor_extension_tlv_t vendor_extension;
+} nfapi_nb_harq_indication_t;
+
+typedef struct {
+	nfapi_p7_message_header_t header;
+	uint16_t sfn_sf;
+	nfapi_nrach_indication_body_t nrach_indication_body;
+	nfapi_vendor_extension_tlv_t vendor_extension;
+} nfapi_nrach_indication_t;
+
+typedef struct {
+	nfapi_p7_message_header_t header;
+	uint16_t sfn_sf;
 	nfapi_lbt_dl_config_request_body_t lbt_dl_config_request_body;
 	nfapi_vendor_extension_tlv_t vendor_extension;
 } nfapi_lbt_dl_config_request_t;
@@ -2961,6 +3414,7 @@ typedef struct {
 		nfapi_lte_rssi_request_t					lte_rssi_request;
 		nfapi_utran_rssi_request_t					utran_rssi_request;
 		nfapi_geran_rssi_request_t					geran_rssi_request;
+		nfapi_nb_iot_rssi_request_t					nb_iot_rssi_request;
 	};
 	nfapi_vendor_extension_tlv_t vendor_extension;
 } nfapi_rssi_request_t;
@@ -2985,6 +3439,7 @@ typedef struct {
 		nfapi_lte_cell_search_request_t				lte_cell_search_request;
 		nfapi_utran_cell_search_request_t			utran_cell_search_request;
 		nfapi_geran_cell_search_request_t			geran_cell_search_request;
+		nfapi_nb_iot_cell_search_request_t			nb_iot_cell_search_request;
 	};
 	nfapi_vendor_extension_tlv_t vendor_extension;
 } nfapi_cell_search_request_t;
@@ -3002,6 +3457,7 @@ typedef struct {
 	nfapi_utran_cell_search_indication_t utran_cell_search_indication;
 	nfapi_geran_cell_search_indication_t geran_cell_search_indication;
 	nfapi_pnf_cell_search_state_t pnf_cell_search_state;
+	nfapi_nb_iot_cell_search_indication_t nb_iot_cell_search_indication;
 	nfapi_vendor_extension_tlv_t vendor_extension;
 } nfapi_cell_search_indication_t;
 
@@ -3012,6 +3468,7 @@ typedef struct {
 	union {
 		nfapi_lte_broadcast_detect_request_t		lte_broadcast_detect_request;
 		nfapi_utran_broadcast_detect_request_t		utran_broadcast_detect_request;
+		nfapi_nb_iot_broadcast_detect_request_t		nb_iot_broadcast_detect_request;
 	};
 	nfapi_pnf_cell_search_state_t pnf_cell_search_state;
 	nfapi_vendor_extension_tlv_t vendor_extension;
@@ -3028,6 +3485,7 @@ typedef struct {
 	uint32_t error_code;
 	nfapi_lte_broadcast_detect_indication_t lte_broadcast_detect_indication;
 	nfapi_utran_broadcast_detect_indication_t utran_broadcast_detect_indication;
+	nfapi_nb_iot_broadcast_detect_indication_t nb_iot_broadcast_detect_indication;
 	nfapi_pnf_cell_broadcast_state_t pnf_cell_broadcast_state;
 	nfapi_vendor_extension_tlv_t vendor_extension;
 } nfapi_broadcast_detect_indication_t;
@@ -3037,6 +3495,7 @@ typedef struct {
 	uint8_t rat_type;
 	union {
 		nfapi_lte_system_information_schedule_request_t lte_system_information_schedule_request;
+		nfapi_nb_iot_system_information_schedule_request_t nb_iot_system_information_schedule_request;
 	};
 	nfapi_pnf_cell_broadcast_state_t pnf_cell_broadcast_state;
 	nfapi_vendor_extension_tlv_t vendor_extension;
@@ -3052,6 +3511,7 @@ typedef struct {
 	nfapi_p4_p5_message_header_t header;
 	uint32_t error_code;
 	nfapi_lte_system_information_indication_t lte_system_information_indication;
+	nfapi_nb_iot_system_information_indication_t nb_iot_system_information_indication;
 	nfapi_vendor_extension_tlv_t vendor_extension;
 } nfapi_system_information_schedule_indication_t;
 
@@ -3062,6 +3522,7 @@ typedef struct {
 		nfapi_lte_system_information_request_t lte_system_information_request;
 		nfapi_utran_system_information_request_t utran_system_information_request;
 		nfapi_geran_system_information_request_t geran_system_information_request;
+		nfapi_nb_iot_system_information_request_t nb_iot_system_information_request;
 	};
 	nfapi_pnf_cell_broadcast_state_t pnf_cell_broadcast_state;
 	nfapi_vendor_extension_tlv_t vendor_extension;
@@ -3079,6 +3540,7 @@ typedef struct {
 	nfapi_lte_system_information_indication_t lte_system_information_indication;
 	nfapi_utran_system_information_indication_t utran_system_information_indication;
 	nfapi_geran_system_information_indication_t geran_system_information_indication;
+	nfapi_nb_iot_system_information_indication_t nb_iot_system_information_indication;
 	nfapi_vendor_extension_tlv_t vendor_extension;
 } nfapi_system_information_indication_t;
 

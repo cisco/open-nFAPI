@@ -54,6 +54,12 @@ int read_xml(const char *xml_file);
 
 }
 
+static uint32_t rand_range(uint32_t min, uint32_t max)
+{
+	return ((rand() % (max + 1 - min)) + min);
+}
+
+
 void* vnf_allocate(size_t size)
 {
 	return (void*)memory_pool::allocate(size);
@@ -379,7 +385,21 @@ int phy_cqi_indication(struct nfapi_vnf_p7_config* config, nfapi_cqi_indication_
 }
 int phy_lbt_dl_indication(struct nfapi_vnf_p7_config* config, nfapi_lbt_dl_indication_t* ind)
 {
-	return 0;
+	vnf_p7_info* p7_vnf = (vnf_p7_info*)(config->user_data);
+	mac_lbt_dl_ind(p7_vnf->mac, ind);
+	return 1;
+}
+int phy_nb_harq_indication(struct nfapi_vnf_p7_config* config, nfapi_nb_harq_indication_t* ind)
+{
+	vnf_p7_info* p7_vnf = (vnf_p7_info*)(config->user_data);
+	mac_nb_harq_ind(p7_vnf->mac, ind);
+	return 1;
+}
+int phy_nrach_indication(struct nfapi_vnf_p7_config* config, nfapi_nrach_indication_t* ind)
+{
+	vnf_p7_info* p7_vnf = (vnf_p7_info*)(config->user_data);
+	mac_nrach_ind(p7_vnf->mac, ind);
+	return 1;
 }
 int phy_vendor_ext(struct nfapi_vnf_p7_config* config, nfapi_p7_message_header_t* msg)
 {
@@ -452,6 +472,8 @@ void* vnf_p7_thread_start(void* ptr)
 	p7_vnf->config->sr_indication = &phy_sr_indication;
 	p7_vnf->config->cqi_indication = &phy_cqi_indication;
 	p7_vnf->config->lbt_dl_indication = &phy_lbt_dl_indication;
+	p7_vnf->config->nb_harq_indication = &phy_nb_harq_indication;
+	p7_vnf->config->nrach_indication = &phy_nrach_indication;
 	p7_vnf->config->malloc = &vnf_allocate;
 	p7_vnf->config->free = &vnf_deallocate;
 
@@ -887,6 +909,112 @@ int param_resp_cb(nfapi_vnf_config_t* config, int p5_idx, nfapi_param_response_t
 				req.emtc_config.pucch_interval_ulhoppingconfigcommonmodea.tl.tag = NFAPI_EMTC_CONFIG_PUCCH_INTERVAL_ULHOPPINGCONFIGCOMMONMODEA_TAG;
 				req.num_tlv++;
 				req.emtc_config.pucch_interval_ulhoppingconfigcommonmodeb.tl.tag = NFAPI_EMTC_CONFIG_PUCCH_INTERVAL_ULHOPPINGCONFIGCOMMONMODEB_TAG;			
+				req.num_tlv++;
+				
+				req.nb_iot_config.operating_mode.tl.tag = NFAPI_NB_IOT_CONFIG_OPERATING_MODE_TAG;
+				req.nb_iot_config.operating_mode.value = rand_range(0, 3);
+				req.num_tlv++;				
+				req.nb_iot_config.anchor.tl.tag = NFAPI_NB_IOT_CONFIG_ANCHOR_TAG;
+				req.nb_iot_config.anchor.value = rand_range(0, 1);
+				req.num_tlv++;
+				req.nb_iot_config.prb_index.tl.tag = NFAPI_NB_IOT_CONFIG_PRB_INDEX_TAG;
+				req.nb_iot_config.prb_index.value = rand_range(0, 0x1F);
+				req.num_tlv++;
+				req.nb_iot_config.control_region_size.tl.tag = NFAPI_NB_IOT_CONFIG_CONTROL_REGION_SIZE_TAG;
+				req.nb_iot_config.control_region_size.value = rand_range(1, 4);
+				req.num_tlv++;
+				req.nb_iot_config.assumed_crs_aps.tl.tag = NFAPI_NB_IOT_CONFIG_ASSUMED_CRS_APS_TAG;
+				req.nb_iot_config.assumed_crs_aps.value = rand_range(0, 1);
+				req.num_tlv++;
+				req.nb_iot_config.nprach_config_0_enabled.tl.tag = NFAPI_NB_IOT_CONFIG_NPRACH_CONFIG_0_ENABLED_TAG;
+				req.nb_iot_config.nprach_config_0_enabled.value = rand_range(0, 1);
+				req.num_tlv++;
+				req.nb_iot_config.nprach_config_0_sf_periodicity.tl.tag = NFAPI_NB_IOT_CONFIG_NPRACH_CONFIG_0_SF_PERIODICITY_TAG;
+				req.nb_iot_config.nprach_config_0_sf_periodicity.value = rand_range(0, 7);
+				req.num_tlv++;
+				req.nb_iot_config.nprach_config_0_start_time.tl.tag = NFAPI_NB_IOT_CONFIG_NPRACH_CONFIG_0_START_TIME_TAG;
+				req.nb_iot_config.nprach_config_0_start_time.value = rand_range(0, 7);
+				req.num_tlv++;
+				req.nb_iot_config.nprach_config_0_subcarrier_offset.tl.tag = NFAPI_NB_IOT_CONFIG_NPRACH_CONFIG_0_SUBCARRIER_OFFSET_TAG;
+				req.nb_iot_config.nprach_config_0_subcarrier_offset.value = rand_range(0, 6);
+				req.num_tlv++;
+				req.nb_iot_config.nprach_config_0_number_of_subcarriers.tl.tag = NFAPI_NB_IOT_CONFIG_NPRACH_CONFIG_0_NUMBER_OF_SUBCARRIERS_TAG;
+				req.nb_iot_config.nprach_config_0_number_of_subcarriers.value = rand_range(0, 3);
+				req.num_tlv++;
+				req.nb_iot_config.nprach_config_0_cp_length.tl.tag = NFAPI_NB_IOT_CONFIG_NPRACH_CONFIG_0_CP_LENGTH_TAG;
+				req.nb_iot_config.nprach_config_0_cp_length.value = rand_range(0, 1);
+				req.num_tlv++;
+				req.nb_iot_config.nprach_config_0_number_of_repetitions_per_attempt.tl.tag = NFAPI_NB_IOT_CONFIG_NPRACH_CONFIG_0_NUMBER_OF_REPETITIONS_PER_ATTEMPT_TAG;
+				req.nb_iot_config.nprach_config_0_number_of_repetitions_per_attempt.value = rand_range(0, 7);
+				req.num_tlv++;
+				req.nb_iot_config.nprach_config_1_enabled.tl.tag = NFAPI_NB_IOT_CONFIG_NPRACH_CONFIG_1_ENABLED_TAG;
+				req.nb_iot_config.nprach_config_1_enabled.value = rand_range(0, 1);
+				req.num_tlv++;
+				req.nb_iot_config.nprach_config_1_sf_periodicity.tl.tag = NFAPI_NB_IOT_CONFIG_NPRACH_CONFIG_1_SF_PERIODICITY_TAG;
+				req.nb_iot_config.nprach_config_1_sf_periodicity.value = rand_range(0, 7);
+				req.num_tlv++;
+				req.nb_iot_config.nprach_config_1_start_time.tl.tag = NFAPI_NB_IOT_CONFIG_NPRACH_CONFIG_1_START_TIME_TAG;
+				req.nb_iot_config.nprach_config_1_start_time.value = rand_range(0, 7);
+				req.num_tlv++;
+				req.nb_iot_config.nprach_config_1_subcarrier_offset.tl.tag = NFAPI_NB_IOT_CONFIG_NPRACH_CONFIG_1_SUBCARRIER_OFFSET_TAG;
+				req.nb_iot_config.nprach_config_1_subcarrier_offset.value = rand_range(0, 6);
+				req.num_tlv++;
+				req.nb_iot_config.nprach_config_1_number_of_subcarriers.tl.tag = NFAPI_NB_IOT_CONFIG_NPRACH_CONFIG_1_NUMBER_OF_SUBCARRIERS_TAG;
+				req.nb_iot_config.nprach_config_1_number_of_subcarriers.value = rand_range(0, 3);				
+				req.num_tlv++;
+				req.nb_iot_config.nprach_config_1_cp_length.tl.tag = NFAPI_NB_IOT_CONFIG_NPRACH_CONFIG_1_CP_LENGTH_TAG;
+				req.nb_iot_config.nprach_config_1_cp_length.value = rand_range(0, 1);
+				req.num_tlv++;
+				req.nb_iot_config.nprach_config_1_number_of_repetitions_per_attempt.tl.tag = NFAPI_NB_IOT_CONFIG_NPRACH_CONFIG_1_NUMBER_OF_REPETITIONS_PER_ATTEMPT_TAG;
+				req.nb_iot_config.nprach_config_1_number_of_repetitions_per_attempt.value = rand_range(0, 7);
+				req.num_tlv++;
+				req.nb_iot_config.nprach_config_2_enabled.tl.tag = NFAPI_NB_IOT_CONFIG_NPRACH_CONFIG_2_ENABLED_TAG;
+				req.nb_iot_config.nprach_config_2_enabled.value = rand_range(0, 1);
+				req.num_tlv++;
+				req.nb_iot_config.nprach_config_2_sf_periodicity.tl.tag = NFAPI_NB_IOT_CONFIG_NPRACH_CONFIG_2_SF_PERIODICITY_TAG;
+				req.nb_iot_config.nprach_config_2_sf_periodicity.value = rand_range(0, 7);
+				req.num_tlv++;
+				req.nb_iot_config.nprach_config_2_start_time.tl.tag = NFAPI_NB_IOT_CONFIG_NPRACH_CONFIG_2_START_TIME_TAG;
+				req.nb_iot_config.nprach_config_2_start_time.value = rand_range(0, 7);
+				req.num_tlv++;
+				req.nb_iot_config.nprach_config_2_subcarrier_offset.tl.tag = NFAPI_NB_IOT_CONFIG_NPRACH_CONFIG_2_SUBCARRIER_OFFSET_TAG;
+				req.nb_iot_config.nprach_config_2_subcarrier_offset.value = rand_range(0, 6);
+				req.num_tlv++;
+				req.nb_iot_config.nprach_config_2_number_of_subcarriers.tl.tag = NFAPI_NB_IOT_CONFIG_NPRACH_CONFIG_2_NUMBER_OF_SUBCARRIERS_TAG;
+				req.nb_iot_config.nprach_config_2_number_of_subcarriers.value = rand_range(0, 3);				
+				req.num_tlv++;
+				req.nb_iot_config.nprach_config_2_cp_length.tl.tag = NFAPI_NB_IOT_CONFIG_NPRACH_CONFIG_2_CP_LENGTH_TAG;
+				req.nb_iot_config.nprach_config_2_cp_length.value = rand_range(0, 1);
+				req.num_tlv++;
+				req.nb_iot_config.nprach_config_2_number_of_repetitions_per_attempt.tl.tag = NFAPI_NB_IOT_CONFIG_NPRACH_CONFIG_2_NUMBER_OF_REPETITIONS_PER_ATTEMPT_TAG;
+				req.nb_iot_config.nprach_config_2_number_of_repetitions_per_attempt.value = rand_range(0, 7);				
+				req.num_tlv++;
+				req.nb_iot_config.three_tone_base_sequence.tl.tag = NFAPI_NB_IOT_CONFIG_THREE_TONE_BASE_SEQUENCE_TAG;
+				req.nb_iot_config.three_tone_base_sequence.value = rand_range(0, 0x0F);				
+				req.num_tlv++;
+				req.nb_iot_config.six_tone_base_sequence.tl.tag = NFAPI_NB_IOT_CONFIG_SIX_TONE_BASE_SEQUENCE_TAG;
+				req.nb_iot_config.six_tone_base_sequence.value = rand_range(0, 0x03);				
+				req.num_tlv++;
+				req.nb_iot_config.twelve_tone_base_sequence.tl.tag = NFAPI_NB_IOT_CONFIG_TWELVE_TONE_BASE_SEQUENCE_TAG;
+				req.nb_iot_config.twelve_tone_base_sequence.value = rand_range(0, 0x1F);				
+				req.num_tlv++;
+				req.nb_iot_config.three_tone_cyclic_shift.tl.tag = NFAPI_NB_IOT_CONFIG_THREE_TONE_CYCLIC_SHIFT_TAG;
+				req.nb_iot_config.three_tone_cyclic_shift.value = rand_range(0, 5); // what is the max
+				req.num_tlv++;
+				req.nb_iot_config.six_tone_cyclic_shift.tl.tag = NFAPI_NB_IOT_CONFIG_SIX_TONE_CYCLIC_SHIFT_TAG;
+				req.nb_iot_config.six_tone_cyclic_shift.value = rand_range(0, 5); // what is the max
+				req.num_tlv++;
+				req.nb_iot_config.dl_gap_config_enable.tl.tag = NFAPI_NB_IOT_CONFIG_DL_GAP_CONFIG_ENABLE_TAG;
+				req.nb_iot_config.dl_gap_config_enable.value = rand_range(0, 1);
+				req.num_tlv++;
+				req.nb_iot_config.dl_gap_threshold.tl.tag = NFAPI_NB_IOT_CONFIG_DL_GAP_THRESHOLD_TAG;
+				req.nb_iot_config.dl_gap_threshold.value = rand_range(0, 3);
+				req.num_tlv++;
+				req.nb_iot_config.dl_gap_periodicity.tl.tag = NFAPI_NB_IOT_CONFIG_DL_GAP_PERIODICITY_TAG;
+				req.nb_iot_config.dl_gap_periodicity.value = rand_range(0, 3);
+				req.num_tlv++;
+				req.nb_iot_config.dl_gap_duration_coefficient.tl.tag = NFAPI_NB_IOT_CONFIG_DL_GAP_DURATION_COEFFICIENT_TAG;
+				req.nb_iot_config.dl_gap_duration_coefficient.value = rand_range(0, 3);
 				req.num_tlv++;
 				
 				req.tdd_frame_structure_config.subframe_assignment.tl.tag = NFAPI_TDD_FRAME_STRUCTURE_SUBFRAME_ASSIGNMENT_TAG;
