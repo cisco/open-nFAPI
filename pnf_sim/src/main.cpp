@@ -1411,7 +1411,7 @@ int fapi_nb_harq_ind(fapi_t* fapi, fapi_nb_harq_ind_t* ind)
 		memset(&pdus, 0, sizeof(pdus));	
 		
 		pdus[0].rx_ue_information.tl.tag = NFAPI_RX_UE_INFORMATION_TAG;
-		pdus[0].rx_ue_information.handle = rand_range(0, -1);
+		pdus[0].rx_ue_information.handle = rand_range(0, 0xFFFF);
 		pdus[0].rx_ue_information.rnti = rand_range(0, 65535);
 		
 		pdus[0].nb_harq_indication_fdd_rel13.tl.tag = NFAPI_NB_HARQ_INDICATION_FDD_REL13_TAG;

@@ -289,6 +289,7 @@ extern "C"
 					dl_config_pdus[i].dci_dl_pdu.dci_dl_pdu_rel12.ul_dl_configuration_indication[0] = rand_range(1, 5);
 					dl_config_pdus[i].dci_dl_pdu.dci_dl_pdu_rel12.ul_dl_configuration_indication[1] = rand_range(1, 5);
 					
+					
 					dl_config_pdus[i].dci_dl_pdu.dci_dl_pdu_rel13.tl.tag = NFAPI_DL_CONFIG_REQUEST_DCI_DL_PDU_REL13_TAG;
 					dl_config_pdus[i].dci_dl_pdu.dci_dl_pdu_rel13.laa_end_partial_sf_flag = rand_range(0, 1);
 					dl_config_pdus[i].dci_dl_pdu.dci_dl_pdu_rel13.laa_end_partial_sf_configuration = rand_range(0, 255);
@@ -302,18 +303,23 @@ extern "C"
 						dl_config_pdus[i].dci_dl_pdu.dci_dl_pdu_rel13.tpm_struct_flag = rand_range(0, 1);
 						dl_config_pdus[i].dci_dl_pdu.dci_dl_pdu_rel13.tpm.num_prb_per_subband = rand_range(0, 8);
 						dl_config_pdus[i].dci_dl_pdu.dci_dl_pdu_rel13.tpm.number_of_subbands = rand_range(0, 13);
-						dl_config_pdus[i].dci_dl_pdu.dci_dl_pdu_rel13.tpm.num_antennas = rand_range(0, 8);
+						dl_config_pdus[i].dci_dl_pdu.dci_dl_pdu_rel13.tpm.num_antennas = 1; // rand_range(0, 8);
 						
 						for(int j = 0; j < dl_config_pdus[i].dci_dl_pdu.dci_dl_pdu_rel13.tpm.number_of_subbands; ++j)
 						{
 							dl_config_pdus[i].dci_dl_pdu.dci_dl_pdu_rel13.tpm.subband_info[j].subband_index = j;
-							dl_config_pdus[i].dci_dl_pdu.dci_dl_pdu_rel13.tpm.subband_info[j].scheduled_ues = rand_range(1, 4);
+							dl_config_pdus[i].dci_dl_pdu.dci_dl_pdu_rel13.tpm.subband_info[j].scheduled_ues = 1; //rand_range(1, 4);
 							
 							for(int k = 0; k < dl_config_pdus[i].dci_dl_pdu.dci_dl_pdu_rel13.tpm.num_antennas; ++k)
 								for(int l = 0; l < dl_config_pdus[i].dci_dl_pdu.dci_dl_pdu_rel13.tpm.subband_info[j].scheduled_ues; ++l)
 									dl_config_pdus[i].dci_dl_pdu.dci_dl_pdu_rel13.tpm.subband_info[j].precoding_value[k][l] = rand_range(0, 65535);
 						}
 					}
+					else
+					{
+						dl_config_pdus[i].dci_dl_pdu.dci_dl_pdu_rel13.tpm_struct_flag = 0;
+					}
+					
 				}
 				break;
 				
@@ -565,7 +571,7 @@ extern "C"
 					dl_config_pdus[i].mpdcch_pdu.mpdcch_pdu_rel13.initial_transmission_sf_io = rand_range(0, 10239);
 					dl_config_pdus[i].mpdcch_pdu.mpdcch_pdu_rel13.transmission_power = rand_range(0, 10000);
 					dl_config_pdus[i].mpdcch_pdu.mpdcch_pdu_rel13.dci_format = rand_range(10, 12);
-					dl_config_pdus[i].mpdcch_pdu.mpdcch_pdu_rel13.resource_block_coding = rand_range(0, -1);
+					dl_config_pdus[i].mpdcch_pdu.mpdcch_pdu_rel13.resource_block_coding = rand_range(0, 0xFFFF);
 					dl_config_pdus[i].mpdcch_pdu.mpdcch_pdu_rel13.mcs = rand_range(0, 15);
 					dl_config_pdus[i].mpdcch_pdu.mpdcch_pdu_rel13.pdsch_reptition_levels = rand_range(1, 8);
 					dl_config_pdus[i].mpdcch_pdu.mpdcch_pdu_rel13.redundancy_version = rand_range(0, 3);
@@ -934,7 +940,7 @@ extern "C"
 		ul_config_pdus[16].pdu_type = NFAPI_UL_CONFIG_NULSCH_PDU_TYPE;
 		ul_config_pdus[16].nulsch_pdu.nulsch_pdu_rel13.tl.tag = NFAPI_UL_CONFIG_REQUEST_NULSCH_PDU_REL13_TAG;
 		ul_config_pdus[16].nulsch_pdu.nulsch_pdu_rel13.nulsch_format = rand_range(0, 1);
-		ul_config_pdus[16].nulsch_pdu.nulsch_pdu_rel13.handle = rand_range(0, (uint32_t)-1);
+		ul_config_pdus[16].nulsch_pdu.nulsch_pdu_rel13.handle = rand_range(0, 0xFFFF);
 		ul_config_pdus[16].nulsch_pdu.nulsch_pdu_rel13.size = rand_range(0, 65535);
 		ul_config_pdus[16].nulsch_pdu.nulsch_pdu_rel13.rnti = rand_range(1, 65535);
 		ul_config_pdus[16].nulsch_pdu.nulsch_pdu_rel13.subcarrier_indication = rand_range(0, 47);
@@ -948,7 +954,7 @@ extern "C"
 		ul_config_pdus[16].nulsch_pdu.nulsch_pdu_rel13.sf_idx = rand_range(0, 40960);
 		
 		ul_config_pdus[16].nulsch_pdu.nulsch_pdu_rel13.ue_information.ue_information_rel8.tl.tag = NFAPI_UL_CONFIG_REQUEST_UE_INFORMATION_REL8_TAG;
-		ul_config_pdus[16].nulsch_pdu.nulsch_pdu_rel13.ue_information.ue_information_rel8.handle = rand_range(0, (uint32_t)-1);
+		ul_config_pdus[16].nulsch_pdu.nulsch_pdu_rel13.ue_information.ue_information_rel8.handle = rand_range(0, 0xFF);
 		ul_config_pdus[16].nulsch_pdu.nulsch_pdu_rel13.ue_information.ue_information_rel8.rnti = rand_range(1, 65535);
 		ul_config_pdus[16].nulsch_pdu.nulsch_pdu_rel13.ue_information.ue_information_rel11.tl.tag = NFAPI_UL_CONFIG_REQUEST_UE_INFORMATION_REL11_TAG;
 		ul_config_pdus[16].nulsch_pdu.nulsch_pdu_rel13.ue_information.ue_information_rel11.virtual_cell_id_enabled_flag = rand_range(0, 1);

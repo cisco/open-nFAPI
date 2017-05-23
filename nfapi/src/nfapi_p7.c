@@ -196,7 +196,8 @@ static uint8_t pack_tpm_value(nfapi_dl_config_dci_dl_tpm_t* value, uint8_t **ppW
 		if(!(push8(subband_info->subband_index, ppWritePackedMsg, end) &&
 			 push8(subband_info->scheduled_ues, ppWritePackedMsg, end)))
 			return 0;	
-			
+		
+
 		uint8_t antenna_idx = 0;
 		uint8_t scheduled_ue_idx = 0;
 		
@@ -208,8 +209,9 @@ static uint8_t pack_tpm_value(nfapi_dl_config_dci_dl_tpm_t* value, uint8_t **ppW
 					return 0;
 			}
 		}
-		
+
 	}
+	
 	
 	return 1;			
 	
@@ -643,7 +645,6 @@ static uint8_t pack_dl_config_request_body_value(void* tlv, uint8_t **ppWritePac
 				{
 					if(!(pack_tlv(NFAPI_DL_CONFIG_REQUEST_MPDCCH_PDU_REL13_TAG, &pdu->mpdcch_pdu.mpdcch_pdu_rel13, ppWritePackedMsg, end, &pack_dl_config_mpdcch_pdu_rel13_value)))
 						return 0;
-					NFAPI_TRACE(NFAPI_TRACE_ERROR, "FIXME : NOT ENCODING MPDCCH AS SPEC IS NOT CONSISTENT \n");
 				}
 				break;
 			case NFAPI_DL_CONFIG_NBCH_PDU_TYPE:
@@ -2814,6 +2815,7 @@ static uint8_t unpack_tpm_value(uint8_t **ppReadPackedMsg, nfapi_dl_config_dci_d
 		 pull8(ppReadPackedMsg, &value->num_antennas, end)))
 		return 0;
 	
+	
 	uint8_t idx = 0;
 	for(idx = 0; idx < value->number_of_subbands; ++idx)
 	{
@@ -2834,8 +2836,9 @@ static uint8_t unpack_tpm_value(uint8_t **ppReadPackedMsg, nfapi_dl_config_dci_d
 					return 0;
 			}
 		}
-		
+
 	}
+	
 	
 	return 1;
 			
@@ -5286,6 +5289,7 @@ static uint8_t  unpack_cqi_indication_body_value(void* tlv, uint8_t **ppReadPack
 	for(i = 0; i < value->number_of_cqis; ++i)
 	{
 		nfapi_cqi_indication_pdu_t* pdu = &(value->cqi_pdu_list[i]);
+		memset(pdu, 0, sizeof(nfapi_cqi_indication_pdu_t));
 
 		if(pull16(ppReadPackedMsg, &pdu->instance_length, end) == 0)
 			return 0;
