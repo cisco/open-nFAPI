@@ -1389,6 +1389,44 @@ int fapi_srs_ind(fapi_t* fapi, fapi_srs_ind_t* ind)
 int fapi_lbt_dl_ind(fapi_t* fapi, fapi_lbt_dl_ind_t* ind)
 {
 	pnf_phy_user_data_t* data = (pnf_phy_user_data_t*)(fapi->user_data);
+	
+	nfapi_lbt_dl_indication_t lbt_dl_ind;
+	memset(&lbt_dl_ind, 0, sizeof(lbt_dl_ind));
+	lbt_dl_ind.header.message_id = NFAPI_LBT_DL_INDICATION;
+	lbt_dl_ind.header.phy_id = data->p7_config->phy_id;
+	lbt_dl_ind.sfn_sf = ind->sfn_sf;
+
+	if(((pnf_info*)(data->config->user_data))->wireshark_test_mode)
+	{
+		lbt_dl_ind.lbt_dl_indication_body.tl.tag = NFAPI_LBT_DL_INDICATION_BODY_TAG;
+		lbt_dl_ind.lbt_dl_indication_body.number_of_pdus = 2;
+		
+		nfapi_lbt_dl_indication_pdu_t pdus[lbt_dl_ind.lbt_dl_indication_body.number_of_pdus];
+		memset(&pdus, 0, sizeof(pdus));	
+		
+		pdus[0].pdu_type = 0; // LBT_PDSCH_RSP PDU
+		pdus[0].pdu_size = 0;
+		pdus[0].lbt_pdsch_rsp_pdu.lbt_pdsch_rsp_pdu_rel13.tl.tag = NFAPI_LBT_PDSCH_RSP_PDU_REL13_TAG;
+		pdus[0].lbt_pdsch_rsp_pdu.lbt_pdsch_rsp_pdu_rel13.handle = 0xABCD;
+		pdus[0].lbt_pdsch_rsp_pdu.lbt_pdsch_rsp_pdu_rel13.result = rand_range(0, 1);
+		pdus[0].lbt_pdsch_rsp_pdu.lbt_pdsch_rsp_pdu_rel13.lte_txop_symbols = rand_range(0, 0xFFFF);
+		pdus[0].lbt_pdsch_rsp_pdu.lbt_pdsch_rsp_pdu_rel13.initial_partial_sf = rand_range(0, 1);
+		
+		pdus[1].pdu_type = 1; // LBT_DRS_RSP PDU
+		pdus[1].pdu_size = 0;
+		pdus[1].lbt_drs_rsp_pdu.lbt_drs_rsp_pdu_rel13.tl.tag = NFAPI_LBT_DRS_RSP_PDU_REL13_TAG;
+		pdus[1].lbt_drs_rsp_pdu.lbt_drs_rsp_pdu_rel13.handle = 0xABCD;
+		pdus[1].lbt_drs_rsp_pdu.lbt_drs_rsp_pdu_rel13.result = rand_range(0, 1);
+
+		lbt_dl_ind.lbt_dl_indication_body.lbt_indication_pdu_list = pdus;
+		nfapi_pnf_p7_lbt_dl_ind(data->p7_config, &lbt_dl_ind);
+	}
+	else
+	{
+		nfapi_pnf_p7_lbt_dl_ind(data->p7_config, &lbt_dl_ind);
+	}
+	
+	return 0;
 }
 
 int fapi_nb_harq_ind(fapi_t* fapi, fapi_nb_harq_ind_t* ind)
@@ -1428,6 +1466,8 @@ int fapi_nb_harq_ind(fapi_t* fapi, fapi_nb_harq_ind_t* ind)
 	{
 		nfapi_pnf_p7_nb_harq_ind(data->p7_config, &nb_harq_ind);
 	}
+	
+	return 0;
 }
 
 int fapi_nrach_ind(fapi_t* fapi, fapi_nrach_ind_t* ind)
@@ -1462,6 +1502,8 @@ int fapi_nrach_ind(fapi_t* fapi, fapi_nrach_ind_t* ind)
 	{
 		nfapi_pnf_p7_nrach_ind(data->p7_config, &nrach_ind);
 	}	
+	
+	return 0;
 }
 
 int pnf_start_request(nfapi_pnf_config_t* config, nfapi_pnf_start_request_t* req)
