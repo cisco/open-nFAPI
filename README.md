@@ -27,6 +27,9 @@ extend the nFAPI libraries use the specified vendor extension techniques,
 so ensuring the widest interoperability of the baseline nFAPI specification 
 in those derivative works.**
 
+## Awards
+
+The Open-nFAPI project has won the Small Cell Forum Judges Choice award 2017. (http://www.smallcellforum.org/awards-2/winners-2017/)
 
 ## Licensing
 
