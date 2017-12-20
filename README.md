@@ -131,3 +131,8 @@ wireshark               code for a wireshark dissector for the nFAPI protocol
 ## Coverity
 
 Coverity runs on the coverity-scan branch. Changes must be merged to the coverity-scan branch to be checked.
+
+
+## eNB Integration - Open Air Interface
+
+The open-nFAPI implementation has been integrated with the Open Air Interface solution here (https://gitlab.eurecom.fr/oai/openairinterface5g) and is (at the time of writing) here (https://gitlab.eurecom.fr/daveprice/openairinterface5g/tree/nfapi-ru-rau-split). The open-nFAPI implementation is integrated with the source eNB implementation with any changes required applied as a patch on top of the baseline open-nFAPI library. Any extensions required must be implemented through the vendor extensions as specified by the Small Cell Forum documentation. Any integration wrapping of functionality must be done within the target environment as shown in the Open Air Interface implementation nfapi directory which is defined by the $NFAPI_DIR location at the top level.
