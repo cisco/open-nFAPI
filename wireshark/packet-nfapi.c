@@ -234,7 +234,7 @@ static const true_false_string nfapi_multi_carrier_tx_strname = {
 };
 
 static const true_false_string nfapi_multi_carrier_freeze_strname = {
-	"Absence of other technology isn’t guaranteed",
+	"Absence of other technology isnâ€™t guaranteed",
 	"Absence of other technology is guaranteed"
 };
 
@@ -1438,8 +1438,8 @@ static const value_string message_id_vals[]	= {	{ 0x80, "DL_CONFIG.request"},
 												{ 0x0110, "MEASUREMENT.request" },
 												{ 0x0111, "MEASUREMENT.response" },
 
-												{ 0x0180, "UL_NODE_SYNC" },
-												{ 0x0181, "DL_NODE_SYNC" },
+												{ 0x0180, "DL_NODE_SYNC" },
+												{ 0x0181, "UL_NODE_SYNC" },
 												{ 0x0182, "TIMING_INFO" },
 
 												{ 0x0200, "RSSI.request" },
@@ -5228,17 +5228,17 @@ static int dissect_nfapi(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, vo
 		case 0x0180:
 		{
 			dissect_p7_header(tvb, pinfo, msg_tree, data, &offset);
-			proto_tree_add_uint32(msg_tree, hf_nfapi_ul_node_sync_t1, tvb, &offset, "microseconds");
-			proto_tree_add_uint32(msg_tree, hf_nfapi_ul_node_sync_t2, tvb, &offset, "microseconds");
-			proto_tree_add_uint32(msg_tree, hf_nfapi_ul_node_sync_t3, tvb, &offset, "microseconds");
+			proto_tree_add_uint32(msg_tree, hf_nfapi_dl_node_sync_t1, tvb, &offset, "microseconds");
+			proto_tree_add_uint32(msg_tree, hf_nfapi_dl_node_sync_delta_sfn_sf, tvb, &offset, 0);
 			break;
 		}
 		// UL_NODE.sync
 		case 0x0181:
 		{
 			dissect_p7_header(tvb, pinfo, msg_tree, data, &offset);
-			proto_tree_add_uint32(msg_tree, hf_nfapi_dl_node_sync_t1, tvb, &offset, "microseconds");
-			proto_tree_add_uint32(msg_tree, hf_nfapi_dl_node_sync_delta_sfn_sf, tvb, &offset, 0);
+			proto_tree_add_uint32(msg_tree, hf_nfapi_ul_node_sync_t1, tvb, &offset, "microseconds");
+			proto_tree_add_uint32(msg_tree, hf_nfapi_ul_node_sync_t2, tvb, &offset, "microseconds");
+			proto_tree_add_uint32(msg_tree, hf_nfapi_ul_node_sync_t3, tvb, &offset, "microseconds");
 			break;
 		}
 		// TIMING_INFO
