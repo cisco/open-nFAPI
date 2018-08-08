@@ -234,7 +234,7 @@ static const true_false_string nfapi_multi_carrier_tx_strname = {
 };
 
 static const true_false_string nfapi_multi_carrier_freeze_strname = {
-	"Absence of other technology isn’t guaranteed",
+	"Absence of other technology isn't guaranteed",
 	"Absence of other technology is guaranteed"
 };
 
